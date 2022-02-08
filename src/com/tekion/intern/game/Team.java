@@ -10,7 +10,7 @@ class Team {
     private int teamScore;
     private int totalPlayedBalls;
     private List<Player> players;
-    private int currentPlayer;
+    private int currentWickets;
     private int totalAvailableBalls;
     private final int NUM_OF_PLAYERS;
 
@@ -22,7 +22,7 @@ class Team {
         this.teamName = teamName;
         teamScore = 0;
         totalPlayedBalls = 0;
-        currentPlayer = 0;
+        currentWickets = 0;
         totalAvailableBalls = balls;
         players = new ArrayList<>();
         this.NUM_OF_PLAYERS = NUM_OF_PLAYERS;
@@ -82,10 +82,10 @@ class Team {
     }
 
     public int getCurrentPlayer() {
-        return currentPlayer;
+        return currentWickets;
     }
 
     public void wicketFallen() {
-        this.currentPlayer++;
+        this.currentWickets++;
     }
 }

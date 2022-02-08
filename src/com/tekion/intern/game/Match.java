@@ -57,7 +57,7 @@ class Strike{
 public class Match {
     private final Team team1;
     private final Team team2;
-    private final int NUM_OF_PLAYERS = 5;
+    private final int NUM_OF_PLAYERS = 11;
     enum Winner{
         TEAM1,
         TEAM2,
