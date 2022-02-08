@@ -4,17 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-//class FinalScore{
-//    public int score;
-//    public int wickets;
-//    public int balls;
-//
-//    public FinalScore(int score, int wickets, int balls){
-//        this.score = score;
-//        this.wickets = wickets;
-//        this.balls = balls;
-//    }
-//}
 
 class Team {
     private String teamName;
@@ -22,16 +11,21 @@ class Team {
     private int totalPlayedBalls;
     private List<Player> players;
     private int currentPlayer;
-    //private FinalScore finalScore;
     private int totalAvailableBalls;
+    private final int NUM_OF_PLAYERS;
 
-    public Team(String teamName, int balls) {
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public Team(String teamName, int balls, int NUM_OF_PLAYERS) {
         this.teamName = teamName;
         teamScore = 0;
         totalPlayedBalls = 0;
         currentPlayer = 0;
         totalAvailableBalls = balls;
         players = new ArrayList<>();
+        this.NUM_OF_PLAYERS = NUM_OF_PLAYERS;
         setPlayers();
     }
 
@@ -42,54 +36,48 @@ class Team {
     private void setPlayers(){
         Scanner sc = new Scanner(System.in);
         String name;
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < NUM_OF_PLAYERS; i++){
             System.out.print("Player-"+(i+1)+": ");
             name = sc.nextLine();
-            players.add(new Player(name));
+            players.add(new Player(name,i));
         }
     }
 
     public void getPlayerwiseScore(){
-        int playersWhoPlayed = Integer.min(currentPlayer+1,10);
+        //int playersWhoPlayed = Integer.min(currentPlayer+1,NUM_OF_PLAYERS);
         Player p;
-        for(int i = 0; i < playersWhoPlayed; i++){
+        for(int i = 0; i < NUM_OF_PLAYERS; i++){
             p = players.get(i);
             System.out.println(String.format("%s: %d runs in %d balls", p.getName(), p.getScore(), p.getBallsPlayed()));
         }
     }
 
-//    public FinalScore getFinalScore(){
-//        if(currentPlayer < 10 || totalPlayedBalls < totalAvailableBalls){
-//            throw new IllegalStateException("Final Score will be available at the end of the inning");
-//        }
-//        return finalScore;
-//    }
 
     public int getTeamScore() {
         return teamScore;
     }
 
-    private void updatePlayerScore(int score){
-        Player player = players.get(currentPlayer);
+    private void updatePlayerScore(int score, int strikeIndex){
+        Player player = players.get(strikeIndex);
         player.incrementScore(score);
     }
 
-    public void incrementTeamScore(int score) {
+    public void incrementTeamScore(int score, int strikeIndex) {
         this.teamScore += score;
-        updatePlayerScore(score);
+        updatePlayerScore(score, strikeIndex);
     }
 
     public int getTotalPlayedBalls() {
         return totalPlayedBalls;
     }
 
-    public void incrementTotalBalls() {
+    public void incrementTotalBalls(int strikeIndex) {
         this.totalPlayedBalls++;
-        updatePlayerBalls();
+        updatePlayerBalls(strikeIndex);
     }
 
-    private void updatePlayerBalls() {
-        Player player = players.get(currentPlayer);
+    private void updatePlayerBalls(int strikeIndex) {
+        Player player = players.get(strikeIndex);
         player.incrementBallsPlayed();
     }
 
@@ -97,15 +85,7 @@ class Team {
         return currentPlayer;
     }
 
-//    public FinalScore showFinalScore(){
-//        return finalScore;
-//    }
-
-//    public void declareFinalScore(){
-//        finalScore = new FinalScore(teamScore, currentPlayer, totalPlayedBalls);
-//    }
-
-    public int wicketFallen() {
-        return ++this.currentPlayer;
+    public void wicketFallen() {
+        this.currentPlayer++;
     }
 }
