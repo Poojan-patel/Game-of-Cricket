@@ -18,37 +18,37 @@ class Team {
         return players;
     }
 
-    public Team(String teamName, int balls, int NUM_OF_PLAYERS) {
+    public int getNumberOfPlayers(){
+        return NUM_OF_PLAYERS;
+    }
+
+    public Team(String teamName, List<String> playerNames, int balls) {
         this.teamName = teamName;
         teamScore = 0;
         totalPlayedBalls = 0;
         currentWickets = 0;
         totalAvailableBalls = balls;
         players = new ArrayList<>();
-        this.NUM_OF_PLAYERS = NUM_OF_PLAYERS;
-        setPlayers();
+        //even indices contains name of the player and odd contains their type (bowler/batsman)
+        this.NUM_OF_PLAYERS = playerNames.size()/2;
+        setPlayers(playerNames);
     }
 
     public String getTeamName() {
         return teamName;
     }
 
-    private void setPlayers(){
-        Scanner sc = new Scanner(System.in);
-        String name;
+    private void setPlayers(List<String> playerNames){
         for(int i = 0; i < NUM_OF_PLAYERS; i++){
-            System.out.print("Player-"+(i+1)+": ");
-            name = sc.nextLine();
-            players.add(new Player(name,i));
+            players.add(new Player(playerNames.get(2*i),playerNames.get(2*i+1),i));
         }
     }
 
     public void getPlayerwiseScore(){
-        //int playersWhoPlayed = Integer.min(currentPlayer+1,NUM_OF_PLAYERS);
-        Player p;
+        Player currentPlayer;
         for(int i = 0; i < NUM_OF_PLAYERS; i++){
-            p = players.get(i);
-            System.out.println(String.format("%s: %d runs in %d balls", p.getName(), p.getScore(), p.getBallsPlayed()));
+            currentPlayer = players.get(i);
+            System.out.println(String.format("%s: %d runs in %d balls", currentPlayer.getName(), currentPlayer.getScore(), currentPlayer.getBallsPlayed()));
         }
     }
 
@@ -57,27 +57,27 @@ class Team {
         return teamScore;
     }
 
-    private void updatePlayerScore(int score, int strikeIndex){
-        Player player = players.get(strikeIndex);
+    private void updatePlayerScore(int score, int playerNumber){
+        Player player = players.get(playerNumber);
         player.incrementScore(score);
     }
 
-    public void incrementTeamScore(int score, int strikeIndex) {
+    public void incrementTeamScore(int score, int playerNumber) {
         this.teamScore += score;
-        updatePlayerScore(score, strikeIndex);
+        updatePlayerScore(score, playerNumber);
     }
 
     public int getTotalPlayedBalls() {
         return totalPlayedBalls;
     }
 
-    public void incrementTotalBalls(int strikeIndex) {
+    public void incrementTotalBalls(int playerNumber) {
         this.totalPlayedBalls++;
-        updatePlayerBalls(strikeIndex);
+        updatePlayerBalls(playerNumber);
     }
 
-    private void updatePlayerBalls(int strikeIndex) {
-        Player player = players.get(strikeIndex);
+    private void updatePlayerBalls(int playerNumber) {
+        Player player = players.get(playerNumber);
         player.incrementBallsPlayed();
     }
 
@@ -85,7 +85,7 @@ class Team {
         return currentWickets;
     }
 
-    public void wicketFallen() {
+    public void updateWickets() {
         this.currentWickets++;
     }
 }
