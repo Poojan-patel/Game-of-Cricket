@@ -1,22 +1,27 @@
 package com.tekion.intern.game;
 
 class Player {
-    enum State{
-        OUT,
-        NOT_OUT,
-        YET_TO_PLAY
+    enum PlayerType{
+        BOWLER,
+        BATSMAN
     }
     private String name;
     private int score;
     private int ballsPlayed;
     private int playerOrder;
+    private PlayerType playerType;
 
-
-    public Player(String name, int playerOrder){
+    public Player(String name, String type, int playerOrder){
         this.name = name;
         this.score = 0;
         this.ballsPlayed = 0;
         this.playerOrder = playerOrder;
+        if(type.equals("BOWLER")){
+            playerType = PlayerType.BOWLER;
+        }
+        else{
+            playerType = PlayerType.BATSMAN;
+        }
     }
 
     public String getName() {
