@@ -16,22 +16,22 @@ public class Match {
     private int totalAvailableBalls;
     private Strike strike;
 
-    public Match(int numOfOvers, String team1Name, List<String> team1Players, String team2Name, List<String> team2Players){
+    public Match(int numOfOvers, String team1Name, List<String> team1PlayerNames, List<String> team1PlayerTypes, String team2Name, List<String> team2PlayerNames, List<String> team2PlayerTypes){
         totalAvailableBalls = numOfOvers*6;
-        team1 = new Team(team1Name,team1Players,totalAvailableBalls);
-        team2 = new Team(team2Name,team2Players,totalAvailableBalls);
+        team1 = new Team(team1Name,team1PlayerNames,team1PlayerTypes,totalAvailableBalls);
+        team2 = new Team(team2Name,team2PlayerNames,team2PlayerTypes,totalAvailableBalls);
         winner = Winner.STARTED;
     }
 
-    public void declareTheWinner(){
-        winner = MatchUtil.decideWinner(team1.getTeamScore(), team2.getTeamScore());
-        System.out.println("Game Ended");
-        if(winner == Winner.TEAM1)
-            System.out.println(team1.getTeamName() + " Won the Game");
-        else if(winner == Winner.TEAM2)
-            System.out.println(team2.getTeamName() + " Won the Game");
-        else
-            System.out.println("Game Tied");
+    public void stimulateGame(int headOrTails, int choiceOfInning){
+        int tossOutcome = choiceOfTossWinner(headOrTails, choiceOfInning);
+        //if((tossWinner == 0 && choiceOfInning == 1) || (tossWinner == 1 && choiceOfInning == 0)){
+        if(tossOutcome == 1){
+            stimulateInnings(team1, team2);
+        } else{
+            stimulateInnings(team2, team1);
+        }
+        declareTheWinner();
     }
 
     public void showFinalScoreBoard(){
@@ -39,7 +39,7 @@ public class Match {
                 String.format("%s: %d/%d (%d.%d Overs)",
                         team1.getTeamName(),
                         team1.getTeamScore(),
-                        team1.getCurrentPlayer(),
+                        team1.getCurrentWickets(),
                         team1.getTotalPlayedBalls()/6,
                         team1.getTotalPlayedBalls()%6
                 )
@@ -48,7 +48,7 @@ public class Match {
                 String.format("%s: %d/%d (%d.%d Overs)",
                         team2.getTeamName(),
                         team2.getTeamScore(),
-                        team2.getCurrentPlayer(),
+                        team2.getCurrentWickets(),
                         team2.getTotalPlayedBalls()/6,
                         team2.getTotalPlayedBalls()%6
                 )
@@ -60,7 +60,7 @@ public class Match {
         team2.getPlayerwiseScore();
     }
 
-    public int choiceOfTossWinner(int tossWinner, int choiceOfInning){
+    private int choiceOfTossWinner(int tossWinner, int choiceOfInning){
         System.out.println(((tossWinner == 0)?team1.getTeamName() :team2.getTeamName()) + " has won the toss and opted for " +
                 ((choiceOfInning == 0)?"Fielding" :"Batting"));
 
@@ -76,33 +76,6 @@ public class Match {
 
         System.out.println(second.getTeamName() + " Will Start Batting");
         startInning(second,true,scoreToChase);
-    }
-
-    public void stimulateGame(int headOrTails, int choiceOfInning){
-        int tossOutcome = choiceOfTossWinner(headOrTails, choiceOfInning);
-        //if((tossWinner == 0 && choiceOfInning == 1) || (tossWinner == 1 && choiceOfInning == 0)){
-        if(choiceOfInning == 1){
-            stimulateInnings(team1, team2);
-        } else{
-            stimulateInnings(team2, team1);
-        }
-        declareTheWinner();
-    }
-
-    private boolean playTheBall(Team team, int ball){
-        int currentPlayer = strike.getCurrentStrike();
-        int outcome = ThreadLocalRandom.current().nextInt(0,8);
-        team.incrementTotalBalls(currentPlayer);
-        if(outcome < 7){
-            System.out.println(ball + ": " + outcome + " of Player: "+ currentPlayer);
-            team.incrementTeamScore(outcome,currentPlayer);
-            strike.changeStrike(outcome);
-            return false;
-        }
-        int outPlayer = strike.updateOnWicket();
-        team.updateWickets();
-        System.out.println(ball + ": Wicket-" + strike.totalWickets() + " of Player: "+ outPlayer);
-        return (strike.totalWickets() == team.getNumberOfPlayers()-1);
     }
 
     private void startInning(Team team, boolean isChasser, int scoreToChase) {
@@ -121,6 +94,33 @@ public class Match {
                 break;
             strike.overChanged();
         }
-
     }
+
+    private boolean playTheBall(Team team, int ball){
+        int currentPlayer = strike.getCurrentStrike();
+        int outcomeOfBallBowled = ThreadLocalRandom.current().nextInt(0,8);
+        team.incrementTotalBalls(currentPlayer);
+        if(outcomeOfBallBowled < 7){
+            System.out.println(ball + ": " + outcomeOfBallBowled + " of Player: "+ currentPlayer);
+            team.incrementTeamScore(outcomeOfBallBowled,currentPlayer);
+            strike.changeStrike(outcomeOfBallBowled);
+            return false;
+        }
+        int outPlayer = strike.updateStrikeOnWicket();
+        team.updateWickets();
+        System.out.println(ball + ": Wicket-" + team.getCurrentWickets() + " of Player: "+ outPlayer);
+        return (team.getCurrentWickets() == team.getNumberOfPlayers()-1);
+    }
+
+    private void declareTheWinner(){
+        winner = MatchUtil.decideWinner(team1.getTeamScore(), team2.getTeamScore());
+        System.out.println("Game Ended");
+        if(winner == Winner.TEAM1)
+            System.out.println(team1.getTeamName() + " Won the Game");
+        else if(winner == Winner.TEAM2)
+            System.out.println(team2.getTeamName() + " Won the Game");
+        else
+            System.out.println("Game Tied");
+    }
+
 }
