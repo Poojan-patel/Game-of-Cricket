@@ -3,12 +3,11 @@ package com.tekion.intern;
 import com.tekion.intern.game.Match;
 import com.tekion.intern.game.MatchUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class MatchController {
     private static final Scanner sc = new Scanner(System.in);
+
     public static void main(String[] args) {
         Match newMatch = initializeMatchData();
 
@@ -66,6 +65,17 @@ public class MatchController {
         return input;
     }
 
+    private static String getStringFromAcceptableValues(List<String> acceptableValues){
+        String input = "";
+        while(true){
+            input = sc.nextLine().toUpperCase();
+            if(acceptableValues.contains(input)){
+                return input;
+            }
+            System.out.println("Enter Value from:" + acceptableValues);
+        }
+    }
+
     private static Match initializeMatchData() {
         System.out.print("Number Of Overs:");
         int numOfOvers = getIntegerInputInRange(1, 50);
@@ -90,12 +100,13 @@ public class MatchController {
     }
 
     private static void initializeTeamPlayers(int numOfPlayers, List<String> playerNames, List<String> playerTypes){
+        List<String> acceptablePlayerTypes = Arrays.asList(new String[]{"BATSMAN","BOWLER"});
         for(int i = 1; i <= numOfPlayers; i++){
             System.out.print("Player-" + i + " Name:");
             playerNames.add(getNonEmptyString());
 
             System.out.print("Player-" + i  +" Type:");
-            playerTypes.add(getNonEmptyString());
+            playerTypes.add(getStringFromAcceptableValues(acceptablePlayerTypes));
         }
 
     }
