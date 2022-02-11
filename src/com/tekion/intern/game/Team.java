@@ -66,13 +66,13 @@ class Team {
         Player currentPlayer;
         for(int i = 0; i < NUM_OF_PLAYERS; i++){
             currentPlayer = players.get(i);
-            System.out.println(String.format("%s: %d runs in %d balls", currentPlayer.getName(), currentPlayer.getScore(), currentPlayer.getBallsPlayed()));
+            System.out.println(currentPlayer);
         }
     }
 
     private void setPlayers(List<String> playerNames, List<String> playerTypes){
         for(int i = 0; i < NUM_OF_PLAYERS; i++){
-            players.add(new Player(playerNames.get(i),playerTypes.get(i),i));
+            players.add(new Player(playerNames.get(i), playerTypes.get(i), i));
         }
     }
 
@@ -88,4 +88,7 @@ class Team {
     }
 
 
+    public String getNameOfPlayer(int currentPlayer) {
+        return players.get(currentPlayer).getName();
+    }
 }
