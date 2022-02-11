@@ -62,7 +62,7 @@ class Team {
         updatePlayerBalls(playerNumber);
     }
 
-    public void getPlayerwiseScore(){
+    public void showPlayerwiseScore(){
         Player currentPlayer;
         for(int i = 0; i < NUM_OF_PLAYERS; i++){
             currentPlayer = players.get(i);

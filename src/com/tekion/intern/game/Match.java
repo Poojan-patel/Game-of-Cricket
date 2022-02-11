@@ -62,9 +62,9 @@ public class Match {
         );
 
         System.out.println("Team: " + team1.getTeamName());
-        team1.getPlayerwiseScore();
+        team1.showPlayerwiseScore();
         System.out.println("Team: " + team2.getTeamName());
-        team2.getPlayerwiseScore();
+        team2.showPlayerwiseScore();
     }
 
     /*
