@@ -43,4 +43,9 @@ class Player {
     public void incrementBallsPlayed() {
         this.ballsPlayed++;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s: %d runs in %d balls", name, score, ballsPlayed);
+    }
 }

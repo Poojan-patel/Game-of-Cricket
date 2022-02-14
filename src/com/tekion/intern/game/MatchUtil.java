@@ -16,6 +16,6 @@ public class MatchUtil {
         return winner;
     }
     public static int stimulateToss(){
-        return ThreadLocalRandom.current().nextInt(0,2);
+        return ThreadLocalRandom.current().nextInt(0, 2);
     }
 }
