@@ -9,12 +9,14 @@ class Player {
     private String name;
     private int score;
     private int ballsPlayed;
+    private int playerOrder;
 
 
-    public Player(String name){
+    public Player(String name, int playerOrder){
         this.name = name;
         this.score = 0;
         this.ballsPlayed = 0;
+        this.playerOrder = playerOrder;
     }
 
     public String getName() {

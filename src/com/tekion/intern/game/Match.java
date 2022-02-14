@@ -1,33 +1,82 @@
 package com.tekion.intern.game;
 
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
+
+class Strike{
+    private int currentWickets;
+    private int[] strikeHolders;
+    private int currentStrike;
+
+    public Strike(){
+        this.currentStrike = 0;
+        this.strikeHolders = new int[]{0, 1};
+        currentWickets = 0;
+    }
+
+    public void reInit() {
+        this.currentStrike = 0;
+        this.strikeHolders = new int[]{0, 1};
+        currentWickets = 0;
+    }
+
+    public void overChanged(){
+        currentStrike = (currentStrike+1)%2;
+    }
+
+    public void changeStrike(int run){
+        if(run%2 == 1)
+            currentStrike = (currentStrike+1)%2;
+    }
+
+    public int getCurrentStrike() {
+        return strikeHolders[currentStrike];
+    }
+
+    public int updateOnWicket(){
+        currentWickets++;
+        //System.out.println("|||WICKET|||");
+        int low = Integer.min(strikeHolders[0], strikeHolders[1]);
+        int high = Integer.max(strikeHolders[0], strikeHolders[1]);
+        int wicketOf = strikeHolders[currentStrike];
+        if(wicketOf == high){
+            //if(currentStrike == 0)
+            strikeHolders[currentStrike]++;
+        }
+        else
+            strikeHolders[currentStrike] = strikeHolders[1-currentStrike]+1;
+        return wicketOf;
+    }
+
+    public int totalWickets(){
+        return currentWickets;
+    }
+}
 
 public class Match {
     private final Team team1;
     private final Team team2;
+    private final int NUM_OF_PLAYERS = 11;
     enum Winner{
         TEAM1,
         TEAM2,
         TIE,
         STARTED
     }
-    //private FinalScore scoreChased;
-    //private FinalScore scoreToChase;
     private Winner winner;
     private int totalAvailableBalls;
+    private Strike strike;
 
     public Match(){
         Scanner sc = new Scanner(System.in);
-        String name;
         System.out.print("Enter Total Number of Overs:");
         totalAvailableBalls = sc.nextInt()*6;
         sc.nextLine();
         System.out.print("Enter Team-1 name: ");
-        name = sc.nextLine();
-        team1 = new Team(name,totalAvailableBalls);
+        team1 = new Team(sc.nextLine(),totalAvailableBalls,NUM_OF_PLAYERS);
         System.out.print("Enter Team-2 name: ");
-        team2 = new Team(sc.nextLine(),totalAvailableBalls);
+        team2 = new Team(sc.nextLine(),totalAvailableBalls,NUM_OF_PLAYERS);
         winner = Winner.STARTED;
     }
 
@@ -78,59 +127,76 @@ public class Match {
         team2.getPlayerwiseScore();
     }
 
+    public int choiceOfTossWinner(int tossWinner){
+        Scanner sc = new Scanner(System.in);
+        System.out.print("0.. Bowl, 1.. Bat: ");
+        int choice = sc.nextInt();
+        while(choice < 0 || choice > 1){
+            System.out.print("Bad Choice\n0.. Bowl, 1.. Bat:");
+            choice = sc.nextInt();
+        }
+        System.out.println(((tossWinner == 0)?team1.getTeamName() :team2.getTeamName()) + " has won the toss and opted for " +
+                ((choice == 0)?"Fielding" :"Batting"));
+
+        // if tossWinner is 1 and choice is 0 or tossWinner is 0 and choice is 1, in both the case team1 will bat
+        return tossWinner+choice;
+    }
+
+    private void stimulateInnings(Team first, Team second){
+        strike = new Strike();
+        System.out.println(first.getTeamName() + " Will Start Batting");
+        startInningOne(first);
+        int scoreToChase = first.getTeamScore();
+        strike.reInit();
+        System.out.println(second.getTeamName() + " Will Start Batting");
+        startInningTwo(second,scoreToChase);
+    }
+
     public void stimulateGame(){
         int tossWinner = stimulateToss();
-        int scoreToChase;
-        if(tossWinner == 0){
-            System.out.println(team1.getTeamName() + " Will Start Batting");
-            startInningOne(team1);
-//            scoreToChase = team1.showFinalScore();
-            scoreToChase = team1.getTeamScore();
-            System.out.println(team2.getTeamName() + " Will Start Batting");
-            startInningTwo(team2,scoreToChase);
-//            scoreChased = team2.showFinalScore();
+        int choiceOfInning = choiceOfTossWinner(tossWinner);
+        //if((tossWinner == 0 && choiceOfInning == 1) || (tossWinner == 1 && choiceOfInning == 0)){
+        if(choiceOfInning == 1){
+            stimulateInnings(team1, team2);
         } else{
-            System.out.println(team2.getTeamName() + " Will Start Batting");
-            startInningOne(team2);
-//            scoreToChase = team2.showFinalScore();
-            scoreToChase = team2.getTeamScore();
-            System.out.println(team1.getTeamName() + " Will Start Batting");
-            startInningTwo(team1,scoreToChase);
-//            scoreChased = team1.showFinalScore();
+            stimulateInnings(team2, team1);
         }
         declareTheWinner();
     }
 
     private int playTheBall(Team team, int ball){
+        int strikeIndex = strike.getCurrentStrike();
         int randomNum = ThreadLocalRandom.current().nextInt(0,8);
-        team.incrementTotalBalls();
+        team.incrementTotalBalls(strikeIndex);
         if(randomNum < 7){
-            System.out.println(ball + ": " + randomNum);
-            team.incrementTeamScore(randomNum);
+            System.out.println(ball + ": " + randomNum + " of Player: "+ strikeIndex);
+            team.incrementTeamScore(randomNum,strikeIndex);
+            strike.changeStrike(randomNum);
             return 0;
         }
-        int totalWicks = team.wicketFallen();
-        System.out.println(ball + ": Wicket-" + totalWicks);
-        return totalWicks;
+        int wicketOf = strike.updateOnWicket();
+        team.wicketFallen();
+        System.out.println(ball + ": Wicket-" + strike.totalWickets() + " of Player: "+ wicketOf);
+        return strike.totalWickets();
     }
 
     private void startInningOne(Team team) {
         int overs = totalAvailableBalls/6;
         int isWicket = 0;
         Scanner sc = new Scanner(System.in);
-        for(int i = 0; i < overs; i++){
-            System.out.println("Over: "+(i+1));
-            for(int j = 0; j < 6; j++){
+        for(int i = 0; i < overs; i++) {
+            System.out.println("Over: " + (i + 1));
+            for (int j = 0; j < 6; j++) {
                 sc.nextLine();
-                isWicket = playTheBall(team, j+1);
-                if(isWicket == 10){
+                isWicket = playTheBall(team, j + 1);
+                if (isWicket == NUM_OF_PLAYERS-1) {
                     break;
                 }
             }
-            if(isWicket == 10)
+            if (isWicket == NUM_OF_PLAYERS-1)
                 break;
+            strike.overChanged();
         }
-        //team.declareFinalScore();
 
     }
 
@@ -138,17 +204,17 @@ public class Match {
         int overs = totalAvailableBalls/6;
         int isWicket = 0;
         Scanner sc = new Scanner(System.in);
-        for(int i = 0; i < overs; i++){
-            System.out.println("Over: "+(i+1));
-            for(int j = 0; j < 6; j++){
+        for(int i = 0; i < overs; i++) {
+            System.out.println("Over: " + (i + 1));
+            for (int j = 0; j < 6; j++) {
                 sc.nextLine();
-                isWicket = playTheBall(team, j+1);
-                if(isWicket == 10 || team.getTeamScore() > scoreToChase)
+                isWicket = playTheBall(team, j + 1);
+                if (isWicket == NUM_OF_PLAYERS-1 || team.getTeamScore() > scoreToChase)
                     break;
             }
-            if(isWicket == 10 || team.getTeamScore() > scoreToChase)
+            if (isWicket == NUM_OF_PLAYERS-1 || team.getTeamScore() > scoreToChase)
                 break;
+            strike.overChanged();
         }
-        //team.declareFinalScore();
     }
 }
