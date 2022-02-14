@@ -5,18 +5,18 @@ import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MatchUtil {
-    public static Map<Integer,Integer> batsmanRandomScore;
-    public static Map<Integer,Integer> bowlerRandomScore;
+    private static final Map<Integer,Integer> batsmanRandomScore;
+    private static final Map<Integer,Integer> bowlerRandomScore;
 
     static{
         batsmanRandomScore = new TreeMap<Integer,Integer>(){{
-            put(1,1); put(2,2); put(3,3); put(4,4);
-            put(5,5); put(6,6); put(7,-1); put(0,0);
+            put(0,0); put(1,1); put(2,2); put(3,3);
+            put(4,4); put(5,5); put(6,6); put(7,-1);
         }};
         bowlerRandomScore = new TreeMap<Integer,Integer>(){{
-            put(1,1); put(2,1); put(3,2); put(4,2);
-            put(5,3); put(6,3); put(7,4); put(8,5);
-            put(9,6); put(10,-1); put(0,0); put(11,0);
+            put(0,0); put(1,0); put(2,1); put(3,1);
+            put(4,2); put(5,2); put(6,3); put(7,3);
+            put(8,4); put(9,5); put(10,6); put(11,-1);
         }};
     }
 
