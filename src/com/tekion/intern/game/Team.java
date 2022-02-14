@@ -12,6 +12,7 @@ class Team {
     private int currentWickets;
     private int totalAvailableBalls;
     private final int NUM_OF_PLAYERS;
+    private int[] scoreDistribution;
 
     public Team(String teamName, List<String> playerNames, List<String> playerTypes, int balls) {
         this.teamName = teamName;
@@ -22,6 +23,7 @@ class Team {
         players = new ArrayList<>();
         this.NUM_OF_PLAYERS = playerNames.size();
         setPlayers(playerNames, playerTypes);
+        scoreDistribution = new int[7];
     }
 
     public String getTeamName() {
@@ -34,6 +36,7 @@ class Team {
 
     public void incrementTeamScore(int score, int playerNumber) {
         this.teamScore += score;
+        scoreDistribution[score]++;
         updatePlayerScore(score, playerNumber);
     }
 
@@ -87,8 +90,27 @@ class Team {
         player.incrementBallsPlayed();
     }
 
-
     public String getNameOfPlayer(int currentPlayer) {
         return players.get(currentPlayer).getName();
+    }
+
+    @Override
+    public String toString() {
+        String scoreDistributionToString = "[";
+        for(int i = 0; i < 6; i++)
+            scoreDistributionToString += (i + ":" + scoreDistribution[i] + ", ");
+        scoreDistributionToString += ("6:" + scoreDistribution[6] + "]");
+        return String.format("%s: %d/%d (%d.%d Overs)\nDistribution: %s",
+                teamName,
+                teamScore,
+                currentWickets,
+                totalPlayedBalls/6,
+                totalPlayedBalls%6,
+                scoreDistributionToString
+        );
+    }
+
+    public Player.PlayerType getPlayerType(int currentPlayer) {
+        return players.get(currentPlayer).getPlayerType();
     }
 }

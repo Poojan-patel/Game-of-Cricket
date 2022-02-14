@@ -42,25 +42,8 @@ public class Match {
     }
 
     public void showFinalScoreBoard(){
-        System.out.println(
-                String.format("%s: %d/%d (%d.%d Overs)",
-                        team1.getTeamName(),
-                        team1.getTeamScore(),
-                        team1.getCurrentWickets(),
-                        team1.getTotalPlayedBalls()/6,
-                        team1.getTotalPlayedBalls()%6
-                )
-        );
-        System.out.println(
-                String.format("%s: %d/%d (%d.%d Overs)",
-                        team2.getTeamName(),
-                        team2.getTeamScore(),
-                        team2.getCurrentWickets(),
-                        team2.getTotalPlayedBalls()/6,
-                        team2.getTotalPlayedBalls()%6
-                )
-        );
-
+        System.out.println(team1);
+        System.out.println(team2);
         System.out.println("Team: " + team1.getTeamName());
         team1.showPlayerwiseScore();
         System.out.println("Team: " + team2.getTeamName());
@@ -110,10 +93,10 @@ public class Match {
 
     private boolean playTheBall(Team team, int ball){
         int currentPlayer = strike.getCurrentStrike();
-        int outcomeOfBallBowled = ThreadLocalRandom.current().nextInt(0, 8);
+        int outcomeOfBallBowled = MatchUtil.generateRandomScore(team.getPlayerType(currentPlayer));
         team.incrementTotalBalls(currentPlayer);
 
-        if(outcomeOfBallBowled < 7){
+        if(outcomeOfBallBowled != -1){
             System.out.println(ball + ": " + outcomeOfBallBowled + " run || Player: " + team.getNameOfPlayer(currentPlayer));
             team.incrementTeamScore(outcomeOfBallBowled, currentPlayer);
             strike.changeStrike(outcomeOfBallBowled);
