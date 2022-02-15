@@ -1,6 +1,7 @@
 package com.tekion.intern.game;
 
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Match {
@@ -15,6 +16,7 @@ public class Match {
     private Winner winner;
     private int totalAvailableBalls;
     private Strike strike;
+    private static Scanner sc = new Scanner(System.in);
 
     public Match(int numOfOvers,
                  String team1Name,
@@ -72,14 +74,29 @@ public class Match {
     }
 
     private void startInning(Team team, boolean isChasser, int scoreToChase) {
+        System.out.println("Here are your choices for key pressing before playing the ball:\n");
+        System.out.println("1... Current Player Score:");
+        System.out.println("2... Current Players Score (Strike and Non-Strike):");
+        System.out.println("3... Current Team Score:");
+        System.out.println("4... Current Wickets and Remaining Wickets:");
+        if(isChasser)   System.out.println("5... Runs to Chase for becoming winner:");
+        System.out.println("Any to Next Ball:");
+
+        String choiceBetweenBalls;
         strike = new Strike();
         int overs = totalAvailableBalls/6;
         boolean allOut = false;
         for(int i = 0; i < overs; i++) {
             System.out.println("Over: " + (i + 1));
+            System.out.println("-----------------------------------------------------------------");
+            System.out.println("-----------------------------------------------------------------");
 
             for (int j = 0; j < 6; j++) {
-                allOut = playTheBall(team, j + 1);
+                allOut = playTheBall(team, j + 1, i+1);
+                System.out.println("-----------------------------------------------------------------");
+                choiceBetweenBalls = sc.nextLine();
+                userChoiceHandler(choiceBetweenBalls, team, strike, scoreToChase);
+                System.out.println("-----------------------------------------------------------------");
                 if (allOut || (isChasser && (scoreToChase < team.getTeamScore()))) {
                     break;
                 }
@@ -91,13 +108,36 @@ public class Match {
         }
     }
 
-    private boolean playTheBall(Team team, int ball){
+    private void userChoiceHandler(String choiceBetweenBalls, Team team, Strike strike, int scoreToChase) {
+        switch (choiceBetweenBalls){
+            case "1": System.out.println(team.getPlayerIndividualScore(strike.getCurrentStrike()));
+                      break;
+            case "2": System.out.println(team.getPlayerIndividualScore(strike.getCurrentStrike()));
+                      System.out.println(team.getPlayerIndividualScore(strike.getCurrentNonStrike()));
+                      break;
+            case "3": System.out.println(team);
+                      break;
+            case "4": System.out.println("Current Wickets: "+ team.getCurrentWickets() + " Remaining Wickets:" + (team.getNumberOfPlayers() - team.getCurrentWickets()-1));
+                      break;
+            case "5": if(scoreToChase != 0) {
+                        System.out.println("Remaining score to chase:" + (scoreToChase + 1 - team.getTeamScore()) + " in " + (totalAvailableBalls - team.getTotalPlayedBalls()) + " balls");
+                        break;
+                      }
+            default:
+        }
+    }
+
+    private boolean playTheBall(Team team, int ball, int over){
+        if(ball == 6){
+            over++;
+            ball = 0;
+        }
         int currentPlayer = strike.getCurrentStrike();
         int outcomeOfBallBowled = MatchUtil.generateRandomScore(team.getPlayerType(currentPlayer));
         team.incrementTotalBalls(currentPlayer);
 
         if(outcomeOfBallBowled != -1){
-            System.out.println(ball + ": " + outcomeOfBallBowled + " run || Player: " + team.getNameOfPlayer(currentPlayer));
+            System.out.println(over + "." + ball + ": " + outcomeOfBallBowled + " run || Player: " + team.getNameOfPlayer(currentPlayer));
             team.incrementTeamScore(outcomeOfBallBowled, currentPlayer);
             strike.changeStrike(outcomeOfBallBowled);
             return false;
@@ -105,7 +145,7 @@ public class Match {
 
         int outPlayer = strike.updateStrikeOnWicket();
         team.updateWickets();
-        System.out.println(ball + ": Wicket-" + team.getCurrentWickets() + " || Player: " + team.getNameOfPlayer(outPlayer));
+        System.out.println(over + "." + ball + ": Wicket-" + team.getCurrentWickets() + " || Player: " + team.getNameOfPlayer(outPlayer));
         return (team.getCurrentWickets() == team.getNumberOfPlayers()-1);
     }
 

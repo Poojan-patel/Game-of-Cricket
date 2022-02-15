@@ -22,6 +22,10 @@ class Strike{
         return strikeHolders[currentStrike];
     }
 
+    public int getCurrentNonStrike(){
+        return strikeHolders[1-currentStrike];
+    }
+
     /*
         If x is the maximum indexOfPlayer between both players, then
         At any point of time, when wicket falls, The next player who comes on the pitch is x+1

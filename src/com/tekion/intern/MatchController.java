@@ -84,13 +84,13 @@ public class MatchController {
         int numOfPlayers = getIntegerInputInRange(2, 11);
 
         System.out.print("Enter Team-1 Name:");
-        String team1 = getNonEmptyString();
+        String team1 = getNonEmptyString().toUpperCase();
         List<String> team1PlayersTypes = new ArrayList<>();
         List<String> team1PlayersNames = new ArrayList<>();
         initializeTeamPlayers(numOfPlayers, team1PlayersNames, team1PlayersTypes);
 
         System.out.print("Enter Team-2 Name:");
-        String team2 = getNonEmptyString();
+        String team2 = getNonEmptyString().toUpperCase();
         List<String> team2PlayersTypes = new ArrayList<>();
         List<String> team2PlayersNames = new ArrayList<>();
         initializeTeamPlayers(numOfPlayers, team2PlayersNames, team2PlayersTypes);

@@ -113,4 +113,8 @@ class Team {
     public Player.PlayerType getPlayerType(int currentPlayer) {
         return players.get(currentPlayer).getPlayerType();
     }
+
+    public String getPlayerIndividualScore(int currentStrike) {
+        return players.get(currentStrike).toString();
+    }
 }
