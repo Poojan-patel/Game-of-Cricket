@@ -3,10 +3,12 @@ package com.tekion.intern.game;
 class Strike{
     private int[] strikeHolders;
     private int currentStrike;
+    private int currentBowler;
 
     public Strike(){
         this.currentStrike = 0;
         this.strikeHolders = new int[]{0, 1};
+        currentBowler = -1;
     }
 
     public void overChanged(){
@@ -37,4 +39,11 @@ class Strike{
         return outPlayer;
     }
 
+    public int getCurrentBowler() {
+        return currentBowler;
+    }
+
+    public void setCurrentBowler(int bowlerIndex){
+        currentBowler = bowlerIndex;
+    }
 }

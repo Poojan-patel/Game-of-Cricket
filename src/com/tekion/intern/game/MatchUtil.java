@@ -1,19 +1,22 @@
 package com.tekion.intern.game;
 
-import java.util.Map;
-import java.util.TreeMap;
+import com.tekion.intern.MatchController;
+
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MatchUtil {
     private static final Map<Integer,Integer> batsmanRandomScore;
     private static final Map<Integer,Integer> bowlerRandomScore;
+    private static Scanner sc = new Scanner(System.in);
 
     static{
-        batsmanRandomScore = new TreeMap<Integer,Integer>(){{
+        batsmanRandomScore = new HashMap<Integer,Integer>(){{
             put(0,0); put(1,1); put(2,2); put(3,3);
             put(4,4); put(5,5); put(6,6); put(7,-1);
         }};
-        bowlerRandomScore = new TreeMap<Integer,Integer>(){{
+        bowlerRandomScore = new HashMap<Integer,Integer>(){{
             put(0,0); put(1,0); put(2,1); put(3,1);
             put(4,2); put(5,2); put(6,3); put(7,4);
             put(8,5); put(9,6); put(10,-1); put(11,-1);
@@ -49,5 +52,78 @@ public class MatchUtil {
             randomScore = bowlerRandomScore.get(randomNumber);
         }
         return randomScore;
+    }
+
+    public static int selectBowler(Team bowlingTeam, List<Integer> availableBowlers) {
+        System.out.println("Select your Bowler:\nPress");
+        for(int i = 0; i < availableBowlers.size(); i++){
+            System.out.println((i+1) + ": " + bowlingTeam.getNameOfPlayer(availableBowlers.get(i)));
+        }
+        int choiceIndex = getIntegerInputInRange(1, availableBowlers.size());
+        return availableBowlers.get(choiceIndex-1);
+    }
+
+    public static String getStringFromAcceptableValues(List<String> acceptableValues){
+        String input = "";
+        while(true){
+            input = sc.nextLine().toUpperCase();
+            if(acceptableValues.contains(input)){
+                return input;
+            }
+            System.out.println("Enter Value from:" + acceptableValues);
+        }
+    }
+
+    public static String getNonEmptyString(){
+        String input = "";
+        while(true){
+            input = sc.nextLine();
+            if(input.isEmpty()){
+                System.out.println("Enter Non-empty Value");
+            }
+            else
+                break;
+        }
+        return input;
+    }
+
+    public static int getIntegerInputInRange(int lower){
+        int input;
+        while(true){
+            try{
+                input = Integer.parseInt(sc.nextLine());
+                if(input < lower)
+                    System.out.println("Value should not be less than " + lower);
+                else
+                    break;
+            } catch(NumberFormatException nfe){
+                System.out.println("Enter an integer");
+            }
+        }
+        return input;
+    }
+
+    public static int getIntegerInputInRange(int lower, int upper){
+        int input;
+        while(true){
+            try{
+                input = Integer.parseInt(sc.nextLine());
+                if(input < lower || input > upper){
+                    System.out.println(String.format("Value should be between %d and %d", lower, upper));
+                }
+                else
+                    break;
+            } catch(NumberFormatException nfe){
+                System.out.println("Enter an integer");
+            }
+        }
+        return input;
+    }
+
+    public static void clearConsole() throws IOException, InterruptedException {
+        new ProcessBuilder("clear").inheritIO().start().waitFor();
+        //Runtime.getRuntime().exec("ls");
+//            System.out.print("\033\143");
+//            System.out.flush();
     }
 }
