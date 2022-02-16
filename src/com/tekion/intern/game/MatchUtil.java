@@ -15,8 +15,8 @@ public class MatchUtil {
         }};
         bowlerRandomScore = new TreeMap<Integer,Integer>(){{
             put(0,0); put(1,0); put(2,1); put(3,1);
-            put(4,2); put(5,2); put(6,3); put(7,3);
-            put(8,4); put(9,5); put(10,6); put(11,-1);
+            put(4,2); put(5,2); put(6,3); put(7,4);
+            put(8,5); put(9,6); put(10,-1); put(11,-1);
         }};
     }
 

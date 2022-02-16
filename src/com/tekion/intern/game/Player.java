@@ -12,6 +12,7 @@ class Player {
     private PlayerType playerType;
     private int[] scoreDistribution;
 
+
     public Player(String name, String type, int playerOrder){
         this.name = name;
         this.score = 0;

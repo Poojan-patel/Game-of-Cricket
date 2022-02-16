@@ -9,6 +9,7 @@ class Team {
     private int teamScore;
     private int totalPlayedBalls;
     private List<Player> players;
+    private List<Integer> bowlersPresent;
     private int currentWickets;
     private int totalAvailableBalls;
     private final int NUM_OF_PLAYERS;

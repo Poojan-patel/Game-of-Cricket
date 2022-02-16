@@ -1,5 +1,6 @@
 package com.tekion.intern.game;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
@@ -32,7 +33,7 @@ public class Match {
         winner = Winner.STARTED;
     }
 
-    public void stimulateGame(int headOrTails, int choiceOfInning){
+    public void stimulateGame(int headOrTails, int choiceOfInning) throws IOException, InterruptedException {
         int tossOutcome = choiceOfTossWinner(headOrTails, choiceOfInning);
         //if((tossWinner == 0 && choiceOfInning == 1) || (tossWinner == 1 && choiceOfInning == 0)){
         if(tossOutcome == 1){
@@ -63,7 +64,7 @@ public class Match {
         return (tossWinner + choiceOfInning);
     }
 
-    private void stimulateInnings(Team first, Team second){
+    private void stimulateInnings(Team first, Team second) throws IOException, InterruptedException {
         System.out.println(first.getTeamName() + " Will Start Batting");
         startInning(first, false, 0);
 
@@ -73,7 +74,7 @@ public class Match {
         startInning(second, true, scoreToChase);
     }
 
-    private void startInning(Team team, boolean isChasser, int scoreToChase) {
+    private void startInning(Team team, boolean isChasser, int scoreToChase) throws IOException, InterruptedException {
         System.out.println("Here are your choices for key pressing before playing the ball:\n");
         System.out.println("1... Current Player Score:");
         System.out.println("2... Current Players Score (Strike and Non-Strike):");
@@ -105,6 +106,7 @@ public class Match {
             if (allOut || (isChasser && (scoreToChase < team.getTeamScore())))
                 break;
             strike.overChanged();
+            new ProcessBuilder("clear").inheritIO().start().waitFor();
         }
     }
 

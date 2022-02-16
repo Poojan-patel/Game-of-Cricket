@@ -3,12 +3,13 @@ package com.tekion.intern;
 import com.tekion.intern.game.Match;
 import com.tekion.intern.game.MatchUtil;
 
+import java.io.IOException;
 import java.util.*;
 
 public class MatchController {
     private static final Scanner sc = new Scanner(System.in);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, InterruptedException {
         Match newMatch = initializeMatchData();
 
         int headOrTail = MatchUtil.stimulateToss();
@@ -81,32 +82,54 @@ public class MatchController {
         int numOfOvers = getIntegerInputInRange(1, 50);
 
         System.out.print("Number Of Players:");
-        int numOfPlayers = getIntegerInputInRange(2, 11);
+        int numOfPlayers = getIntegerInputInRange(5, 11);
 
         System.out.print("Enter Team-1 Name:");
         String team1 = getNonEmptyString().toUpperCase();
         List<String> team1PlayersTypes = new ArrayList<>();
         List<String> team1PlayersNames = new ArrayList<>();
-        initializeTeamPlayers(numOfPlayers, team1PlayersNames, team1PlayersTypes);
+        //initializeTeamPlayers(numOfPlayers, team1PlayersNames, team1PlayersTypes);
+        initializeTeamPlayers(numOfPlayers, team1, team1PlayersNames, team1PlayersTypes);
 
         System.out.print("Enter Team-2 Name:");
         String team2 = getNonEmptyString().toUpperCase();
         List<String> team2PlayersTypes = new ArrayList<>();
         List<String> team2PlayersNames = new ArrayList<>();
-        initializeTeamPlayers(numOfPlayers, team2PlayersNames, team2PlayersTypes);
+        //initializeTeamPlayers(numOfPlayers, team2PlayersNames, team2PlayersTypes);
+        initializeTeamPlayers(numOfPlayers, team2, team2PlayersNames, team2PlayersTypes);
 
         Match newMatch = new Match(numOfOvers, team1, team1PlayersNames, team1PlayersTypes, team2, team2PlayersNames, team2PlayersTypes);
         return newMatch;
     }
 
-    private static void initializeTeamPlayers(int numOfPlayers, List<String> playerNames, List<String> playerTypes){
-        List<String> acceptablePlayerTypes = Arrays.asList(new String[]{"BATSMAN","BOWLER"});
-        for(int i = 1; i <= numOfPlayers; i++){
-            System.out.print("Player-" + i + " Name:");
-            playerNames.add(getNonEmptyString());
+//    private static void initializeTeamPlayers(int numOfPlayers, List<String> playerNames, List<String> playerTypes){
+//        List<String> acceptablePlayerTypes = Arrays.asList(new String[]{"BATSMAN","BOWLER"});
+//        for(int i = 1; i <= numOfPlayers; i++){
+//            System.out.print("Player-" + i + " Name:");
+//            playerNames.add(getNonEmptyString());
+//
+//            System.out.print("Player-" + i  +" Type:");
+//            playerTypes.add(getStringFromAcceptableValues(acceptablePlayerTypes));
+//        }
+//
+//    }
 
-            System.out.print("Player-" + i  +" Type:");
-            playerTypes.add(getStringFromAcceptableValues(acceptablePlayerTypes));
+    private static void initializeTeamPlayers(int numOfPlayers, String teamName, List<String> playerNames, List<String> playerTypes){
+        System.out.println("You must have 5 bowlers in the team");
+        System.out.print("Enter Number of Batsman:");
+        int numOfBatsman = getIntegerInputInRange(0,numOfPlayers-5);
+        int numOfBowlers = numOfPlayers - numOfBatsman;
+        System.out.println("Batsmen are:");
+        for(int i = 1; i <= numOfBatsman; i++){
+            System.out.println("Player-" + i + " Name:" + (teamName + i));
+            playerNames.add(teamName + i);
+            playerTypes.add("BATSMAN");
+        }
+        System.out.println("Bowlers are:");
+        for(int i = numOfBatsman+1; i <= numOfPlayers; i++){
+            System.out.println("Player-" + i + " Name:" + (teamName + i));
+            playerNames.add(teamName + i);
+            playerTypes.add("BOWLER");
         }
 
     }
