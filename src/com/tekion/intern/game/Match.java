@@ -93,36 +93,35 @@ public class Match {
             selectedBowler = MatchUtil.selectBowler(bowlingTeam, availableBowlers);
             bowlingTeam.markBowlerForOver(selectedBowler);
             strike.setCurrentBowler(selectedBowler);
-            System.out.println("Over: " + (i + 1));
+            System.out.println("Over: " + i);
             System.out.println("-----------------------------------------------------------------");
             System.out.println("-----------------------------------------------------------------");
 
             allOutOrChased = playTheOver(battingTeam, bowlingTeam, isChasser, scoreToChase, i);
             if (allOutOrChased)
                 break;
-            strike.overChanged();
 
+            strike.overChanged();
             MatchUtil.clearConsole();
         }
     }
 
     private boolean playTheOver(Team battingTeam, Team bowlingTeam, boolean isChasser, int scoreToChase, int i) {
-        String choiceBetweenBalls;
         boolean allOut;
         for (int j = 0; j < 6; j++) {
             allOut = playTheBall(battingTeam, bowlingTeam, j + 1, i + 1);
             System.out.println("-----------------------------------------------------------------");
-            choiceBetweenBalls = sc.nextLine();
-            userChoiceHandler(choiceBetweenBalls, battingTeam, strike, scoreToChase);
-            System.out.println("-----------------------------------------------------------------");
             if (allOut || (isChasser && (scoreToChase < battingTeam.getTeamScore()))) {
                 return true;
             }
+            userChoiceHandler(battingTeam, strike, scoreToChase);
+            System.out.println("-----------------------------------------------------------------");
         }
         return false;
     }
 
-    private void userChoiceHandler(String choiceBetweenBalls, Team team, Strike strike, int scoreToChase) {
+    private void userChoiceHandler(Team team, Strike strike, int scoreToChase) {
+        String choiceBetweenBalls = sc.nextLine();
         switch (choiceBetweenBalls){
             case "1": System.out.println(team.getPlayerIndividualScore(strike.getCurrentStrike()));
                       break;
