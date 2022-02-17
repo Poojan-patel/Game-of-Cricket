@@ -9,6 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MatchUtil {
     private static final Map<Integer,Integer> batsmanRandomScore;
     private static final Map<Integer,Integer> bowlerRandomScore;
+    private static final String os = System.getProperty("os.name").toLowerCase();
     private static Scanner sc = new Scanner(System.in);
 
     static{
@@ -43,7 +44,7 @@ public class MatchUtil {
     public static int generateRandomScore(Player.PlayerType playerType){
         int randomNumber;
         int randomScore;
-        if(playerType == Player.PlayerType.BATSMAN) {
+        if(playerType != Player.PlayerType.BOWLER) {
             randomNumber = ThreadLocalRandom.current().nextInt(0, batsmanRandomScore.size());
             randomScore = batsmanRandomScore.get(randomNumber);
         }
@@ -59,8 +60,8 @@ public class MatchUtil {
         for(int i = 0; i < availableBowlers.size(); i++){
             System.out.println((i+1) + ": " + bowlingTeam.getNameOfPlayer(availableBowlers.get(i)));
         }
-        int choiceIndex = getIntegerInputInRange(1, availableBowlers.size());
-        return availableBowlers.get(choiceIndex-1);
+        int choiceOfBowlerPosition = getIntegerInputInRange(1, availableBowlers.size());
+        return availableBowlers.get(choiceOfBowlerPosition-1);
     }
 
     public static String getStringFromAcceptableValues(List<String> acceptableValues){
@@ -121,7 +122,10 @@ public class MatchUtil {
     }
 
     public static void clearConsole() throws IOException, InterruptedException {
-        new ProcessBuilder("clear").inheritIO().start().waitFor();
+        if(os.contains("windows"))
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        else
+            new ProcessBuilder("clear").inheritIO().start().waitFor();
         //Runtime.getRuntime().exec("ls");
 //            System.out.print("\033\143");
 //            System.out.flush();
