@@ -148,6 +148,6 @@ class Team {
      */
     public void incrementWicketsTakenByBowler(int currentBowler) {
         players.get(currentBowler).incrementWicketsTaken();
-        players.get(currentBowler).incrementNumberOfBallsThrown();
+        //players.get(currentBowler).incrementNumberOfBallsThrown();
     }
 }

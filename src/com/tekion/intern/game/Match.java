@@ -115,7 +115,7 @@ public class Match {
     private boolean playTheOver(Team battingTeam, Team bowlingTeam, int scoreToChase, int currentOver) {
         boolean allOut;
         for (int j = 0; j < 6; j++) {
-            allOut = playTheBall(battingTeam, bowlingTeam, j + 1, currentOver);
+            allOut = playTheBall(battingTeam, bowlingTeam, j + 1, currentOver, true);
             System.out.println("-----------------------------------------------------------------");
             if (allOut || ((scoreToChase != -1) && (scoreToChase < battingTeam.getTeamScore()))) {
                 return true;
@@ -154,33 +154,34 @@ public class Match {
         int outPlayer = strike.updateStrikeOnWicket();
         battingTeam.updateWickets();
         bowlingTeam.incrementWicketsTakenByBowler(strike.getCurrentBowler());
+        bowlingTeam.incrementBowlersNumberOfBalls(strike.getCurrentBowler());
         System.out.println(MatchUtil.getRandomTypeOfWicket());
         System.out.println(over + "." + ballNumber + ": Wicket-" + battingTeam.getTotalWicketsFallen() + " || Player: " + battingTeam.getNameOfPlayer(outPlayer));
         return (battingTeam.getTotalWicketsFallen() == battingTeam.getNumberOfPlayers()-1);
     }
 
-    private boolean unFairBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over){
-        //int unfairBallType = ThreadLocalRandom.current().nextInt(0,2);
-        battingTeam.incrementTeamScore(1,strike.getCurrentStrike());
-        System.out.println("Unfair Ball: 1 run");
-        //if(unfairBallType == 0){
-            // Wide Ball
-            int outcomeOnWideBall = MatchUtil.generateRandomScore(battingTeam.getPlayerType(strike.getCurrentStrike()));
-            if(outcomeOnWideBall == -1){
-                return outcomeOnWicketBall(battingTeam, bowlingTeam, ballNumber, over);
-            } else if(outcomeOnWideBall >= 0){
-                return legitimateBall(battingTeam, bowlingTeam, ballNumber, over, outcomeOnWideBall);
-            } else
-                return unFairBall(battingTeam, bowlingTeam, ballNumber, over);
-
-        //} else{
-
-        //}
-    }
+//    private boolean unFairBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over){
+//        int unfairBallType = ThreadLocalRandom.current().nextInt(0,2);
+//        battingTeam.incrementTeamScore(1,strike.getCurrentStrike());
+//        System.out.println("Unfair Ball: 1 run");
+//        if(unfairBallType == 0){
+//            // Wide Ball
+//            int outcomeOnWideBall = MatchUtil.generateRandomScore(battingTeam.getPlayerType(strike.getCurrentStrike()));
+//            if(outcomeOnWideBall == -1){
+//                return outcomeOnWicketBall(battingTeam, bowlingTeam, ballNumber, over);
+//            } else if(outcomeOnWideBall >= 0){
+//                return legitimateBall(battingTeam, bowlingTeam, ballNumber, over, outcomeOnWideBall);
+//            } else
+//                return unFairBall(battingTeam, bowlingTeam, ballNumber, over);
+//
+//        } else{
+//
+//        }
+//        return false;
+//    }
 
     private boolean legitimateBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over, int outcomeOfBallBowled){
         int currentPlayer = strike.getCurrentStrike();
-        bowlingTeam.incrementBowlersNumberOfBalls(strike.getCurrentBowler());
         System.out.println(over + "." + ballNumber + ": " + outcomeOfBallBowled + " run || Player: " + battingTeam.getNameOfPlayer(currentPlayer));
         battingTeam.incrementTeamScore(outcomeOfBallBowled, currentPlayer);
         strike.changeStrike(outcomeOfBallBowled);
@@ -200,24 +201,33 @@ public class Match {
         return false;
     }
 
-    private boolean playTheBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over){
+    private boolean playTheBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over, boolean wicketPossible){
         if(ballNumber == 6){
             over++;
             ballNumber = 0;
         }
         int currentPlayer = strike.getCurrentStrike();
-        int outcomeOfBallBowled = MatchUtil.generateRandomScore(battingTeam.getPlayerType(currentPlayer));
+        int outcomeOfBallBowled = MatchUtil.generateRandomScore(battingTeam.getPlayerType(currentPlayer), wicketPossible);
 
         if(outcomeOfBallBowled == -1){
             battingTeam.incrementTotalBalls(currentPlayer);
             return outcomeOnWicketBall(battingTeam, bowlingTeam, ballNumber, over);
         }
-        else if(outcomeOfBallBowled >= 0){
-            battingTeam.incrementTotalBalls(currentPlayer);
-            return legitimateBall(battingTeam, bowlingTeam, ballNumber,over, outcomeOfBallBowled);
-        }
-        else {
-            return unFairBall(battingTeam, bowlingTeam, ballNumber, over);
+        else{
+            int possibilityOfUnFairBall = ThreadLocalRandom.current().nextInt(0,9);
+            if(possibilityOfUnFairBall >= 7){
+                battingTeam.incrementTeamScore(1,strike.getCurrentStrike());
+                System.out.println(((possibilityOfUnFairBall == 7) ?"Wide" :"No") + " Ball: 1 run");
+                boolean isAllOut = legitimateBall(battingTeam, bowlingTeam, ballNumber, over, outcomeOfBallBowled);
+                if(isAllOut)
+                    return true;
+                return playTheBall(battingTeam, bowlingTeam, ballNumber, over, (possibilityOfUnFairBall == 7));
+            }
+            else {
+                battingTeam.incrementTotalBalls(currentPlayer);
+                bowlingTeam.incrementBowlersNumberOfBalls(strike.getCurrentBowler());
+                return legitimateBall(battingTeam, bowlingTeam, ballNumber, over, outcomeOfBallBowled);
+            }
         }
     }
 

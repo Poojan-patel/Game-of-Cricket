@@ -17,13 +17,11 @@ public class MatchUtil {
         batsmanRandomScore = new HashMap<Integer,Integer>(){{
             put(0,0); put(1,1); put(2,2); put(3,3);
             put(4,4); put(5,5); put(6,6); put(7,-1);
-            put(8,-2);
         }};
         bowlerRandomScore = new HashMap<Integer,Integer>(){{
             put(0,0); put(1,0); put(2,1); put(3,1);
             put(4,2); put(5,2); put(6,3); put(7,4);
             put(8,5); put(9,6); put(10,-1); put(11,-1);
-            put(12,-1);
         }};
         typeOfWicketFallen = Arrays.asList("BOLD", "CAUGHT AND BOLD", "STUMPED", "HIT WICKET");
     }
@@ -45,22 +43,22 @@ public class MatchUtil {
         return ThreadLocalRandom.current().nextInt(0, 2);
     }
 
-    public static int generateRandomScore(Player.PlayerType playerType){
+    public static int generateRandomScore(Player.PlayerType playerType, boolean wicketPossible){
         int randomNumber;
         int randomScore;
         if(playerType != Player.PlayerType.BOWLER) {
-            randomNumber = ThreadLocalRandom.current().nextInt(0, batsmanRandomScore.size());
+            randomNumber = ThreadLocalRandom.current().nextInt(0, batsmanRandomScore.size() - ((wicketPossible) ?0 :1));
             randomScore = batsmanRandomScore.get(randomNumber);
         }
         else {
-            randomNumber = ThreadLocalRandom.current().nextInt(0, bowlerRandomScore.size());
+            randomNumber = ThreadLocalRandom.current().nextInt(0, bowlerRandomScore.size() - ((wicketPossible) ?0 :2));
             randomScore = bowlerRandomScore.get(randomNumber);
         }
         return randomScore;
     }
 
     public static String getRandomTypeOfWicket(){
-        return typeOfWicketFallen.get(ThreadLocalRandom.current().nextInt(0,3));
+        return typeOfWicketFallen.get(ThreadLocalRandom.current().nextInt(0,4));
     }
 
     public static int selectBowler(Team bowlingTeam, Set<Integer> availableBowlers) {
