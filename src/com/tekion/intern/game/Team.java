@@ -1,7 +1,6 @@
 package com.tekion.intern.game;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 class Team {
@@ -9,10 +8,11 @@ class Team {
     private int teamScore;
     private int totalPlayedBalls;
     private List<Player> players;
-    private int numOfBatsman;
     private int totalWicketsFallen;
     private final int NUM_OF_PLAYERS;
+    private int extras;
     private int[] scoreDistribution;
+    private Set<Integer> availableBowlers;
 
     public Team(String teamName, List<String> playerNames, List<String> playerTypes, int balls) {
         this.teamName = teamName;
@@ -21,8 +21,9 @@ class Team {
         totalWicketsFallen = 0;
         players = new ArrayList<>();
         this.NUM_OF_PLAYERS = playerNames.size();
-        setPlayers(playerNames, playerTypes);
         scoreDistribution = new int[7];
+        availableBowlers = new TreeSet<>();
+        setPlayers(playerNames, playerTypes);
     }
 
     public String getTeamName() {
@@ -72,26 +73,51 @@ class Team {
         }
     }
 
-    private void setPlayers(List<String> playerNames, List<String> playerTypes){
-        for(int i = 0; i < NUM_OF_PLAYERS; i++){
-            if(playerTypes.get(i).equals("BATSMAN"))
-                numOfBatsman++;
-            players.add(new Player(playerNames.get(i), playerTypes.get(i), i));
+    public Set<Integer> getAvailableBowlers(int previousBowler, int secondLastBowler, int maxOversCanBeThrown, int remainingOvers){
+        if(secondLastBowler != -1 && players.get(secondLastBowler).remainingOvers(maxOversCanBeThrown) > 0){
+            availableBowlers.add(secondLastBowler);
         }
-    }
-
-    public List<Integer> getAvailableBowlers(int previousBowler, int maxOversCanBeThrown){
-        List<Integer> availableBowlers = new ArrayList<>();
-        for(int i = 0; i < NUM_OF_PLAYERS; i++){
-            if(!(players.get(i).getPlayerType() == Player.PlayerType.BATSMAN) && !players.get(i).hasExaustedOvers(maxOversCanBeThrown) && (i != previousBowler)){
-                availableBowlers.add(i);
-            }
+        availableBowlers.remove(previousBowler);
+        int bowlerWithMaxRemainingOvers = Collections.min(availableBowlers);
+        for(int i:availableBowlers){
+            if(players.get(i).remainingOvers(maxOversCanBeThrown) > players.get(bowlerWithMaxRemainingOvers).remainingOvers(maxOversCanBeThrown))
+                bowlerWithMaxRemainingOvers = i;
         }
+        if(players.get(bowlerWithMaxRemainingOvers).remainingOvers(maxOversCanBeThrown) > (remainingOvers/2))
+            return Collections.singleton(bowlerWithMaxRemainingOvers);
         return availableBowlers;
     }
 
     public void incrementBowlersNumberOfBalls(int bowlerIndex){
         players.get(bowlerIndex).incrementNumberOfBallsThrown();
+    }
+
+    public String getNameOfPlayer(int currentPlayer) {
+        return players.get(currentPlayer).getName();
+    }
+
+    public Player.PlayerType getPlayerType(int currentPlayer) {
+        return players.get(currentPlayer).getPlayerType();
+    }
+
+    public String getPlayerIndividualScore(int currentStrike) {
+        return players.get(currentStrike).toString();
+    }
+
+    public void incrementWicketsTakenByBowler(int currentBowler) {
+        players.get(currentBowler).incrementWicketsTaken();
+    }
+
+    public String getTypeOfBowler(int currentBowler) {
+        return players.get(currentBowler).getTypeOfBowler();
+    }
+
+    private void setPlayers(List<String> playerNames, List<String> playerTypes){
+        for(int i = 0; i < NUM_OF_PLAYERS; i++){
+            if(!playerTypes.get(i).equals("BATSMAN"))
+                availableBowlers.add(i);
+            players.add(new Player(playerNames.get(i), playerTypes.get(i)));
+        }
     }
 
     private void updatePlayerScore(int score, int playerNumber){
@@ -105,39 +131,26 @@ class Team {
         player.incrementBallsPlayed();
     }
 
-    public String getNameOfPlayer(int currentPlayer) {
-        return players.get(currentPlayer).getName();
-    }
-
     @Override
     public String toString() {
         String scoreDistributionToString = "[";
         for(int i = 0; i < 6; i++)
             scoreDistributionToString += (i + ":" + scoreDistribution[i] + ", ");
         scoreDistributionToString += ("6:" + scoreDistribution[6] + "]");
-        return String.format("%s: %d/%d (%d.%d Overs)\nDistribution: %s",
+        return String.format("%s: %d/%d (%d.%d Overs)\nDistribution: %s\n Extras: %d",
                 teamName,
                 teamScore,
                 totalWicketsFallen,
                 totalPlayedBalls/6,
                 totalPlayedBalls%6,
-                scoreDistributionToString
+                scoreDistributionToString,
+                extras
         );
     }
 
-    public Player.PlayerType getPlayerType(int currentPlayer) {
-        return players.get(currentPlayer).getPlayerType();
-    }
-
-    public String getPlayerIndividualScore(int currentStrike) {
-        return players.get(currentStrike).toString();
-    }
-    /*
-        Because wicket can only be taken after ball is thrown, in normal cases
-        So balls can be incremented from here only
-     */
-    public void incrementWicketsTakenByBowler(int currentBowler) {
-        players.get(currentBowler).incrementWicketsTaken();
-        players.get(currentBowler).incrementNumberOfBallsThrown();
+    public void incrementTeamScoreForUnfair() {
+        scoreDistribution[1]++;
+        extras++;
+        teamScore++;
     }
 }

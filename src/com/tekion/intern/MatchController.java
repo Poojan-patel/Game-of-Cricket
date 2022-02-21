@@ -29,14 +29,12 @@ public class MatchController {
         String team1 = MatchUtil.getNonEmptyString().toUpperCase();
         List<String> team1PlayersTypes = new ArrayList<>();
         List<String> team1PlayersNames = new ArrayList<>();
-        //initializeTeamPlayers(numOfPlayers, team1PlayersNames, team1PlayersTypes);
         initializeTeamPlayers(numOfPlayers, team1, team1PlayersNames, team1PlayersTypes);
 
         System.out.print("Enter Team-2 Name:");
         String team2 = MatchUtil.getNonEmptyString().toUpperCase();
         List<String> team2PlayersTypes = new ArrayList<>();
         List<String> team2PlayersNames = new ArrayList<>();
-        //initializeTeamPlayers(numOfPlayers, team2PlayersNames, team2PlayersTypes);
         initializeTeamPlayers(numOfPlayers, team2, team2PlayersNames, team2PlayersTypes);
 
         Match newMatch = new Match(numOfOvers, team1, team1PlayersNames, team1PlayersTypes, team2, team2PlayersNames, team2PlayersTypes);
@@ -45,6 +43,8 @@ public class MatchController {
 
     private static void initializeTeamPlayers(int numOfPlayers, String teamName, List<String> playerNames, List<String> playerTypes){
         List<String> acceptablePlayerTypes = new LinkedList<>(Arrays.asList("BATSMAN","BOWLER","ALLROUNDER"));
+        List<String> bowlerTypes = new LinkedList<>(Arrays.asList("FAST","SPIN","MEDIUM"));
+
         System.out.println("You must have 5 bowlers and allrounders in total in the team");
         int numOfBatsman = numOfPlayers-5;
         String singlePlayerType;
@@ -62,28 +62,14 @@ public class MatchController {
             singlePlayerType = MatchUtil.getStringFromAcceptableValues(acceptablePlayerTypes);
             if(numOfBatsman > 0 && singlePlayerType.equals("BATSMAN"))
                 numOfBatsman--;
+
+            if(!singlePlayerType.equals("BATSMAN")){
+                System.out.print("Enter pace of bowling:");
+                singlePlayerType += "," + MatchUtil.getStringFromAcceptableValues(bowlerTypes);
+            }
             playerTypes.add(singlePlayerType);
         }
 
     }
 
-//    private static void initializeTeamPlayers(int numOfPlayers, String teamName, List<String> playerNames, List<String> playerTypes){
-//        System.out.println("You must have 5 bowlers in the team");
-//        System.out.print("Enter Number of Batsman:");
-//        int numOfBatsman = MatchUtil.getIntegerInputInRange(0, numOfPlayers-5);
-//
-//        System.out.println("Batsmen are:");
-//        for(int i = 1; i <= numOfBatsman; i++){
-//            System.out.println("Player-" + i + " Name:" + (teamName + i));
-//            playerNames.add(teamName + i);
-//            playerTypes.add("BATSMAN");
-//        }
-//        System.out.println("Bowlers are:");
-//        for(int i = numOfBatsman+1; i <= numOfPlayers; i++){
-//            System.out.println("Player-" + i + " Name:" + (teamName + i));
-//            playerNames.add(teamName + i);
-//            playerTypes.add("BOWLER");
-//        }
-//
-//    }
 }

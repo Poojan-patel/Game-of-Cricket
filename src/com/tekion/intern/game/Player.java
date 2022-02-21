@@ -6,28 +6,48 @@ class Player {
         BATSMAN,
         ALLROUNDER
     }
+
+    enum TypeOfBowler{
+        FAST,
+        SPIN,
+        MEDIUM,
+        NA;
+
+        public static TypeOfBowler fromStringToEnum(String type){
+            if(type.equals("FAST"))
+                return TypeOfBowler.FAST;
+            else if(type.equals("SPIN"))
+                return TypeOfBowler.SPIN;
+            else if(type.equals("MEDIUM"))
+                return TypeOfBowler.MEDIUM;
+            else
+                return TypeOfBowler.NA;
+        }
+    }
     private String name;
     private int score;
     private int ballsPlayed;
-    private int playerOrder;
     private PlayerType playerType;
+    private TypeOfBowler typeOfBowler;
     private int[] scoreDistribution;
     private int currentlyThrownBalls;
     private int wicketsTaken;
 
-    public Player(String name, String type, int playerOrder){
+    public Player(String name, String type){
         this.name = name;
         this.score = 0;
         this.ballsPlayed = 0;
-        this.playerOrder = playerOrder;
-        if(type.equals("BOWLER")){
-            playerType = PlayerType.BOWLER;
-        }
-        else if(type.equals("BATSMAN")){
+        if(type.equals("BATSMAN")){
             playerType = PlayerType.BATSMAN;
+            typeOfBowler = TypeOfBowler.NA;
         }
         else{
-            playerType = PlayerType.ALLROUNDER;
+            String[] bowlerType = type.split(",");
+            if(bowlerType[0].equals("BOWLER"))
+                playerType = PlayerType.BOWLER;
+            else
+                playerType = PlayerType.ALLROUNDER;
+            typeOfBowler = TypeOfBowler.fromStringToEnum(bowlerType[1]);
         }
         scoreDistribution = new int[7];
         currentlyThrownBalls = 0;
@@ -58,8 +78,8 @@ class Player {
         return playerType;
     }
 
-    public boolean hasExaustedOvers(int maxOversCanBeThrown) {
-        return (Math.ceil(currentlyThrownBalls/6.0) == maxOversCanBeThrown);
+    public int remainingOvers(int maxOversCanBeThrown) {
+        return (maxOversCanBeThrown - (int)Math.ceil(currentlyThrownBalls/6.0));
     }
 
     public void incrementNumberOfBallsThrown(){
@@ -68,6 +88,10 @@ class Player {
 
     public void incrementWicketsTaken() {
         wicketsTaken++;
+    }
+
+    public String getTypeOfBowler() {
+        return typeOfBowler.toString();
     }
 
     @Override
