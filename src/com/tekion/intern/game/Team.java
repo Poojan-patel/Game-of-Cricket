@@ -2,6 +2,8 @@ package com.tekion.intern.game;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 
 class Team {
@@ -13,6 +15,7 @@ class Team {
     private int totalWicketsFallen;
     private final int NUM_OF_PLAYERS;
     private int[] scoreDistribution;
+    private Set<Integer> availableBowlers;
 
     public Team(String teamName, List<String> playerNames, List<String> playerTypes, int balls) {
         this.teamName = teamName;
@@ -21,8 +24,9 @@ class Team {
         totalWicketsFallen = 0;
         players = new ArrayList<>();
         this.NUM_OF_PLAYERS = playerNames.size();
-        setPlayers(playerNames, playerTypes);
         scoreDistribution = new int[7];
+        availableBowlers = new TreeSet<>();
+        setPlayers(playerNames, playerTypes);
     }
 
     public String getTeamName() {
@@ -76,17 +80,23 @@ class Team {
         for(int i = 0; i < NUM_OF_PLAYERS; i++){
             if(playerTypes.get(i).equals("BATSMAN"))
                 numOfBatsman++;
+            else
+                availableBowlers.add(i);
             players.add(new Player(playerNames.get(i), playerTypes.get(i), i));
         }
     }
 
-    public List<Integer> getAvailableBowlers(int previousBowler, int maxOversCanBeThrown){
-        List<Integer> availableBowlers = new ArrayList<>();
-        for(int i = 0; i < NUM_OF_PLAYERS; i++){
-            if(!(players.get(i).getPlayerType() == Player.PlayerType.BATSMAN) && !players.get(i).hasExaustedOvers(maxOversCanBeThrown) && (i != previousBowler)){
-                availableBowlers.add(i);
-            }
+    public Set<Integer> getAvailableBowlers(int previousBowler, int secondLastBowler, int maxOversCanBeThrown){
+        //List<Integer> availableBowlers = new ArrayList<>();
+        if(secondLastBowler != -1 && !players.get(secondLastBowler).hasExaustedOvers(maxOversCanBeThrown)){
+            availableBowlers.add(secondLastBowler);
         }
+        availableBowlers.remove(previousBowler);
+//        for(int i = 0; i < NUM_OF_PLAYERS; i++){
+//            if(!(players.get(i).getPlayerType() == Player.PlayerType.BATSMAN) && !players.get(i).hasExaustedOvers(maxOversCanBeThrown) && (i != previousBowler)){
+//                availableBowlers.add(i);
+//            }
+//        }
         return availableBowlers;
     }
 

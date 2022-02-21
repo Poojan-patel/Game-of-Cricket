@@ -9,6 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MatchUtil {
     private static final Map<Integer,Integer> batsmanRandomScore;
     private static final Map<Integer,Integer> bowlerRandomScore;
+    private static List<String> typeOfWicketFallen;
     private static final String os = System.getProperty("os.name").toLowerCase();
     private static Scanner sc = new Scanner(System.in);
 
@@ -16,12 +17,15 @@ public class MatchUtil {
         batsmanRandomScore = new HashMap<Integer,Integer>(){{
             put(0,0); put(1,1); put(2,2); put(3,3);
             put(4,4); put(5,5); put(6,6); put(7,-1);
+            put(8,-2);
         }};
         bowlerRandomScore = new HashMap<Integer,Integer>(){{
             put(0,0); put(1,0); put(2,1); put(3,1);
             put(4,2); put(5,2); put(6,3); put(7,4);
             put(8,5); put(9,6); put(10,-1); put(11,-1);
+            put(12,-1);
         }};
+        typeOfWicketFallen = Arrays.asList("BOLD", "CAUGHT AND BOLD", "STUMPED", "HIT WICKET");
     }
 
     public static Match.Winner decideWinner(int team1Score, int team2Score){
@@ -55,13 +59,23 @@ public class MatchUtil {
         return randomScore;
     }
 
-    public static int selectBowler(Team bowlingTeam, List<Integer> availableBowlers) {
+    public static String getRandomTypeOfWicket(){
+        return typeOfWicketFallen.get(ThreadLocalRandom.current().nextInt(0,3));
+    }
+
+    public static int selectBowler(Team bowlingTeam, Set<Integer> availableBowlers) {
         System.out.println("Select your Bowler:\nPress");
-        for(int i = 0; i < availableBowlers.size(); i++){
-            System.out.println((i+1) + ": " + bowlingTeam.getNameOfPlayer(availableBowlers.get(i)));
+        List<Integer> bowlerSelectionList = new ArrayList<>();
+        int cnt = 1;
+        for(int i:availableBowlers){
+            System.out.println((cnt++) + ": " + bowlingTeam.getNameOfPlayer(i));
+            bowlerSelectionList.add(i);
         }
+//        for(int i = 0; i < availableBowlers.size(); i++){
+//            System.out.println((i+1) + ": " + bowlingTeam.getNameOfPlayer(availableBowlers.get(i)));
+//        }
         int choiceOfBowlerPosition = getIntegerInputInRange(1, availableBowlers.size());
-        return availableBowlers.get(choiceOfBowlerPosition-1);
+        return bowlerSelectionList.get(choiceOfBowlerPosition-1);
     }
 
     public static String getStringFromAcceptableValues(List<String> acceptableValues){

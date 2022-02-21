@@ -4,11 +4,13 @@ class Strike{
     private int[] strikeHolders;
     private int currentStrike;
     private int currentBowler;
+    private int previousBowler;
 
     public Strike(){
         this.currentStrike = 0;
         this.strikeHolders = new int[]{0, 1};
         currentBowler = -1;
+        previousBowler = -1;
     }
 
     public void overChanged(){
@@ -43,7 +45,15 @@ class Strike{
         return currentBowler;
     }
 
+    public int getPreviousBowler() {
+        return previousBowler;
+    }
+
     public void setCurrentBowler(int bowlerIndex){
         currentBowler = bowlerIndex;
+    }
+
+    public void setPreviousBowler(int bowlerIndex){
+        previousBowler = bowlerIndex;
     }
 }
