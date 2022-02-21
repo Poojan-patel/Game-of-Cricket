@@ -1,9 +1,6 @@
 package com.tekion.intern.game;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 
 class Team {
@@ -76,11 +73,18 @@ class Team {
         }
     }
 
-    public Set<Integer> getAvailableBowlers(int previousBowler, int secondLastBowler, int maxOversCanBeThrown){
-        if(secondLastBowler != -1 && !players.get(secondLastBowler).hasExaustedOvers(maxOversCanBeThrown)){
+    public Set<Integer> getAvailableBowlers(int previousBowler, int secondLastBowler, int maxOversCanBeThrown, int remainingOvers){
+        if(secondLastBowler != -1 && players.get(secondLastBowler).remainingOvers(maxOversCanBeThrown) > 0){
             availableBowlers.add(secondLastBowler);
         }
         availableBowlers.remove(previousBowler);
+        int bowlerWithMaxRemainingOvers = Collections.min(availableBowlers);
+        for(int i:availableBowlers){
+            if(players.get(i).remainingOvers(maxOversCanBeThrown) > players.get(bowlerWithMaxRemainingOvers).remainingOvers(maxOversCanBeThrown))
+                bowlerWithMaxRemainingOvers = i;
+        }
+        if(players.get(bowlerWithMaxRemainingOvers).remainingOvers(maxOversCanBeThrown) > (remainingOvers/2))
+            return Collections.singleton(bowlerWithMaxRemainingOvers);
         return availableBowlers;
     }
 
@@ -144,8 +148,9 @@ class Team {
         );
     }
 
-    public void incrementTeamScoreForUnfair(int score) {
-        scoreDistribution[score]++;
+    public void incrementTeamScoreForUnfair() {
+        scoreDistribution[1]++;
         extras++;
+        teamScore++;
     }
 }

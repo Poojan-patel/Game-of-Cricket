@@ -16,7 +16,9 @@ public class MatchUtil {
     static{
         batsmanRandomScore = new HashMap<Integer,Integer>(){{
             put(0,0); put(1,1); put(2,2); put(3,3);
-            put(4,4); put(5,5); put(6,6); put(7,-1);
+            put(4,4); put(5,5); put(6,6);
+            put(7,0); put(8,1); put(9,2); put(10,3);
+            put(11,4); put(12,6); put(13,-1);
         }};
         bowlerRandomScore = new HashMap<Integer,Integer>(){{
             put(0,0); put(1,0); put(2,1); put(3,1);

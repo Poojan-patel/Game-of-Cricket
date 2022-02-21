@@ -78,8 +78,8 @@ class Player {
         return playerType;
     }
 
-    public boolean hasExaustedOvers(int maxOversCanBeThrown) {
-        return (Math.ceil(currentlyThrownBalls/6.0) >= maxOversCanBeThrown);
+    public int remainingOvers(int maxOversCanBeThrown) {
+        return (maxOversCanBeThrown - (int)Math.ceil(currentlyThrownBalls/6.0));
     }
 
     public void incrementNumberOfBallsThrown(){

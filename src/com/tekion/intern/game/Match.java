@@ -96,7 +96,7 @@ public class Match {
         Set<Integer> availableBowlers;
         int selectedBowler;
         for(int i = 0; i < overs; i++) {
-            availableBowlers = bowlingTeam.getAvailableBowlers(strike.getCurrentBowler(), strike.getPreviousBowler(), maxOversCanBeThrown);
+            availableBowlers = bowlingTeam.getAvailableBowlers(strike.getCurrentBowler(), strike.getPreviousBowler(), maxOversCanBeThrown, totalAvailableBalls/6 - i);
             selectedBowler = MatchUtil.selectBowler(bowlingTeam, availableBowlers);
             strike.setPreviousBowler(strike.getCurrentBowler());
             strike.setCurrentBowler(selectedBowler);
@@ -176,11 +176,8 @@ public class Match {
                 System.out.println("RunOut-" + battingTeam.getNameOfPlayer(strike.getCurrentStrike()));
                 strike.updateStrikeOnWicket();
                 battingTeam.updateWickets();
-                // Needs to be changed, since runout is of team not of player
-                // bowlingTeam.incrementWicketsTakenByBowler(strike.getCurrentBowler());
                 return (battingTeam.getTotalWicketsFallen() == battingTeam.getNumberOfPlayers()-1);
             }
-            return false;
         }
         return false;
     }
@@ -199,13 +196,13 @@ public class Match {
         }
         else{
             int possibilityOfUnFairBall = ThreadLocalRandom.current().nextInt(0,9);
-            if(possibilityOfUnFairBall >= 7){
-                battingTeam.incrementTeamScoreForUnfair(1);
-                System.out.println(((possibilityOfUnFairBall == 7) ?"Wide" :"No") + " Ball: 1 run");
+            if(possibilityOfUnFairBall <= 1){
+                battingTeam.incrementTeamScoreForUnfair();
+                System.out.println(((possibilityOfUnFairBall == 0) ?"Wide" :"No") + " Ball: 1 run");
                 boolean isAllOut = legitimateBall(battingTeam, bowlingTeam, ballNumber, over, outcomeOfBallBowled);
                 if(isAllOut)
                     return true;
-                return playTheBall(battingTeam, bowlingTeam, ballNumber, over, (possibilityOfUnFairBall == 7));
+                return playTheBall(battingTeam, bowlingTeam, ballNumber, over, (possibilityOfUnFairBall == 0));
             }
             else {
                 battingTeam.incrementTotalBalls(currentPlayer);
