@@ -23,7 +23,7 @@ public class MatchUtil {
             put(4,2); put(5,2); put(6,3); put(7,4);
             put(8,5); put(9,6); put(10,-1); put(11,-1);
         }};
-        typeOfWicketFallen = Arrays.asList("BOLD", "CAUGHT AND BOLD", "STUMPED", "HIT WICKET");
+        typeOfWicketFallen = Arrays.asList("BOLD", "CAUGHT AND BOLD", "STUMPED", "HIT WICKET", "LBW", "DOUBLE HIT", "BALL OBSTRUCTION");
     }
 
     public static Match.Winner decideWinner(int team1Score, int team2Score){
@@ -58,7 +58,7 @@ public class MatchUtil {
     }
 
     public static String getRandomTypeOfWicket(){
-        return typeOfWicketFallen.get(ThreadLocalRandom.current().nextInt(0,4));
+        return typeOfWicketFallen.get(ThreadLocalRandom.current().nextInt(0,7));
     }
 
     public static int selectBowler(Team bowlingTeam, Set<Integer> availableBowlers) {
@@ -66,12 +66,10 @@ public class MatchUtil {
         List<Integer> bowlerSelectionList = new ArrayList<>();
         int cnt = 1;
         for(int i:availableBowlers){
-            System.out.println((cnt++) + ": " + bowlingTeam.getNameOfPlayer(i));
+            System.out.println((cnt++) + ": " + bowlingTeam.getNameOfPlayer(i) + '-' + bowlingTeam.getTypeOfBowler(i));
             bowlerSelectionList.add(i);
         }
-//        for(int i = 0; i < availableBowlers.size(); i++){
-//            System.out.println((i+1) + ": " + bowlingTeam.getNameOfPlayer(availableBowlers.get(i)));
-//        }
+
         int choiceOfBowlerPosition = getIntegerInputInRange(1, availableBowlers.size());
         return bowlerSelectionList.get(choiceOfBowlerPosition-1);
     }
