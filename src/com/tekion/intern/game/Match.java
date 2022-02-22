@@ -182,6 +182,16 @@ public class Match {
         return false;
     }
 
+    /*
+        When a ball is delivered, choices can be, 1.. Wicket (C&B, B, Stumped, .., all except runout)
+        2.. ball with runs possible, can be zero
+        for 2nd, after generation of random run, we can randomly generate whether it was wide/no ball
+            if it is, then increment one run and play again the same ball, till there is one legitimate ball thrown where pattern ends
+                on a wide ball, any wicket can be possible, same as legitimate ball
+                on a no ball, on that ball as well as on next ball, free hit, only runout is possible. this possibility of wicket (mentioned is 1st type)
+                is handle by wicketPossible parameter.
+            if not, we will call legitimateBall, where also we will generate a random number for possibility of run out.
+     */
     private boolean playTheBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over, boolean wicketPossible){
         if(ballNumber == 6){
             over++;
@@ -202,6 +212,7 @@ public class Match {
                 boolean isAllOut = legitimateBall(battingTeam, bowlingTeam, ballNumber, over, outcomeOfBallBowled);
                 if(isAllOut)
                     return true;
+                System.out.println("-----------------------------------------------------------------");
                 return playTheBall(battingTeam, bowlingTeam, ballNumber, over, (possibilityOfUnFairBall == 0));
             }
             else {
