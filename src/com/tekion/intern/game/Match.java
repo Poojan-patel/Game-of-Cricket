@@ -33,8 +33,8 @@ public class Match {
     ){
         totalAvailableBalls = numOfOvers*6;
         maxOversCanBeThrown = (int)Math.ceil(numOfOvers/5.0);
-        team1 = new Team(team1Name, team1PlayerNames, team1PlayerTypes, totalAvailableBalls);
-        team2 = new Team(team2Name, team2PlayerNames, team2PlayerTypes, totalAvailableBalls);
+        team1 = new Team(team1Name, team1PlayerNames, team1PlayerTypes);
+        team2 = new Team(team2Name, team2PlayerNames, team2PlayerTypes);
         winner = Winner.STARTED;
     }
 

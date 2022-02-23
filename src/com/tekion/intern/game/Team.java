@@ -3,7 +3,7 @@ package com.tekion.intern.game;
 import java.util.*;
 
 
-class Team {
+public class Team {
     private String teamName;
     private int teamScore;
     private int totalPlayedBalls;
@@ -14,7 +14,7 @@ class Team {
     private int[] scoreDistribution;
     private Set<Integer> availableBowlers;
 
-    public Team(String teamName, List<String> playerNames, List<String> playerTypes, int balls) {
+    public Team(String teamName, List<String> playerNames, List<String> playerTypes) {
         this.teamName = teamName;
         teamScore = 0;
         totalPlayedBalls = 0;

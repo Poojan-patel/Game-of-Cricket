@@ -1,7 +1,7 @@
 package com.tekion.intern.game;
 
-class Player {
-    enum PlayerType{
+public class Player {
+    public enum PlayerType{
         BOWLER,
         BATSMAN,
         ALLROUNDER

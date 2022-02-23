@@ -1,21 +1,66 @@
 package com.tekion.intern;
 
+import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.game.Match;
 import com.tekion.intern.game.MatchUtil;
+import com.tekion.intern.game.Team;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 public class MatchController {
     public static void main(String[] args) throws IOException, InterruptedException {
-        Match newMatch = initializeMatchData();
+        System.out.println("1... Initialize Team");
+        System.out.print("2... Initialize Match with Teams:");
+        int choice = MatchUtil.getIntegerInputInRange(1,2);
+        if(choice == 1){
+            initializeTeam();
+            return;
+        }
+        System.out.println("Enter Number of Overs:");
+        try {
+            int matchId = MySqlConnector.initializeMatch(MatchUtil.getIntegerInputInRange(1, 50));
+            System.out.println("Note down MatchID:" + matchId);
+            System.out.println("Use MatchID to play the game");
+        } catch(SQLException sqle){
+            System.out.println(sqle);
+            System.out.println("Match Creation Unsuccessful");
+        } catch(Exception e){
+            System.out.println("DB Error");
+        }
+//        Match newMatch = initializeMatchData();
+//
+//        int headOrTail = MatchUtil.stimulateToss();
+//        System.out.println("0.. Fielding, 1.. Batting:");
+//        int choiceOfInning = MatchUtil.getIntegerInputInRange(0, 1);
+//
+//        newMatch.stimulateGame(headOrTail, choiceOfInning);
+//        newMatch.showFinalScoreBoard();
+    }
 
-        int headOrTail = MatchUtil.stimulateToss();
-        System.out.println("0.. Fielding, 1.. Batting:");
-        int choiceOfInning = MatchUtil.getIntegerInputInRange(0, 1);
-
-        newMatch.stimulateGame(headOrTail, choiceOfInning);
-        newMatch.showFinalScoreBoard();
+    private static void initializeTeam() {
+        System.out.print("Enter Team Name:");
+        String teamName = MatchUtil.getNonEmptyString();
+        System.out.println("Total of 11 Players should be added");
+        List<String> teamPlayerNames = new ArrayList<>();
+        List<String> teamPlayerTypes = new ArrayList<>();
+        initializeTeamPlayers(11,teamName,teamPlayerNames,teamPlayerTypes);
+        Team team = new Team(teamName, teamPlayerNames, teamPlayerTypes);
+        try{
+            MySqlConnector.insertTeamData(team);
+            System.out.println("Data Insertion Success");
+        }
+        catch(SQLException sqe){
+            System.out.println(sqe);
+            System.out.println("Data Insertion Unsuccessful");
+        }
+        catch(Exception e){
+            System.out.println("DB Error");
+        }
     }
 
     private static Match initializeMatchData() {
