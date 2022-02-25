@@ -57,6 +57,7 @@ public class MatchUtil {
             randomScore = bowlerRandomScore.get(randomNumber);
         }
         return randomScore;
+        //return -1;
     }
 
     public static String getRandomTypeOfWicket(){

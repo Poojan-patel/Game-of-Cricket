@@ -82,10 +82,11 @@ public class MatchRepository {
         try {
             con.setAutoCommit(false);
             if (whichTeamToBatFirst != 1) {
-                ps = con.prepareStatement("update MatchTable set team1 = ?, team2 = ? where match_id = ?");
+                ps = con.prepareStatement("update MatchTable set team1 = ?, team2 = ?, winner = ? where match_id = ?");
                 ps.setInt(1, team2);
                 ps.setInt(2, team1);
-                ps.setInt(3, matchId);
+                ps.setString(3,"STARTED");
+                ps.setInt(4, matchId);
                 ps.execute();
             }
             con.commit();
