@@ -142,4 +142,11 @@ public class MatchUtil {
 //            System.out.print("\033\143");
 //            System.out.flush();
     }
+
+    public static int decideBatterFirst(int headOrTail, int choiceOfInning) {
+        if(headOrTail + choiceOfInning == 1){
+            return 1;
+        } else
+            return 2;
+    }
 }

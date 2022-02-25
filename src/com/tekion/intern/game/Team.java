@@ -13,6 +13,7 @@ public class Team {
     private int extras;
     private int[] scoreDistribution;
     private Set<Integer> availableBowlers;
+    private int teamId;
 
     public Team(String teamName, List<String> playerNames, List<String> playerTypes) {
         this.teamName = teamName;
@@ -24,6 +25,26 @@ public class Team {
         scoreDistribution = new int[7];
         availableBowlers = new TreeSet<>();
         setPlayers(playerNames, playerTypes);
+        this.teamId = 0;
+    }
+
+    public Team(String teamName, List<String> playerNames, List<String> playerTypes, List<Integer> playerIds, int teamId) {
+        this.teamName = teamName;
+        teamScore = 0;
+        totalPlayedBalls = 0;
+        totalWicketsFallen = 0;
+        players = new ArrayList<>();
+        this.NUM_OF_PLAYERS = playerNames.size();
+        scoreDistribution = new int[7];
+        availableBowlers = new TreeSet<>();
+        setPlayers(playerNames, playerTypes, playerIds);
+        this.teamId = teamId;
+    }
+
+    public int getTeamId(){ return teamId; }
+
+    public void setTeamId(int teamId){
+        this.teamId = teamId;
     }
 
     public String getTeamName() {
@@ -120,6 +141,14 @@ public class Team {
         }
     }
 
+    private void setPlayers(List<String> playerNames, List<String> playerTypes, List<Integer> playerIds) {
+        for(int i = 0; i < NUM_OF_PLAYERS; i++){
+            if(!playerTypes.get(i).equals("BATSMAN"))
+                availableBowlers.add(i);
+            players.add(new Player(playerNames.get(i), playerTypes.get(i), playerIds.get(i)));
+        }
+    }
+
     private void updatePlayerScore(int score, int playerNumber){
         Player player = players.get(playerNumber);
         player.incrementScore(score);
@@ -152,5 +181,9 @@ public class Team {
         scoreDistribution[1]++;
         extras++;
         teamScore++;
+    }
+
+    public int getPlayerId(int playerOffset) {
+        return players.get(playerOffset).getPlayerId();
     }
 }

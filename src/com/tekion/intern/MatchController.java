@@ -4,26 +4,73 @@ import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.game.Match;
 import com.tekion.intern.game.MatchUtil;
 import com.tekion.intern.game.Team;
+import com.tekion.intern.repository.MatchRepository;
+import com.tekion.intern.repository.TeamInPlayRepository;
+import com.tekion.intern.repository.TeamRepository;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 
 public class MatchController {
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("1... Initialize Team");
-        System.out.print("2... Initialize Match with Teams:");
-        int choice = MatchUtil.getIntegerInputInRange(1,2);
-        if(choice == 1){
-            initializeTeam();
+        System.out.println("2... Initialize Match with Teams:");
+        System.out.println("3... Stimulate the Game:");
+        System.out.print("4... Recreate the Match:");
+        int choice = MatchUtil.getIntegerInputInRange(1,4);
+
+        switch (choice){
+            case 1: initializeTeam();
+                    break;
+            case 2: createMatch();
+                    break;
+            case 3: startMatch();
+                    break;
+        }
+    }
+
+    private static void startMatch() throws IOException, InterruptedException {
+        System.out.println("Enter MatchId:");
+        int matchId = MatchUtil.getIntegerInputInRange(1);
+        try {
+            boolean isMatchScheduled = MatchRepository.getMatchFromMatchId(matchId);
+            if (!isMatchScheduled) {
+                System.out.println("MatchId is Invalid");
+                return;
+            }
+        } catch(Exception e){
+            System.out.println("DB error");
+        }
+
+        int headOrTail = MatchUtil.stimulateToss();
+        System.out.println("0.. Fielding, 1.. Batting:");
+        int choiceOfInning = MatchUtil.getIntegerInputInRange(0, 1);
+
+        int whichTeamToBatFirst = MatchUtil.decideBatterFirst(headOrTail, choiceOfInning);
+        Match newMatch = null;
+        try {
+            MatchRepository.updateTeamOrder(matchId, whichTeamToBatFirst);
+            newMatch = MatchRepository.createMatchFromDB(matchId);
+        } catch(SQLException sqle){
+            System.out.println(sqle);
+            System.out.println("Update Failed");
+            return;
+        } catch(Exception e){
+            System.out.println("DB Error");
             return;
         }
+
+        newMatch.stimulateGame(0, 1);
+        newMatch.showFinalScoreBoard();
+
+    }
+
+    private static void createMatch() {
         System.out.println("Enter Number of Overs:");
         try {
-            int matchId = MySqlConnector.initializeMatch(MatchUtil.getIntegerInputInRange(1, 50));
+            int matchId = MatchRepository.createMatch(MatchUtil.getIntegerInputInRange(1, 50));
             System.out.println("Note down MatchID:" + matchId);
             System.out.println("Use MatchID to play the game");
         } catch(SQLException sqle){
@@ -32,14 +79,6 @@ public class MatchController {
         } catch(Exception e){
             System.out.println("DB Error");
         }
-//        Match newMatch = initializeMatchData();
-//
-//        int headOrTail = MatchUtil.stimulateToss();
-//        System.out.println("0.. Fielding, 1.. Batting:");
-//        int choiceOfInning = MatchUtil.getIntegerInputInRange(0, 1);
-//
-//        newMatch.stimulateGame(headOrTail, choiceOfInning);
-//        newMatch.showFinalScoreBoard();
     }
 
     private static void initializeTeam() {
@@ -51,7 +90,7 @@ public class MatchController {
         initializeTeamPlayers(11,teamName,teamPlayerNames,teamPlayerTypes);
         Team team = new Team(teamName, teamPlayerNames, teamPlayerTypes);
         try{
-            MySqlConnector.insertTeamData(team);
+            TeamRepository.insertTeamData(team);
             System.out.println("Data Insertion Success");
         }
         catch(SQLException sqe){

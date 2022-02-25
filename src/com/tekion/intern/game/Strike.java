@@ -1,5 +1,9 @@
 package com.tekion.intern.game;
 
+import com.tekion.intern.repository.TeamInPlayRepository;
+
+import java.sql.SQLException;
+
 class Strike{
     private int[] strikeHolders;
     private int currentStrike;
@@ -55,5 +59,21 @@ class Strike{
 
     public void setPreviousBowler(int bowlerIndex){
         previousBowler = bowlerIndex;
+    }
+
+    public void updateStrikeInDB(int matchId, Team team) {
+        int teamId = team.getTeamId();
+        int onStrike, offStrike;
+        //if(team.getTotalWicketsFallen() == team.getNumberOfPlayers()-1) {
+            onStrike = (getCurrentStrike() >= team.getNumberOfPlayers())? -1: team.getPlayerId(getCurrentStrike());
+            offStrike = (getCurrentNonStrike() >= team.getNumberOfPlayers())? -1: team.getPlayerId(getCurrentNonStrike());
+        //}
+        try {
+            TeamInPlayRepository.updateStrikes(onStrike, offStrike, matchId, teamId);
+        } catch (SQLException sqle){
+            System.out.println(sqle);
+        } catch (Exception e){
+
+        }
     }
 }

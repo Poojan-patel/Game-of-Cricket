@@ -1,6 +1,10 @@
 package com.tekion.intern.game;
 
+import com.tekion.intern.repository.MatchRepository;
+import com.tekion.intern.repository.TeamInPlayRepository;
+
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -22,6 +26,7 @@ public class Match {
     private Strike strike;
     private static Scanner sc = new Scanner(System.in);
     private static List<String> ballTypes = Arrays.asList("SHORT", "LONG", "LEG", "YORKER", "BOUNCE", "FULLTOSS");
+    private int matchId;
 
     public Match(int numOfOvers,
                  String team1Name,
@@ -36,17 +41,42 @@ public class Match {
         team1 = new Team(team1Name, team1PlayerNames, team1PlayerTypes);
         team2 = new Team(team2Name, team2PlayerNames, team2PlayerTypes);
         winner = Winner.STARTED;
+        this.matchId = 0;
+    }
+
+    public Match(int numOfOvers, int maxOversCanBeThrown, Team team1, Team team2, int matchId){
+        totalAvailableBalls = numOfOvers*6;
+        this.maxOversCanBeThrown = maxOversCanBeThrown;
+        this.team1 = team1;
+        this.team2 = team2;
+        winner = Winner.STARTED;
+        this.matchId = matchId;
     }
 
     public void stimulateGame(int headOrTails, int choiceOfInning) throws IOException, InterruptedException {
         int tossOutcome = choiceOfTossWinner(headOrTails, choiceOfInning);
         //if((tossWinner == 0 && choiceOfInning == 1) || (tossWinner == 1 && choiceOfInning == 0)){
+        try {
+            MatchRepository.updateWinner(matchId, winner.toString());
+            System.out.println("here");
+        } catch (SQLException sqle){
+            System.out.println(sqle);
+        } catch (Exception e){
+
+        }
         if(tossOutcome == 1){
             stimulateInnings(team1, team2);
         } else{
             stimulateInnings(team2, team1);
         }
         declareTheWinner();
+        try {
+            MatchRepository.updateWinner(matchId, winner.toString());
+        } catch (SQLException sqle){
+            System.out.println(sqle);
+        } catch (Exception e){
+
+        }
     }
 
     public void showFinalScoreBoard(){
@@ -98,6 +128,15 @@ public class Match {
         for(int i = 0; i < overs; i++) {
             availableBowlers = bowlingTeam.getAvailableBowlers(strike.getCurrentBowler(), strike.getPreviousBowler(), maxOversCanBeThrown, totalAvailableBalls/6 - i);
             selectedBowler = MatchUtil.selectBowler(bowlingTeam, availableBowlers);
+
+            try {
+                TeamInPlayRepository.updateBowler(bowlingTeam.getPlayerId(selectedBowler), matchId, battingTeam.getTeamId());
+            } catch(SQLException sqle){
+                System.out.println(sqle);
+            } catch(Exception e){
+
+            }
+
             strike.setPreviousBowler(strike.getCurrentBowler());
             strike.setCurrentBowler(selectedBowler);
             System.out.println("Over: " + i);
@@ -109,6 +148,7 @@ public class Match {
                 break;
 
             strike.overChanged();
+            strike.updateStrikeInDB(matchId, battingTeam);
             MatchUtil.clearConsole();
         }
     }
@@ -156,6 +196,7 @@ public class Match {
 
     private boolean outcomeOnWicketBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over){
         int outPlayer = strike.updateStrikeOnWicket();
+        strike.updateStrikeInDB(matchId, battingTeam);
         battingTeam.updateWickets();
         bowlingTeam.incrementWicketsTakenByBowler(strike.getCurrentBowler());
         bowlingTeam.incrementBowlersNumberOfBalls(strike.getCurrentBowler());
@@ -170,12 +211,16 @@ public class Match {
         battingTeam.incrementTeamScore(outcomeOfBallBowled, currentPlayer);
         strike.changeStrike(outcomeOfBallBowled);
 
+        if(outcomeOfBallBowled%2 == 1)
+            strike.updateStrikeInDB(matchId, battingTeam);
+
         if(outcomeOfBallBowled != 4 && outcomeOfBallBowled != 6) {
             int possibilityOfRunOut = ThreadLocalRandom.current().nextInt(0, 10);
             if(possibilityOfRunOut == 9){
                 System.out.println("RunOut-" + battingTeam.getNameOfPlayer(strike.getCurrentStrike()));
                 strike.updateStrikeOnWicket();
                 battingTeam.updateWickets();
+                strike.updateStrikeInDB(matchId, battingTeam);
                 return (battingTeam.getTotalWicketsFallen() == battingTeam.getNumberOfPlayers()-1);
             }
         }

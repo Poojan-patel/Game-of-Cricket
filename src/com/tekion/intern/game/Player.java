@@ -32,6 +32,7 @@ public class Player {
     private int[] scoreDistribution;
     private int currentlyThrownBalls;
     private int wicketsTaken;
+    private int playerId;
 
     public Player(String name, String type){
         this.name = name;
@@ -51,6 +52,12 @@ public class Player {
         }
         scoreDistribution = new int[7];
         currentlyThrownBalls = 0;
+        playerId = 0;
+    }
+
+    public Player(String name, String type, int playerId){
+        this(name,type);
+        this.playerId = playerId;
     }
 
     public String getName() {
@@ -105,5 +112,9 @@ public class Player {
             objectAsString += String.format(" Overs taken:%d.%d, Wickets Taken:%d", currentlyThrownBalls/6, currentlyThrownBalls%6, wicketsTaken);
         }
         return objectAsString;
+    }
+
+    public int getPlayerId() {
+        return playerId;
     }
 }
