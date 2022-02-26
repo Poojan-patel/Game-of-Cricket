@@ -38,26 +38,6 @@ public class MatchRepository {
         }
     }
 
-    private static List<Integer> selectTeams(Connection con) throws SQLException{
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("select * from team");
-        List<Integer> teamIds = new LinkedList<>();
-        int cnt = 0;
-        while(rs.next()){
-            teamIds.add(rs.getInt("team_id"));
-            System.out.println((++cnt) + ".." + rs.getString("name"));
-        }
-        int team1, team2;
-        do{
-            team1 = MatchUtil.getIntegerInputInRange(1,cnt);
-            team2 = MatchUtil.getIntegerInputInRange(1,cnt);
-            if(team1 == team2)
-                System.out.println("Both Teams should be different");
-        } while(team1 == team2);
-
-        return Arrays.asList(teamIds.get(team1-1), teamIds.get(team2-1));
-    }
-
     public static boolean getMatchFromMatchId(int matchId) throws SQLException, ClassNotFoundException{
         Connection con = MySqlConnector.getConnection();
         PreparedStatement stmt = con.prepareStatement("select * from MatchTable where match_id = ?");
@@ -115,8 +95,8 @@ public class MatchRepository {
                 overs = rs.getInt("overs");
                 maxOvers = rs.getInt("maxovers");
             }
-            Team team1 = TeamRepository.createTeamFromTeamID(team1Id, matchId);
-            Team team2 = TeamRepository.createTeamFromTeamID(team2Id, matchId);
+            Team team1 = TeamRepository.createTeamFromTeamID(team1Id);
+            Team team2 = TeamRepository.createTeamFromTeamID(team2Id);
             //con.commit();
             con.close();
             return new Match(overs, maxOvers, team1, team2, matchId);
@@ -146,5 +126,25 @@ public class MatchRepository {
         } catch (Exception e){
 
         }
+    }
+
+    private static List<Integer> selectTeams(Connection con) throws SQLException{
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("select * from team");
+        List<Integer> teamIds = new LinkedList<>();
+        int cnt = 0;
+        while(rs.next()){
+            teamIds.add(rs.getInt("team_id"));
+            System.out.println((++cnt) + ".." + rs.getString("name"));
+        }
+        int team1, team2;
+        do{
+            team1 = MatchUtil.getIntegerInputInRange(1,cnt);
+            team2 = MatchUtil.getIntegerInputInRange(1,cnt);
+            if(team1 == team2)
+                System.out.println("Both Teams should be different");
+        } while(team1 == team2);
+
+        return Arrays.asList(teamIds.get(team1-1), teamIds.get(team2-1));
     }
 }

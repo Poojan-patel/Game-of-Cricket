@@ -9,12 +9,25 @@ class Strike{
     private int currentStrike;
     private int currentBowler;
     private int previousBowler;
+    private int matchId;
+    private Team team;
 
-    public Strike(){
+    public Strike(int matchId, Team team){
         this.currentStrike = 0;
         this.strikeHolders = new int[]{0, 1};
         currentBowler = -1;
         previousBowler = -1;
+        this.team = team;
+        this.matchId = matchId;
+        int strike = team.insertPlayer(0);
+        int nonstrike = team.insertPlayer(1);
+        try {
+            TeamInPlayRepository.insertStrikeData(strike, nonstrike, matchId, team.getTeamId());
+        } catch (SQLException sqle){
+            System.out.println(sqle);
+        } catch (Exception e){
+
+        }
     }
 
     public void overChanged(){
@@ -42,7 +55,12 @@ class Strike{
         int maxOrder = Integer.max(strikeHolders[0], strikeHolders[1]);
         int outPlayer = strikeHolders[currentStrike];
         strikeHolders[currentStrike] = maxOrder+1;
+        team.insertPlayer(maxOrder+1);
         return outPlayer;
+    }
+
+    public void removeOutPlayer(Team team, int outPlayer){
+        team.removePlayer(outPlayer);
     }
 
     public int getCurrentBowler() {
@@ -61,18 +79,30 @@ class Strike{
         previousBowler = bowlerIndex;
     }
 
-    public void updateStrikeInDB(int matchId, Team team) {
+    public void updateStrikeInDB() {
         int teamId = team.getTeamId();
-        int onStrike, offStrike;
-        //if(team.getTotalWicketsFallen() == team.getNumberOfPlayers()-1) {
-            onStrike = (getCurrentStrike() >= team.getNumberOfPlayers())? -1: team.getPlayerId(getCurrentStrike());
-            offStrike = (getCurrentNonStrike() >= team.getNumberOfPlayers())? -1: team.getPlayerId(getCurrentNonStrike());
-        //}
+        int onStrike, offStrike, curWickets;
+        onStrike = (getCurrentStrike() >= team.getNumberOfPlayers())? -1: team.getPlayerId(getCurrentStrike());
+        offStrike = (getCurrentNonStrike() >= team.getNumberOfPlayers())? -1: team.getPlayerId(getCurrentNonStrike());
+        if(onStrike == -1 || offStrike == -1)
+            curWickets = 10;
+        else
+            curWickets = Integer.max(strikeHolders[0], strikeHolders[1])-1;
         try {
-            TeamInPlayRepository.updateStrikes(onStrike, offStrike, matchId, teamId);
+            TeamInPlayRepository.updateStrikes(onStrike, offStrike, matchId, teamId, curWickets);
         } catch (SQLException sqle){
             System.out.println(sqle);
         } catch (Exception e){
+
+        }
+    }
+
+    public void updateBowler(int bowlerId) {
+        try {
+            TeamInPlayRepository.updateBowler(bowlerId, matchId, team.getTeamId());
+        } catch(SQLException sqle){
+            System.out.println(sqle);
+        } catch(Exception e){
 
         }
     }

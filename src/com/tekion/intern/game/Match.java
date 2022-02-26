@@ -1,8 +1,6 @@
 package com.tekion.intern.game;
 
-import com.tekion.intern.repository.BallEventsRepository;
-import com.tekion.intern.repository.MatchRepository;
-import com.tekion.intern.repository.TeamInPlayRepository;
+import com.tekion.intern.repository.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -96,12 +94,25 @@ public class Match {
     private void stimulateInnings(Team first, Team second) throws IOException, InterruptedException {
         System.out.println(first.getTeamName() + " Will Start Batting");
         inning = 0;
+        try {
+            PlayerRepository.fetchBowlersForBowlingTeam(second);
+        } catch(SQLException e){
+            System.out.println(e);
+        } catch(Exception e){
+            System.out.println(e);
+        }
         startInning(first, second, -1);
-
         int scoreToChase = first.getTeamScore();
 
         System.out.println(second.getTeamName() + " Will Start Batting");
         inning = 1;
+        try {
+            PlayerRepository.fetchBowlersForBowlingTeam(first);
+        } catch(SQLException e){
+            System.out.println(e);
+        } catch(Exception e){
+
+        }
         startInning(second, first, scoreToChase);
     }
 
@@ -116,7 +127,7 @@ public class Match {
         if(scoreToChase != -1)   System.out.println("7... Runs to Chase for becoming winner:");
         System.out.println("Any to Next Ball:");
 
-        strike = new Strike();
+        strike = new Strike(matchId, battingTeam);
         int overs = totalAvailableBalls/6;
         boolean allOutOrChased = false;
         Set<Integer> availableBowlers;
@@ -124,17 +135,9 @@ public class Match {
         for(int i = 0; i < overs; i++) {
             availableBowlers = bowlingTeam.getAvailableBowlers(strike.getCurrentBowler(), strike.getPreviousBowler(), maxOversCanBeThrown, totalAvailableBalls/6 - i);
             selectedBowler = MatchUtil.selectBowler(bowlingTeam, availableBowlers);
-
-            try {
-                TeamInPlayRepository.updateBowler(bowlingTeam.getPlayerId(selectedBowler), matchId, battingTeam.getTeamId());
-            } catch(SQLException sqle){
-                System.out.println(sqle);
-            } catch(Exception e){
-
-            }
-
             strike.setPreviousBowler(strike.getCurrentBowler());
             strike.setCurrentBowler(selectedBowler);
+            strike.updateBowler(bowlingTeam.getPlayerId(selectedBowler));
             System.out.println("Over: " + i);
             System.out.println("-----------------------------------------------------------------");
             System.out.println("-----------------------------------------------------------------");
@@ -144,7 +147,7 @@ public class Match {
                 break;
 
             strike.overChanged();
-            strike.updateStrikeInDB(matchId, battingTeam);
+            strike.updateStrikeInDB();
             MatchUtil.clearConsole();
         }
     }
@@ -183,7 +186,7 @@ public class Match {
             case "6": System.out.println(battingTeam);
                       System.out.println(bowlingTeam);
                       break;
-            case "7": if(scoreToChase != 0)
+            case "7": if(scoreToChase != -1)
                         System.out.println("Remaining score to chase:" + (scoreToChase + 1 - battingTeam.getTeamScore()) + " in " + (totalAvailableBalls - battingTeam.getTotalPlayedBalls()) + " balls");
                       break;
             default:
@@ -192,7 +195,7 @@ public class Match {
 
     private boolean outcomeOnWicketBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over){
         int outPlayer = strike.updateStrikeOnWicket();
-        strike.updateStrikeInDB(matchId, battingTeam);
+        strike.updateStrikeInDB();
         String typeOfWicketFallen = MatchUtil.getRandomTypeOfWicket();
         try{
             BallEventsRepository.insertEvent(
@@ -209,6 +212,7 @@ public class Match {
         bowlingTeam.incrementBowlersNumberOfBalls(strike.getCurrentBowler());
         System.out.println(typeOfWicketFallen);
         System.out.println(over + "." + ballNumber + ": Wicket-" + battingTeam.getTotalWicketsFallen() + " || Player: " + battingTeam.getNameOfPlayer(outPlayer));
+        strike.removeOutPlayer(battingTeam, outPlayer);
         return (battingTeam.getTotalWicketsFallen() == battingTeam.getNumberOfPlayers()-1);
     }
 
@@ -230,7 +234,7 @@ public class Match {
         }
 
         if(outcomeOfBallBowled%2 == 1)
-            strike.updateStrikeInDB(matchId, battingTeam);
+            strike.updateStrikeInDB();
 
         if(outcomeOfBallBowled != 4 && outcomeOfBallBowled != 6) {
             int possibilityOfRunOut = ThreadLocalRandom.current().nextInt(0, 10);
@@ -247,9 +251,10 @@ public class Match {
                 } catch (Exception e){
 
                 }
-                strike.updateStrikeOnWicket();
+                int outPlayer = strike.updateStrikeOnWicket();
                 battingTeam.updateWickets();
-                strike.updateStrikeInDB(matchId, battingTeam);
+                strike.updateStrikeInDB();
+                strike.removeOutPlayer(battingTeam, outPlayer);
                 return (battingTeam.getTotalWicketsFallen() == battingTeam.getNumberOfPlayers()-1);
             }
         }

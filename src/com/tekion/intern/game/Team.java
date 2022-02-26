@@ -1,5 +1,9 @@
 package com.tekion.intern.game;
 
+import com.tekion.intern.repository.PlayerRepository;
+import com.tekion.intern.repository.TeamInPlayRepository;
+
+import java.sql.SQLException;
 import java.util.*;
 
 
@@ -28,16 +32,16 @@ public class Team {
         this.teamId = 0;
     }
 
-    public Team(String teamName, List<String> playerNames, List<String> playerTypes, List<Integer> playerIds, int teamId) {
+    public Team(String teamName, int teamId) {
         this.teamName = teamName;
         teamScore = 0;
         totalPlayedBalls = 0;
         totalWicketsFallen = 0;
         players = new ArrayList<>();
-        this.NUM_OF_PLAYERS = playerNames.size();
+        this.NUM_OF_PLAYERS = 11;
         scoreDistribution = new int[7];
         availableBowlers = new TreeSet<>();
-        setPlayers(playerNames, playerTypes, playerIds);
+        setPlayers();
         this.teamId = teamId;
     }
 
@@ -133,31 +137,21 @@ public class Team {
         return players.get(currentBowler).getTypeOfBowler();
     }
 
-    private void setPlayers(List<String> playerNames, List<String> playerTypes){
+    public void setPlayers() {
         for(int i = 0; i < NUM_OF_PLAYERS; i++){
-            if(!playerTypes.get(i).equals("BATSMAN"))
-                availableBowlers.add(i);
-            players.add(new Player(playerNames.get(i), playerTypes.get(i)));
+            players.add(null);
         }
     }
 
-    private void setPlayers(List<String> playerNames, List<String> playerTypes, List<Integer> playerIds) {
-        for(int i = 0; i < NUM_OF_PLAYERS; i++){
-            if(!playerTypes.get(i).equals("BATSMAN"))
-                availableBowlers.add(i);
-            players.add(new Player(playerNames.get(i), playerTypes.get(i), playerIds.get(i)));
+    public void setPlayers(List<Player> bowlers) {
+        this.players = bowlers;
+        int cnt = -1;
+        for(Player p:bowlers){
+            cnt++;
+            if(p != null)
+                availableBowlers.add(cnt);
         }
-    }
-
-    private void updatePlayerScore(int score, int playerNumber){
-        Player player = players.get(playerNumber);
-        player.incrementScore(score);
-    }
-
-
-    private void updatePlayerBalls(int playerNumber) {
-        Player player = players.get(playerNumber);
-        player.incrementBallsPlayed();
+        System.gc();
     }
 
     @Override
@@ -185,5 +179,41 @@ public class Team {
 
     public int getPlayerId(int playerOffset) {
         return players.get(playerOffset).getPlayerId();
+    }
+
+    public void removePlayer(int outPlayer) {
+        players.set(outPlayer, null);
+        System.gc();
+    }
+
+    public int insertPlayer(int playerOffset) {
+        try {
+            Player newPlayer = PlayerRepository.getPlayerFromOffset(teamId, playerOffset);
+            players.set(playerOffset, newPlayer);
+            return newPlayer.getPlayerId();
+        } catch (SQLException sqle) {
+            System.out.println(sqle);
+        } catch (Exception e) {
+
+        }
+        return 0;
+    }
+
+    private void updatePlayerScore(int score, int playerNumber){
+        Player player = players.get(playerNumber);
+        player.incrementScore(score);
+    }
+
+    private void setPlayers(List<String> playerNames, List<String> playerTypes){
+        for(int i = 0; i < NUM_OF_PLAYERS; i++){
+            if(!playerTypes.get(i).equals("BATSMAN"))
+                availableBowlers.add(i);
+            players.add(new Player(playerNames.get(i), playerTypes.get(i)));
+        }
+    }
+
+    private void updatePlayerBalls(int playerNumber) {
+        Player player = players.get(playerNumber);
+        player.incrementBallsPlayed();
     }
 }
