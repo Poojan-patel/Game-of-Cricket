@@ -1,0 +1,1 @@
+select team1,team2 from MatchTable where match_id = ?

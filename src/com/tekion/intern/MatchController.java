@@ -1,15 +1,13 @@
 package com.tekion.intern;
 
-import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.game.Match;
-import com.tekion.intern.game.MatchUtil;
+import com.tekion.intern.util.MatchUtil;
 import com.tekion.intern.game.Team;
 import com.tekion.intern.repository.MatchRepository;
-import com.tekion.intern.repository.TeamInPlayRepository;
 import com.tekion.intern.repository.TeamRepository;
+import com.tekion.intern.util.ReaderUtil;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -19,7 +17,7 @@ public class MatchController {
         System.out.println("2... Initialize Match with Teams:");
         System.out.println("3... Stimulate the Game:");
         System.out.print("4... Recreate the Match:");
-        int choice = MatchUtil.getIntegerInputInRange(1,4);
+        int choice = ReaderUtil.getIntegerInputInRange(1,4);
 
         switch (choice){
             case 1: initializeTeam();
@@ -33,9 +31,9 @@ public class MatchController {
 
     private static void startMatch() throws IOException, InterruptedException {
         System.out.println("Enter MatchId:");
-        int matchId = MatchUtil.getIntegerInputInRange(1);
+        int matchId = ReaderUtil.getIntegerInputInRange(1);
         try {
-            boolean isMatchScheduled = MatchRepository.getMatchFromMatchId(matchId);
+            boolean isMatchScheduled = MatchRepository.getMatchByMatchId(matchId);
             if (!isMatchScheduled) {
                 System.out.println("MatchId is Invalid");
                 return;
@@ -46,13 +44,13 @@ public class MatchController {
 
         int headOrTail = MatchUtil.stimulateToss();
         System.out.println("0.. Fielding, 1.. Batting:");
-        int choiceOfInning = MatchUtil.getIntegerInputInRange(0, 1);
+        int choiceOfInning = ReaderUtil.getIntegerInputInRange(0, 1);
 
         int whichTeamToBatFirst = MatchUtil.decideBatterFirst(headOrTail, choiceOfInning);
         Match newMatch = null;
         try {
-            MatchRepository.updateTeamOrder(matchId, whichTeamToBatFirst);
-            newMatch = MatchRepository.createMatchFromDB(matchId);
+            MatchRepository.updateTeamOrderByMatchId(matchId, whichTeamToBatFirst);
+            newMatch = MatchRepository.createMatchByMatchId(matchId);
         } catch(SQLException sqle){
             System.out.println(sqle);
             System.out.println("Update Failed");
@@ -70,7 +68,7 @@ public class MatchController {
     private static void createMatch() {
         System.out.println("Enter Number of Overs:");
         try {
-            int matchId = MatchRepository.createMatch(MatchUtil.getIntegerInputInRange(1, 50));
+            int matchId = MatchRepository.createMatch(ReaderUtil.getIntegerInputInRange(1, 50));
             System.out.println("Note down MatchID:" + matchId);
             System.out.println("Use MatchID to play the game");
         } catch(SQLException sqle){
@@ -83,7 +81,7 @@ public class MatchController {
 
     private static void initializeTeam() {
         System.out.print("Enter Team Name:");
-        String teamName = MatchUtil.getNonEmptyString();
+        String teamName = ReaderUtil.getNonEmptyString();
         System.out.println("Total of 11 Players should be added");
         List<String> teamPlayerNames = new ArrayList<>();
         List<String> teamPlayerTypes = new ArrayList<>();
@@ -104,19 +102,19 @@ public class MatchController {
 
     private static Match initializeMatchData() {
         System.out.print("Number Of Overs:");
-        int numOfOvers = MatchUtil.getIntegerInputInRange(1, 50);
+        int numOfOvers = ReaderUtil.getIntegerInputInRange(1, 50);
 
         System.out.print("Number Of Players:");
-        int numOfPlayers = MatchUtil.getIntegerInputInRange(5, 11);
+        int numOfPlayers = ReaderUtil.getIntegerInputInRange(5, 11);
 
         System.out.print("Enter Team-1 Name:");
-        String team1 = MatchUtil.getNonEmptyString().toUpperCase();
+        String team1 = ReaderUtil.getNonEmptyString().toUpperCase();
         List<String> team1PlayersTypes = new ArrayList<>();
         List<String> team1PlayersNames = new ArrayList<>();
         initializeTeamPlayers(numOfPlayers, team1, team1PlayersNames, team1PlayersTypes);
 
         System.out.print("Enter Team-2 Name:");
-        String team2 = MatchUtil.getNonEmptyString().toUpperCase();
+        String team2 = ReaderUtil.getNonEmptyString().toUpperCase();
         List<String> team2PlayersTypes = new ArrayList<>();
         List<String> team2PlayersNames = new ArrayList<>();
         initializeTeamPlayers(numOfPlayers, team2, team2PlayersNames, team2PlayersTypes);
@@ -143,13 +141,13 @@ public class MatchController {
             playerNames.add(teamName + i);
             //playerNames.add(MatchUtil.getNonEmptyString());
             System.out.print("Player-" + i  +" Type:");
-            singlePlayerType = MatchUtil.getStringFromAcceptableValues(acceptablePlayerTypes);
+            singlePlayerType = ReaderUtil.getStringFromAcceptableValues(acceptablePlayerTypes);
             if(numOfBatsman > 0 && singlePlayerType.equals("BATSMAN"))
                 numOfBatsman--;
 
             if(!singlePlayerType.equals("BATSMAN")){
                 System.out.print("Enter pace of bowling:");
-                singlePlayerType += "," + MatchUtil.getStringFromAcceptableValues(bowlerTypes);
+                singlePlayerType += "," + ReaderUtil.getStringFromAcceptableValues(bowlerTypes);
             }
             playerTypes.add(singlePlayerType);
         }

@@ -2,8 +2,8 @@ package com.tekion.intern.repository;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.game.Match;
-import com.tekion.intern.game.MatchUtil;
 import com.tekion.intern.game.Team;
+import com.tekion.intern.util.ReaderUtil;
 
 import java.sql.*;
 import java.util.Arrays;
@@ -17,7 +17,7 @@ public class MatchRepository {
         List<Integer> selectedTeams = selectTeams(con);
         try {
             con.setAutoCommit(false);
-            PreparedStatement ps = con.prepareStatement("insert into MatchTable(team1, team2, overs, maxovers) VALUES(?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("matchtable", "createMatch"), Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, selectedTeams.get(0));
             ps.setInt(2, selectedTeams.get(1));
             ps.setInt(3, numOfOvers);
@@ -38,17 +38,17 @@ public class MatchRepository {
         }
     }
 
-    public static boolean getMatchFromMatchId(int matchId) throws SQLException, ClassNotFoundException{
+    public static boolean getMatchByMatchId(int matchId) throws SQLException, ClassNotFoundException{
         Connection con = MySqlConnector.getConnection();
-        PreparedStatement stmt = con.prepareStatement("select * from MatchTable where match_id = ?");
+        PreparedStatement stmt = con.prepareStatement(ReaderUtil.readSqlFromFile("matchtable", "getMatchByMatchId"));
         stmt.setInt(1,matchId);
         ResultSet rs = stmt.executeQuery();
         return rs.next();
     }
 
-    public static void updateTeamOrder(int matchId, int whichTeamToBatFirst) throws SQLException, ClassNotFoundException {
+    public static void updateTeamOrderByMatchId(int matchId, int whichTeamToBatFirst) throws SQLException, ClassNotFoundException {
         Connection con = MySqlConnector.getConnection();
-        PreparedStatement ps = con.prepareStatement("select team1,team2 from MatchTable where match_id = ?");
+        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("matchtable", "getBothTeamByMatchId"));
         ps.setInt(1,matchId);
         ResultSet rs = ps.executeQuery();
         int team1 = 0, team2 = 0;
@@ -62,7 +62,7 @@ public class MatchRepository {
         try {
             con.setAutoCommit(false);
             if (whichTeamToBatFirst != 1) {
-                ps = con.prepareStatement("update MatchTable set team1 = ?, team2 = ?, winner = ? where match_id = ?");
+                ps = con.prepareStatement(ReaderUtil.readSqlFromFile("matchtable", "updateTeamOrderByMatchId"));
                 ps.setInt(1, team2);
                 ps.setInt(2, team1);
                 ps.setString(3,"STARTED");
@@ -78,10 +78,10 @@ public class MatchRepository {
         }
     }
 
-    public static Match createMatchFromDB(int matchId) throws SQLException, ClassNotFoundException{
+    public static Match createMatchByMatchId(int matchId) throws SQLException, ClassNotFoundException{
         Connection con = MySqlConnector.getConnection();
         try {
-            PreparedStatement ps = con.prepareStatement("select * from MatchTable where match_id = ?");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("matchtable", "getMatchByMatchId"));
             ps.setInt(1, matchId);
             ResultSet rs = ps.executeQuery();
 
@@ -109,11 +109,11 @@ public class MatchRepository {
         return null;
     }
 
-    public static void updateWinner(int matchId, String winner) throws SQLException, ClassNotFoundException{
+    public static void updateWinnerByMatchId(int matchId, String winner) throws SQLException, ClassNotFoundException{
         Connection con = MySqlConnector.getConnection();
         try{
             con.setAutoCommit(false);
-            PreparedStatement ps = con.prepareStatement("update MatchTable set winner = ? where match_id = ?");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("matchtable", "updateWinnerByMatchId"));
             ps.setString(1,winner);
             ps.setInt(2,matchId);
             ps.execute();
@@ -130,7 +130,7 @@ public class MatchRepository {
 
     private static List<Integer> selectTeams(Connection con) throws SQLException{
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("select * from team");
+        ResultSet rs = stmt.executeQuery(ReaderUtil.readSqlFromFile("team", "getAll"));
         List<Integer> teamIds = new LinkedList<>();
         int cnt = 0;
         while(rs.next()){
@@ -139,8 +139,8 @@ public class MatchRepository {
         }
         int team1, team2;
         do{
-            team1 = MatchUtil.getIntegerInputInRange(1,cnt);
-            team2 = MatchUtil.getIntegerInputInRange(1,cnt);
+            team1 = ReaderUtil.getIntegerInputInRange(1,cnt);
+            team2 = ReaderUtil.getIntegerInputInRange(1,cnt);
             if(team1 == team2)
                 System.out.println("Both Teams should be different");
         } while(team1 == team2);

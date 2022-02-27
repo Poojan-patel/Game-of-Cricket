@@ -22,7 +22,7 @@ class Strike{
         int strike = team.insertPlayer(0);
         int nonstrike = team.insertPlayer(1);
         try {
-            TeamInPlayRepository.insertStrikeData(strike, nonstrike, matchId, team.getTeamId());
+            TeamInPlayRepository.insertStrike(strike, nonstrike, matchId, team.getTeamId());
         } catch (SQLException sqle){
             System.out.println(sqle);
         } catch (Exception e){
@@ -89,7 +89,7 @@ class Strike{
         else
             curWickets = Integer.max(strikeHolders[0], strikeHolders[1])-1;
         try {
-            TeamInPlayRepository.updateStrikes(onStrike, offStrike, matchId, teamId, curWickets);
+            TeamInPlayRepository.updateStrikesByTeamAndMatchId(onStrike, offStrike, matchId, teamId, curWickets);
         } catch (SQLException sqle){
             System.out.println(sqle);
         } catch (Exception e){
@@ -99,7 +99,7 @@ class Strike{
 
     public void updateBowler(int bowlerId) {
         try {
-            TeamInPlayRepository.updateBowler(bowlerId, matchId, team.getTeamId());
+            TeamInPlayRepository.updateBowlerByTeamAndMatchId(bowlerId, matchId, team.getTeamId());
         } catch(SQLException sqle){
             System.out.println(sqle);
         } catch(Exception e){

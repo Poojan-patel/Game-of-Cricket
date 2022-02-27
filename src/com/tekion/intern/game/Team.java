@@ -1,7 +1,7 @@
 package com.tekion.intern.game;
 
+import com.tekion.intern.enums.PlayerType;
 import com.tekion.intern.repository.PlayerRepository;
-import com.tekion.intern.repository.TeamInPlayRepository;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -121,7 +121,7 @@ public class Team {
         return players.get(currentPlayer).getName();
     }
 
-    public Player.PlayerType getPlayerType(int currentPlayer) {
+    public PlayerType getPlayerType(int currentPlayer) {
         return players.get(currentPlayer).getPlayerType();
     }
 
@@ -188,7 +188,7 @@ public class Team {
 
     public int insertPlayer(int playerOffset) {
         try {
-            Player newPlayer = PlayerRepository.getPlayerFromOffset(teamId, playerOffset);
+            Player newPlayer = PlayerRepository.getPlayerFromOffsetByTeamId(teamId, playerOffset);
             players.set(playerOffset, newPlayer);
             return newPlayer.getPlayerId();
         } catch (SQLException sqle) {
@@ -215,5 +215,15 @@ public class Team {
     private void updatePlayerBalls(int playerNumber) {
         Player player = players.get(playerNumber);
         player.incrementBallsPlayed();
+    }
+
+    public void clearAllPlayers() {
+        for(int i = 0; i < players.size(); i++){
+            players.set(i,null);
+        }
+    }
+
+    public void fetchBowlersFromDB() throws SQLException, Exception{
+        PlayerRepository.fetchBowlersForBowlingTeamByTeamId(this);
     }
 }

@@ -1,17 +1,6 @@
 package com.tekion.intern.dbconnector;
 
-import com.tekion.intern.game.MatchUtil;
-import com.tekion.intern.game.Player;
-import com.tekion.intern.game.Team;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import java.sql.*;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 public class MySqlConnector {
     private static Connection conn = null;

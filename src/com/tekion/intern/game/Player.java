@@ -1,29 +1,10 @@
 package com.tekion.intern.game;
 
+import com.tekion.intern.enums.PlayerType;
+import com.tekion.intern.enums.TypeOfBowler;
+
 public class Player {
-    public enum PlayerType{
-        BOWLER,
-        BATSMAN,
-        ALLROUNDER
-    }
 
-    enum TypeOfBowler{
-        FAST,
-        SPIN,
-        MEDIUM,
-        NA;
-
-        public static TypeOfBowler fromStringToEnum(String type){
-            if(type.equals("FAST"))
-                return TypeOfBowler.FAST;
-            else if(type.equals("SPIN"))
-                return TypeOfBowler.SPIN;
-            else if(type.equals("MEDIUM"))
-                return TypeOfBowler.MEDIUM;
-            else
-                return TypeOfBowler.NA;
-        }
-    }
     private String name;
     private int score;
     private int ballsPlayed;

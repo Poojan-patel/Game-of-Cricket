@@ -1,6 +1,8 @@
-package com.tekion.intern.game;
+package com.tekion.intern.util;
 
-import com.tekion.intern.MatchController;
+import com.tekion.intern.enums.PlayerType;
+import com.tekion.intern.enums.Winner;
+import com.tekion.intern.game.Team;
 
 import java.io.IOException;
 import java.util.*;
@@ -11,7 +13,6 @@ public class MatchUtil {
     private static final Map<Integer,Integer> bowlerRandomScore;
     private static List<String> typeOfWicketFallen;
     private static final String os = System.getProperty("os.name").toLowerCase();
-    private static Scanner sc = new Scanner(System.in);
 
     static{
         batsmanRandomScore = new HashMap<Integer,Integer>(){{
@@ -28,15 +29,15 @@ public class MatchUtil {
         typeOfWicketFallen = Arrays.asList("BOLD", "CAUGHT AND BOLD", "STUMPED", "HIT WICKET", "LBW", "DOUBLE HIT", "BALL OBSTRUCTION");
     }
 
-    public static Match.Winner decideWinner(int team1Score, int team2Score){
-        Match.Winner winner;
+    public static Winner decideWinner(int team1Score, int team2Score){
+        Winner winner;
         int diff = team1Score - team2Score;
         if(diff > 0){
-            winner = Match.Winner.TEAM1;
+            winner = Winner.TEAM1;
         } else if(diff < 0){
-            winner = Match.Winner.TEAM2;
+            winner = Winner.TEAM2;
         } else{
-            winner = Match.Winner.TIE;
+            winner = Winner.TIE;
         }
         return winner;
     }
@@ -45,10 +46,10 @@ public class MatchUtil {
         return ThreadLocalRandom.current().nextInt(0, 2);
     }
 
-    public static int generateRandomScore(Player.PlayerType playerType, boolean wicketPossible){
+    public static int generateRandomScore(PlayerType playerType, boolean wicketPossible){
         int randomNumber;
         int randomScore;
-        if(playerType != Player.PlayerType.BOWLER) {
+        if(playerType != PlayerType.BOWLER) {
             randomNumber = ThreadLocalRandom.current().nextInt(0, batsmanRandomScore.size() - ((wicketPossible) ?0 :1));
             randomScore = batsmanRandomScore.get(randomNumber);
         }
@@ -73,65 +74,8 @@ public class MatchUtil {
             bowlerSelectionList.add(i);
         }
 
-        int choiceOfBowlerPosition = getIntegerInputInRange(1, availableBowlers.size());
+        int choiceOfBowlerPosition = ReaderUtil.getIntegerInputInRange(1, availableBowlers.size());
         return bowlerSelectionList.get(choiceOfBowlerPosition-1);
-    }
-
-    public static String getStringFromAcceptableValues(List<String> acceptableValues){
-        String input = "";
-        while(true){
-            input = sc.nextLine().toUpperCase();
-            if(acceptableValues.contains(input)){
-                return input;
-            }
-            System.out.println("Enter Value from:" + acceptableValues);
-        }
-    }
-
-    public static String getNonEmptyString(){
-        String input = "";
-        while(true){
-            input = sc.nextLine();
-            if(input.isEmpty()){
-                System.out.println("Enter Non-empty Value");
-            }
-            else
-                break;
-        }
-        return input;
-    }
-
-    public static int getIntegerInputInRange(int lower){
-        int input;
-        while(true){
-            try{
-                input = Integer.parseInt(sc.nextLine());
-                if(input < lower)
-                    System.out.println("Value should not be less than " + lower);
-                else
-                    break;
-            } catch(NumberFormatException nfe){
-                System.out.println("Enter an integer");
-            }
-        }
-        return input;
-    }
-
-    public static int getIntegerInputInRange(int lower, int upper){
-        int input;
-        while(true){
-            try{
-                input = Integer.parseInt(sc.nextLine());
-                if(input < lower || input > upper){
-                    System.out.println(String.format("Value should be between %d and %d", lower, upper));
-                }
-                else
-                    break;
-            } catch(NumberFormatException nfe){
-                System.out.println("Enter an integer");
-            }
-        }
-        return input;
     }
 
     public static void clearConsole() throws IOException, InterruptedException {

@@ -1,6 +1,9 @@
 package com.tekion.intern.game;
 
+import com.tekion.intern.enums.Winner;
 import com.tekion.intern.repository.*;
+import com.tekion.intern.util.MatchUtil;
+import com.tekion.intern.util.ReaderUtil;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -11,16 +14,11 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Match {
-    enum Winner{
-        TEAM1,
-        TEAM2,
-        TIE,
-        STARTED
-    }
     private final Team team1;
     private final Team team2;
     private Winner winner;
     private int totalAvailableBalls;
+    private int curBalls;
     private int maxOversCanBeThrown;
     private Strike strike;
     private static Scanner sc = new Scanner(System.in);
@@ -63,7 +61,7 @@ public class Match {
         }
         declareTheWinner();
         try {
-            MatchRepository.updateWinner(matchId, winner.toString());
+            MatchRepository.updateWinnerByMatchId(matchId, winner.toString());
         } catch (SQLException sqle){
             System.out.println(sqle);
         } catch (Exception e){
@@ -95,19 +93,21 @@ public class Match {
         System.out.println(first.getTeamName() + " Will Start Batting");
         inning = 0;
         try {
-            PlayerRepository.fetchBowlersForBowlingTeam(second);
+            second.fetchBowlersFromDB();
         } catch(SQLException e){
             System.out.println(e);
         } catch(Exception e){
             System.out.println(e);
         }
         startInning(first, second, -1);
+        second.clearAllPlayers();
+        first.clearAllPlayers();
         int scoreToChase = first.getTeamScore();
 
         System.out.println(second.getTeamName() + " Will Start Batting");
         inning = 1;
         try {
-            PlayerRepository.fetchBowlersForBowlingTeam(first);
+            first.fetchBowlersFromDB();
         } catch(SQLException e){
             System.out.println(e);
         } catch(Exception e){
@@ -157,7 +157,7 @@ public class Match {
         String nextBallType;
         for (int j = 0; j < 6; j++) {
             System.out.print("Enter Ball Type:");
-            nextBallType = MatchUtil.getStringFromAcceptableValues(ballTypes);
+            nextBallType = ReaderUtil.getStringFromAcceptableValues(ballTypes);
             allOut = playTheBall(battingTeam, bowlingTeam, j + 1, currentOver, true);
             System.out.println("-----------------------------------------------------------------");
             if (allOut || ((scoreToChase != -1) && (scoreToChase < battingTeam.getTeamScore()))) {
@@ -241,11 +241,23 @@ public class Match {
             if(possibilityOfRunOut == 9){
                 System.out.println("RunOut-" + battingTeam.getNameOfPlayer(strike.getCurrentStrike()));
                 try{
+                    String isWicket;
+                    if(currentPlayer != strike.getCurrentStrike()) {
+                        BallEventsRepository.insertEvent(
+                                matchId, battingTeam.getTeamId(), inning, over * 6 + ballNumber,
+                                battingTeam.getPlayerId(strike.getCurrentStrike()),
+                                -1, 0, "", "RUN OUT"
+                        );
+                        isWicket = "";
+                    }
+                    else
+                        isWicket = "RUN OUT";
+
                     BallEventsRepository.insertEvent(
-                            matchId, battingTeam.getTeamId(), inning, over*6 + ballNumber,
-                            battingTeam.getPlayerId(strike.getCurrentStrike()),
-                            -1, 0, "", "RUN OUT"
+                            matchId, battingTeam.getTeamId(), inning, over * 6 + ballNumber, battingTeam.getPlayerId(currentPlayer),
+                            bowlingTeam.getPlayerId(strike.getCurrentBowler()), outcomeOfBallBowled, "", isWicket
                     );
+
                 } catch (SQLException sqle){
                     System.out.println(sqle);
                 } catch (Exception e){

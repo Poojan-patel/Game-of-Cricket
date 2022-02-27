@@ -1,0 +1,1 @@
+insert into MatchTable(team1, team2, overs, maxovers) VALUES(?,?,?,?)

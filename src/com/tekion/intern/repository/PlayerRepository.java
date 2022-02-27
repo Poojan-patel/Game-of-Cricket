@@ -3,6 +3,7 @@ package com.tekion.intern.repository;
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.game.Player;
 import com.tekion.intern.game.Team;
+import com.tekion.intern.util.ReaderUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,10 +14,10 @@ import java.util.List;
 
 public class PlayerRepository {
 
-    public static Player getPlayerFromOffset(int teamId, int playerOffset) throws SQLException, ClassNotFoundException{
+    public static Player getPlayerFromOffsetByTeamId(int teamId, int playerOffset) throws SQLException, ClassNotFoundException{
         Connection con = MySqlConnector.getConnection();
         try{
-            PreparedStatement ps = con.prepareStatement("select player_id, name, playertype, bowling_pace from Player where team = ? limit ?, ?");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "getPlayerFromOffsetByTeamId"));
             ps.setInt(1, teamId);
             ps.setInt(2,playerOffset);
             ps.setInt(3,1);
@@ -41,10 +42,10 @@ public class PlayerRepository {
         }
     }
 
-    public static void fetchBowlersForBowlingTeam(Team team) throws SQLException, ClassNotFoundException{
+    public static void fetchBowlersForBowlingTeamByTeamId(Team team) throws SQLException, ClassNotFoundException{
         Connection con = MySqlConnector.getConnection();
         try{
-            PreparedStatement ps = con.prepareStatement("select player_id, name, playertype, bowling_pace from player where team = ?");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchBowlersForBowlingTeamByTeamId"));
             ps.setInt(1,team.getTeamId());
             ResultSet rs = ps.executeQuery();
             String name = null;

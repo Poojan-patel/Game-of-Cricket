@@ -3,6 +3,7 @@ package com.tekion.intern.repository;
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.game.Player;
 import com.tekion.intern.game.Team;
+import com.tekion.intern.util.ReaderUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ public class TeamRepository {
         String teamName = team.getTeamName();
         Connection con = MySqlConnector.getConnection();
         con.setAutoCommit(false);
-        PreparedStatement stmt = con.prepareStatement("insert into team(name) values(?)", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement stmt = con.prepareStatement(ReaderUtil.readSqlFromFile("team", "insertTeamData"), Statement.RETURN_GENERATED_KEYS);
         stmt.setString(1, teamName);
         try {
             stmt.execute();
@@ -32,7 +33,7 @@ public class TeamRepository {
 
     public static String getTeamNameFromTeamId(int teamId) throws SQLException, ClassNotFoundException {
         Connection con = MySqlConnector.getConnection();
-        PreparedStatement ps = con.prepareStatement("select name from team where team_id = ?");
+        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("team", "getTeamNameFromTeamId"));
         ps.setInt(1, teamId);
         ResultSet rs = ps.executeQuery();
         while (rs.next())
@@ -47,7 +48,7 @@ public class TeamRepository {
     }
 
     private static void insertTeamPlayers(List<Player> players, int teamId, Connection conn) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("insert into player(team, name, playertype, bowling_pace) values (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement stmt = conn.prepareStatement(ReaderUtil.readSqlFromFile("team","insertTeamPlayers"), Statement.RETURN_GENERATED_KEYS);
         for (Player player : players) {
             stmt.setInt(1, teamId);
             stmt.setString(2, player.getName());

@@ -1,0 +1,1 @@
+insert into player(team, name, playertype, bowling_pace) values (?,?,?,?)

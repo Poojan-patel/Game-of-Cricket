@@ -1,6 +1,7 @@
 package com.tekion.intern.repository;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
+import com.tekion.intern.util.ReaderUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,7 +15,7 @@ public class BallEventsRepository{
     {
         Connection con = MySqlConnector.getConnection();
         try{
-            PreparedStatement ps = con.prepareStatement("insert into BallEvents(match_id, team, inning, ballnumber, batsman, bowler, score, extra, wicket) values(?,?,?,?,?,?,?,?,?)");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "insertEvent"));
             ps.setInt(1,matchId);
             ps.setInt(2,teamId);
             ps.setInt(3,inning);

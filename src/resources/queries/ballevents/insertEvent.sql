@@ -1,0 +1,1 @@
+insert into BallEvents(match_id, team, inning, ballnumber, batsman, bowler, score, extra, wicket) values(?,?,?,?,?,?,?,?,?)
