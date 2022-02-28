@@ -1,6 +1,7 @@
 package com.tekion.intern;
 
 import com.tekion.intern.game.Match;
+import com.tekion.intern.repository.BallEventsRepository;
 import com.tekion.intern.util.MatchUtil;
 import com.tekion.intern.game.Team;
 import com.tekion.intern.repository.MatchRepository;
@@ -16,7 +17,7 @@ public class MatchController {
         System.out.println("1... Initialize Team");
         System.out.println("2... Initialize Match with Teams:");
         System.out.println("3... Stimulate the Game:");
-        System.out.print("4... Recreate the Match:");
+        System.out.print("4... Show Scoreboard:");
         int choice = ReaderUtil.getIntegerInputInRange(1,4);
 
         switch (choice){
@@ -26,6 +27,8 @@ public class MatchController {
                     break;
             case 3: startMatch();
                     break;
+            case 4: System.out.println("Enter MatchId:");
+                BallEventsRepository.generateFinalScoreBoard(ReaderUtil.getIntegerInputInRange(1));
         }
     }
 

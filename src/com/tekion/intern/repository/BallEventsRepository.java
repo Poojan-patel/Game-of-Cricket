@@ -3,10 +3,7 @@ package com.tekion.intern.repository;
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.util.ReaderUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 public class BallEventsRepository{
     public static void insertEvent
@@ -39,6 +36,66 @@ public class BallEventsRepository{
         } catch(SQLException sqle){
             con.close();
             throw sqle;
+        }
+    }
+
+    public static void generateFinalScoreBoard(int matchId) {
+        Connection con = null;
+        try{
+            con = MySqlConnector.getConnection();
+            System.out.println("Team Scores");
+            getTeamScore(matchId, con);
+            System.out.println("---------------------------------------------------");
+            System.out.println("Batsman Scores");
+            getBatsmanStats(matchId, con);
+            System.out.println("---------------------------------------------------");
+            System.out.println("Bowling Stats");
+            getBowlingStats(matchId, con);
+            con.close();
+        } catch (SQLException sqle){
+            System.out.println(sqle);
+        } catch (Exception e){
+
+        }
+    }
+
+    private static void getBowlingStats(int matchId, Connection con) throws SQLException {
+        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getBowlingStats"));
+        ps.setInt(1,matchId);
+        ResultSet rs = ps.executeQuery();
+        while(rs.next()){
+            System.out.println(
+                    rs.getString("name") + ":\t" +
+                    "Wickets:" + rs.getInt("Wicket") +
+                    "\tOvers:" + rs.getInt("Balls Thrown")/6 + "." + rs.getInt("Balls Thrown")%6 +
+                    "\tExtras: " + rs.getInt("Extra")
+            );
+        }
+    }
+
+    private static void getBatsmanStats(int matchId, Connection con) throws SQLException{
+        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getBatsmanStats"));
+        ps.setInt(1,matchId);
+        ResultSet rs = ps.executeQuery();
+        while(rs.next()){
+            System.out.println(
+                    rs.getString("name") + ":\t" +
+                    rs.getInt("Score") + ",\tBalls:" + rs.getInt("Balls Played")
+            );
+        }
+    }
+
+    private static void getTeamScore(int matchId, Connection con) throws SQLException{
+        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getTeamScore"));
+        ps.setInt(1,matchId);
+        ResultSet rs = ps.executeQuery();
+        while(rs.next()){
+            System.out.println(
+                    rs.getString("name") + ":\t" +
+                    rs.getInt("Total Score") + "/" + rs.getInt("Total Wickets") +
+                    "\tOvers: " + rs.getInt("Total Balls")/6 + "." + rs.getInt("Total Balls")%6 +
+                    "\tExtras: " + rs.getInt("Extras")
+            );
         }
     }
 }

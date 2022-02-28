@@ -11,7 +11,6 @@ class Strike{
     private int previousBowler;
     private int matchId;
     private Team team;
-    private boolean wasLastBallNoBall;
     private int currentWickets;
 
     public Strike(int matchId, Team team){
@@ -22,7 +21,6 @@ class Strike{
         this.team = team;
         this.matchId = matchId;
         this.currentWickets = 0;
-        wasLastBallNoBall = false;
         int strike = team.insertPlayer(0);
         int nonstrike = team.insertPlayer(1);
         try {
@@ -61,12 +59,13 @@ class Strike{
         int outPlayer = strikeHolders[currentStrike];
         strikeHolders[currentStrike] = maxOrder+1;
         team.insertPlayer(maxOrder+1);
+        team.removePlayer(outPlayer);
         return outPlayer;
     }
 
-    public void removeOutPlayer(Team team, int outPlayer){
-        team.removePlayer(outPlayer);
-    }
+//    public void removeOutPlayer(int outPlayer){
+//        team.removePlayer(outPlayer);
+//    }
 
     public int getCurrentBowler() {
         return currentBowler;
@@ -107,14 +106,6 @@ class Strike{
         } catch(Exception e){
 
         }
-    }
-
-    public boolean isLastBallNoBall(){
-        return wasLastBallNoBall;
-    }
-
-    public void setLastBallNoBall(){
-        wasLastBallNoBall = true;
     }
 
     public boolean isAllOut(){

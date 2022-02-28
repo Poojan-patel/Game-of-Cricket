@@ -1,5 +1,6 @@
 package com.tekion.intern.game;
 
+import com.tekion.intern.enums.UnfairBallType;
 import com.tekion.intern.enums.Winner;
 import com.tekion.intern.repository.*;
 import com.tekion.intern.util.MatchUtil;
@@ -53,7 +54,6 @@ public class Match {
 
     public void stimulateGame(int headOrTails, int choiceOfInning) throws IOException, InterruptedException {
         int tossOutcome = choiceOfTossWinner(headOrTails, choiceOfInning);
-        //if((tossWinner == 0 && choiceOfInning == 1) || (tossWinner == 1 && choiceOfInning == 0)){
         if(tossOutcome == 1){
             stimulateInnings(team1, team2);
         } else{
@@ -70,12 +70,13 @@ public class Match {
     }
 
     public void showFinalScoreBoard(){
-        System.out.println(team1);
-        System.out.println(team2);
-        System.out.println("Team: " + team1.getTeamName());
-        team1.showPlayerwiseScore();
-        System.out.println("Team: " + team2.getTeamName());
-        team2.showPlayerwiseScore();
+//        System.out.println(team1);
+//        System.out.println(team2);
+//        System.out.println("Team: " + team1.getTeamName());
+//        team1.showPlayerwiseScore();
+//        System.out.println("Team: " + team2.getTeamName());
+//        team2.showPlayerwiseScore();
+        BallEventsRepository.generateFinalScoreBoard(matchId);
     }
 
     /*
@@ -153,16 +154,22 @@ public class Match {
     }
 
     private boolean playTheOver(Team battingTeam, Team bowlingTeam, int scoreToChase, int currentOver) {
-        int cumRunForUnFairBalls = 0;
+        UnfairBallType unfairBallType;
         String nextBallType;
+        boolean isWicketPossible = true;
         for (int j = 0; j < 6; j++) {
             System.out.print("Enter Ball Type:");
             nextBallType = ReaderUtil.getStringFromAcceptableValues(ballTypes);
-            cumRunForUnFairBalls = playTheBall(battingTeam, bowlingTeam, j + 1, currentOver, cumRunForUnFairBalls);
+            unfairBallType = playTheBall(battingTeam, bowlingTeam, j + 1, currentOver, isWicketPossible);
+
             System.out.println("-----------------------------------------------------------------");
             if (strike.isAllOut() || ((scoreToChase != -1) && (scoreToChase < battingTeam.getTeamScore()))) {
                 return true;
             }
+            if(unfairBallType != UnfairBallType.NA)
+                j--;
+            isWicketPossible = (unfairBallType != UnfairBallType.NO);
+
             userChoiceHandler(battingTeam, bowlingTeam, strike, scoreToChase);
             System.out.println("-----------------------------------------------------------------");
         }
@@ -194,12 +201,15 @@ public class Match {
     }
 
     private void outcomeOnWicketBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over){
-        int outPlayer = strike.updateStrikeOnWicket();
-        strike.updateStrikeInDB();
+        battingTeam.updateWickets();
+        bowlingTeam.incrementWicketsTakenByBowler(strike.getCurrentBowler());
+        bowlingTeam.incrementBowlersNumberOfBalls(strike.getCurrentBowler());
         String typeOfWicketFallen = MatchUtil.getRandomTypeOfWicket();
+        System.out.println(typeOfWicketFallen);
+        System.out.println(over + "." + ballNumber + ": Wicket-" + battingTeam.getTotalWicketsFallen() + " || Player: " + battingTeam.getNameOfPlayer(strike.getCurrentStrike()));
         try{
             BallEventsRepository.insertEvent(
-                    matchId, battingTeam.getTeamId(), inning, over*6 + ballNumber, battingTeam.getPlayerId(outPlayer),
+                    matchId, battingTeam.getTeamId(), inning, over*6 + ballNumber, battingTeam.getPlayerId(strike.getCurrentStrike()),
                     bowlingTeam.getPlayerId(strike.getCurrentBowler()), 0, "", typeOfWicketFallen
             );
         } catch (SQLException sqle){
@@ -207,29 +217,29 @@ public class Match {
         } catch (Exception e){
 
         }
-        battingTeam.updateWickets();
-        bowlingTeam.incrementWicketsTakenByBowler(strike.getCurrentBowler());
-        bowlingTeam.incrementBowlersNumberOfBalls(strike.getCurrentBowler());
-        System.out.println(typeOfWicketFallen);
-        System.out.println(over + "." + ballNumber + ": Wicket-" + battingTeam.getTotalWicketsFallen() + " || Player: " + battingTeam.getNameOfPlayer(outPlayer));
-        strike.removeOutPlayer(battingTeam, outPlayer);
-        //return (battingTeam.getTotalWicketsFallen() == battingTeam.getNumberOfPlayers()-1);
+        strike.updateStrikeOnWicket();
+        strike.updateStrikeInDB();
     }
 
     private void legitimateBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over, int outcomeOfBallBowled, boolean isTeamScore){
         int currentPlayer = strike.getCurrentStrike();
-        System.out.println(over + "." + ballNumber + ": " + outcomeOfBallBowled + " run || Player: " + battingTeam.getNameOfPlayer(currentPlayer));
+        System.out.print(over + "." + ballNumber + ": " + outcomeOfBallBowled + " run ");
+        if(isTeamScore)
+            System.out.print("\n");
+        else
+            System.out.println("|| Player: " + battingTeam.getNameOfPlayer(currentPlayer));
         battingTeam.incrementTeamScore(outcomeOfBallBowled, currentPlayer);
         strike.changeStrike(outcomeOfBallBowled);
+
         try {
             BallEventsRepository.insertEvent(
                     matchId, battingTeam.getTeamId(), inning, over * 6 + ballNumber,
                     (isTeamScore) ?-1 :battingTeam.getPlayerId(currentPlayer),
                     bowlingTeam.getPlayerId(strike.getCurrentBowler()), outcomeOfBallBowled, "", ""
             );
-        } catch (SQLException sqle) {
+        } catch (SQLException sqle){
             System.out.println(sqle);
-        } catch (Exception e) {
+        } catch (Exception e){
 
         }
 
@@ -238,28 +248,25 @@ public class Match {
 
         if(outcomeOfBallBowled != 4 && outcomeOfBallBowled != 6) {
             int possibilityOfRunOut = ThreadLocalRandom.current().nextInt(0, 10);
-            if(possibilityOfRunOut == 9){
+            if (possibilityOfRunOut == 9) {
                 System.out.println("RunOut-" + battingTeam.getNameOfPlayer(strike.getCurrentStrike()));
-                try{
+                try {
                     BallEventsRepository.insertEvent(
-                            matchId, battingTeam.getTeamId(), inning, over*6 + ballNumber,
+                            matchId, battingTeam.getTeamId(), inning, over * 6 + ballNumber,
                             battingTeam.getPlayerId(strike.getCurrentStrike()),
                             -1, 0, "", "RUN OUT"
                     );
 
-                } catch (SQLException sqle){
+                } catch (SQLException sqle) {
                     System.out.println(sqle);
-                } catch (Exception e){
+                } catch (Exception e) {
 
                 }
-                int outPlayer = strike.updateStrikeOnWicket();
+                strike.updateStrikeOnWicket();
                 battingTeam.updateWickets();
                 strike.updateStrikeInDB();
-                strike.removeOutPlayer(battingTeam, outPlayer);
-                //return (battingTeam.getTotalWicketsFallen() == battingTeam.getNumberOfPlayers()-1);
             }
         }
-//        return false;
     }
 
     /*
@@ -272,18 +279,18 @@ public class Match {
                 is handle by wicketPossible parameter.
             if not, we will call legitimateBall, where also we will generate a random number for possibility of run out.
      */
-    private int playTheBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over, int cumRunForUnFairBalls){
+    private UnfairBallType playTheBall(Team battingTeam, Team bowlingTeam, int ballNumber, int over, boolean wicketPossible){
         if(ballNumber == 6){
             over++;
             ballNumber = 0;
         }
         int currentPlayer = strike.getCurrentStrike();
-        int outcomeOfBallBowled = MatchUtil.generateRandomScore(battingTeam.getPlayerType(currentPlayer), !strike.isLastBallNoBall());
+        int outcomeOfBallBowled = MatchUtil.generateRandomScore(battingTeam.getPlayerType(currentPlayer), wicketPossible);
 
         if(outcomeOfBallBowled == -1){
             battingTeam.incrementTotalBalls(currentPlayer);
             outcomeOnWicketBall(battingTeam, bowlingTeam, ballNumber, over);
-            return 0;
+            return UnfairBallType.NA;
         }
         else{
             int possibilityOfUnFairBall = ThreadLocalRandom.current().nextInt(0,9);
@@ -291,28 +298,27 @@ public class Match {
                 battingTeam.incrementTeamScoreForUnfair();
                 String typeOfUnFairBall;
                 System.out.println((typeOfUnFairBall = (possibilityOfUnFairBall == 0) ?"WIDE" :"NO BALL") + " : 1 run");
-//                try {
-//                    BallEventsRepository.insertEvent(
-//                            matchId, battingTeam.getTeamId(), inning, over * 6 + ballNumber,
-//                            -1,
-//                            bowlingTeam.getPlayerId(strike.getCurrentBowler()), 1, typeOfUnFairBall, ""
-//                    );
-//                } catch (SQLException sqle){
-//                    System.out.println(sqle);
-//                } catch (Exception e){
-//
-//                }
-                cumRunForUnFairBalls += (1 + outcomeOfBallBowled);
-                legitimateBall(battingTeam, bowlingTeam, ballNumber, over, outcomeOfBallBowled, false);
+                try {
+                    BallEventsRepository.insertEvent(
+                            matchId, battingTeam.getTeamId(), inning, over * 6 + ballNumber,
+                            -1,
+                            bowlingTeam.getPlayerId(strike.getCurrentBowler()), 1, typeOfUnFairBall, ""
+                    );
+                } catch (SQLException sqle){
+                    System.out.println(sqle);
+                } catch (Exception e){
+
+                }
+                legitimateBall(battingTeam, bowlingTeam, ballNumber, over, outcomeOfBallBowled, true);
                 System.out.println("-----------------------------------------------------------------");
-                return cumRunForUnFairBalls;
-                //return playTheBall(battingTeam, bowlingTeam, ballNumber, over, (possibilityOfUnFairBall == 0));
+                // returning Enum will ensure the caller, not to update the ball number
+                return (possibilityOfUnFairBall == 0) ?UnfairBallType.WIDE : UnfairBallType.NO;
             }
             else {
                 battingTeam.incrementTotalBalls(currentPlayer);
                 bowlingTeam.incrementBowlersNumberOfBalls(strike.getCurrentBowler());
-                legitimateBall(battingTeam, bowlingTeam, ballNumber, over, outcomeOfBallBowled, true);
-                return 0;
+                legitimateBall(battingTeam, bowlingTeam, ballNumber, over, outcomeOfBallBowled, false);
+                return UnfairBallType.NA;
             }
         }
     }
