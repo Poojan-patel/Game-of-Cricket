@@ -11,6 +11,8 @@ class Strike{
     private int previousBowler;
     private int matchId;
     private Team team;
+    private boolean wasLastBallNoBall;
+    private int currentWickets;
 
     public Strike(int matchId, Team team){
         this.currentStrike = 0;
@@ -19,6 +21,8 @@ class Strike{
         previousBowler = -1;
         this.team = team;
         this.matchId = matchId;
+        this.currentWickets = 0;
+        wasLastBallNoBall = false;
         int strike = team.insertPlayer(0);
         int nonstrike = team.insertPlayer(1);
         try {
@@ -52,6 +56,7 @@ class Strike{
         At any point of time, when wicket falls, The next player who comes on the pitch is x+1
     */
     public int updateStrikeOnWicket(){
+        currentWickets++;
         int maxOrder = Integer.max(strikeHolders[0], strikeHolders[1]);
         int outPlayer = strikeHolders[currentStrike];
         strikeHolders[currentStrike] = maxOrder+1;
@@ -81,15 +86,12 @@ class Strike{
 
     public void updateStrikeInDB() {
         int teamId = team.getTeamId();
-        int onStrike, offStrike, curWickets;
+        int onStrike, offStrike;
         onStrike = (getCurrentStrike() >= team.getNumberOfPlayers())? -1: team.getPlayerId(getCurrentStrike());
         offStrike = (getCurrentNonStrike() >= team.getNumberOfPlayers())? -1: team.getPlayerId(getCurrentNonStrike());
-        if(onStrike == -1 || offStrike == -1)
-            curWickets = 10;
-        else
-            curWickets = Integer.max(strikeHolders[0], strikeHolders[1])-1;
+
         try {
-            TeamInPlayRepository.updateStrikesByTeamAndMatchId(onStrike, offStrike, matchId, teamId, curWickets);
+            TeamInPlayRepository.updateStrikesByTeamAndMatchId(onStrike, offStrike, matchId, teamId, currentWickets);
         } catch (SQLException sqle){
             System.out.println(sqle);
         } catch (Exception e){
@@ -105,5 +107,17 @@ class Strike{
         } catch(Exception e){
 
         }
+    }
+
+    public boolean isLastBallNoBall(){
+        return wasLastBallNoBall;
+    }
+
+    public void setLastBallNoBall(){
+        wasLastBallNoBall = true;
+    }
+
+    public boolean isAllOut(){
+        return (currentWickets == 10);
     }
 }
