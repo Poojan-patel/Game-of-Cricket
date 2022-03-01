@@ -1,1 +1,0 @@
-update MatchTable set winner = ? where match_id = ?

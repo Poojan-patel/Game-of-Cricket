@@ -1,1 +1,0 @@
-select player_id, name, playertype, bowling_pace from player where team = ?
