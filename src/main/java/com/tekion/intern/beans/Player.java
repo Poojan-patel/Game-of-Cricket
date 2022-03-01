@@ -1,4 +1,4 @@
-package com.tekion.intern.game;
+package com.tekion.intern.beans;
 
 import com.tekion.intern.enums.PlayerType;
 import com.tekion.intern.enums.TypeOfBowler;

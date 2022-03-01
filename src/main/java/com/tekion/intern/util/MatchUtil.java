@@ -2,7 +2,7 @@ package com.tekion.intern.util;
 
 import com.tekion.intern.enums.PlayerType;
 import com.tekion.intern.enums.Winner;
-import com.tekion.intern.game.Team;
+import com.tekion.intern.beans.Team;
 
 import java.io.IOException;
 import java.util.*;

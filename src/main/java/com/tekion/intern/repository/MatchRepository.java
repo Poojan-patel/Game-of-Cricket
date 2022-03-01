@@ -1,8 +1,8 @@
 package com.tekion.intern.repository;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
-import com.tekion.intern.game.Match;
-import com.tekion.intern.game.Team;
+import com.tekion.intern.beans.Match;
+import com.tekion.intern.beans.Team;
 import com.tekion.intern.util.ReaderUtil;
 
 import java.sql.*;

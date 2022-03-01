@@ -1,9 +1,9 @@
 package com.tekion.intern;
 
-import com.tekion.intern.game.Match;
+import com.tekion.intern.beans.Match;
 import com.tekion.intern.repository.BallEventsRepository;
 import com.tekion.intern.util.MatchUtil;
-import com.tekion.intern.game.Team;
+import com.tekion.intern.beans.Team;
 import com.tekion.intern.repository.MatchRepository;
 import com.tekion.intern.repository.TeamRepository;
 import com.tekion.intern.util.ReaderUtil;
