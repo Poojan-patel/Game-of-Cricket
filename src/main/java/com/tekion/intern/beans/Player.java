@@ -2,100 +2,34 @@ package com.tekion.intern.beans;
 
 import com.tekion.intern.enums.PlayerType;
 import com.tekion.intern.enums.TypeOfBowler;
+import com.tekion.intern.models.PlayerDTO;
 
+import javax.persistence.*;
+
+@Entity
 public class Player {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer playerId;
     private String name;
-    private int score;
-    private int ballsPlayed;
     private PlayerType playerType;
     private TypeOfBowler typeOfBowler;
-    private int[] scoreDistribution;
-    private int currentlyThrownBalls;
-    private int wicketsTaken;
-    private int playerId;
 
-    public Player(String name, String type){
-        this.name = name;
-        this.score = 0;
-        this.ballsPlayed = 0;
-        if(type.equals("BATSMAN")){
-            playerType = PlayerType.BATSMAN;
-            typeOfBowler = TypeOfBowler.NA;
-        }
-        else{
-            String[] bowlerType = type.split(",");
-            if(bowlerType[0].equals("BOWLER"))
-                playerType = PlayerType.BOWLER;
-            else
-                playerType = PlayerType.ALLROUNDER;
-            typeOfBowler = TypeOfBowler.fromStringToEnum(bowlerType[1]);
-        }
-        scoreDistribution = new int[7];
-        currentlyThrownBalls = 0;
-        playerId = 0;
+    @ManyToOne
+    private Team team;
+
+    public Player(PlayerDTO p){
+        name = p.getName();
+        playerType = p.getPlayerType();
+        typeOfBowler = p.getTypeOfBowler();
     }
 
-    public Player(String name, String type, int playerId){
-        this(name,type);
-        this.playerId = playerId;
+    public Player() {
+
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public void incrementScore(int score) {
-        this.score += score;
-        scoreDistribution[score]++;
-    }
-
-    public int getBallsPlayed() {
-        return ballsPlayed;
-    }
-
-    public void incrementBallsPlayed() {
-        this.ballsPlayed++;
-    }
-
-    public PlayerType getPlayerType() {
-        return playerType;
-    }
-
-    public int remainingOvers(int maxOversCanBeThrown) {
-        return (maxOversCanBeThrown - (int)Math.ceil(currentlyThrownBalls/6.0));
-    }
-
-    public void incrementNumberOfBallsThrown(){
-        currentlyThrownBalls++;
-    }
-
-    public void incrementWicketsTaken() {
-        wicketsTaken++;
-    }
-
-    public String getTypeOfBowler() {
-        return typeOfBowler.toString();
-    }
-
-    @Override
-    public String toString() {
-        String scoreDistributionToString = "[";
-        for(int i = 0; i < 6; i++)
-            scoreDistributionToString += (i + ":" + scoreDistribution[i] + ", ");
-        scoreDistributionToString += ("6:" + scoreDistribution[6] + "]");
-        String objectAsString = String.format("%s: %d runs in %d balls, scorewise:%s", name, score, ballsPlayed, scoreDistributionToString);
-        if(this.playerType != PlayerType.BATSMAN){
-            objectAsString += String.format(" Overs taken:%d.%d, Wickets Taken:%d", currentlyThrownBalls/6, currentlyThrownBalls%6, wicketsTaken);
-        }
-        return objectAsString;
-    }
-
-    public int getPlayerId() {
-        return playerId;
+    public void setTeam(Team t){
+        team = t;
     }
 }

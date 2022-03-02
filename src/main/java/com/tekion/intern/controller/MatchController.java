@@ -1,25 +1,20 @@
-package com.tekion.intern;
+package com.tekion.intern.controller;
 
-import com.tekion.intern.beans.Match;
+import com.tekion.intern.dto.Match;
 import com.tekion.intern.repository.BallEventsRepository;
 import com.tekion.intern.util.MatchUtil;
-import com.tekion.intern.beans.Team;
+import com.tekion.intern.dto.Team;
 import com.tekion.intern.repository.MatchRepository;
 import com.tekion.intern.repository.TeamRepository;
 import com.tekion.intern.util.ReaderUtil;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
 public class MatchController {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        SpringApplication.run(MatchController.class, args);
         System.out.println("1... Initialize Team");
         System.out.println("2... Initialize Match with Teams:");
         System.out.println("3... Stimulate the Game:");

@@ -3,15 +3,15 @@ package com.tekion.intern.models;
 import com.tekion.intern.enums.PlayerType;
 import com.tekion.intern.enums.TypeOfBowler;
 
-public class Player {
+public class PlayerDTO {
     private String name;
     private PlayerType playerType;
     private TypeOfBowler typeOfBowler;
 
-    public Player(){
+    public PlayerDTO(){
     }
 
-    public Player(String name, String playerType, String typeOfBowling) {
+    public PlayerDTO(String name, String playerType, String typeOfBowling) {
         this.name = name;
         this.playerType = PlayerType.fromStringToEnum(playerType);
         this.typeOfBowler = TypeOfBowler.fromStringToEnum(typeOfBowling);

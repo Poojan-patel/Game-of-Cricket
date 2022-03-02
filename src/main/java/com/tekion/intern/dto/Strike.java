@@ -1,4 +1,4 @@
-package com.tekion.intern.beans;
+package com.tekion.intern.dto;
 
 import com.tekion.intern.repository.TeamInPlayRepository;
 

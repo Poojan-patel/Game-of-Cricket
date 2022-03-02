@@ -1,40 +1,39 @@
 package com.tekion.intern.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Team {
+public class TeamDTO {
+    @JsonView
     private String teamName;
-    private List<Player> players;
-
-//    public Team(){
-//
-//    }
-//
-//    public Team(String teamName, List<Player> players){
-//        this.teamName = teamName;
-//        this.players = players;
-//    }
+    @JsonIgnore
+    private List<PlayerDTO> players;
+    @JsonView
+    private Integer teamId;
 
     public String getTeamName() {
         return teamName;
     }
 
-    public List<Player> getPlayers() {
+    public List<PlayerDTO> getPlayers() {
         return players;
     }
 
     @Override
     public String toString() {
         String ts = "Team{" +
-                "teamName='" + teamName + '\n';
-        for(Player i:players)
-            ts += i + "\n";
+                "teamName='" + teamName + ',' + "teamId=" + teamId + '}';
         return ts;
+    }
+
+    public TeamDTO(String teamName, Integer teamId){
+        this.teamName = teamName;
+        this.teamId = teamId;
     }
 
     @SuppressWarnings("unchecked")
@@ -42,7 +41,7 @@ public class Team {
     private void unpackPlayers(List<Map<String,Object>> playerList){
         players = new ArrayList<>();
         for(Map<String, Object> singlePlayer: playerList){
-            players.add(new Player((String)singlePlayer.get("name"), (String)singlePlayer.get("playerType"), (String)singlePlayer.get("bowlingType")));
+            players.add(new PlayerDTO((String)singlePlayer.get("name"), (String)singlePlayer.get("playerType"), (String)singlePlayer.get("bowlingType")));
         }
     }
 }

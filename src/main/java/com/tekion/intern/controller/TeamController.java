@@ -1,19 +1,34 @@
 package com.tekion.intern.controller;
 
-import com.tekion.intern.models.Team;
+import com.tekion.intern.models.TeamDTO;
+import com.tekion.intern.services.TeamService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.logging.Level;
+import java.util.List;
 import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/team")
 public class TeamController {
-    public static Logger logger = Logger.getLogger("teamcontroller");
+    private Logger logger = Logger.getLogger("teamcontroller");
+
+    @Autowired
+    private TeamService teamService;
 
     @PostMapping("/create")
-    public String createTeam(@RequestBody Team team){
-        System.out.println(team);
-        return team.getTeamName();
+    public ResponseEntity<String> createTeam(@RequestBody TeamDTO team){
+        Integer teamId = teamService.validateTeam(team);
+
+        return ResponseEntity.accepted().body(teamId.toString());
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<TeamDTO>> getAllTeams(){
+        List<TeamDTO> allTeams = teamService.getAllTeams();
+        System.out.println(allTeams);
+        System.out.println(allTeams.get(0));
+        return ResponseEntity.ok(allTeams);
     }
 }

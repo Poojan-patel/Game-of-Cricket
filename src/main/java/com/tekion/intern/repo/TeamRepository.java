@@ -1,4 +1,4 @@
-package com.tekion.intern.repository;
+package com.tekion.intern.repo;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.dto.Player;

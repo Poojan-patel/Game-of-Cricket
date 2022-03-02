@@ -1,8 +1,9 @@
-package com.tekion.intern.repository;
+package com.tekion.intern.repo;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.dto.Match;
 import com.tekion.intern.dto.Team;
+import com.tekion.intern.repository.TeamRepository;
 import com.tekion.intern.util.ReaderUtil;
 
 import java.sql.*;
@@ -57,7 +58,7 @@ public class MatchRepository {
             team2 = rs.getInt(2);
         }
 
-        String teamName = TeamRepository.getTeamNameFromTeamId((whichTeamToBatFirst == 1) ?team1 :team2);
+        String teamName = com.tekion.intern.repository.TeamRepository.getTeamNameFromTeamId((whichTeamToBatFirst == 1) ?team1 :team2);
         System.out.println(teamName + " is Going to Bat First");
         try {
             con.setAutoCommit(false);
@@ -95,7 +96,7 @@ public class MatchRepository {
                 overs = rs.getInt("overs");
                 maxOvers = rs.getInt("maxovers");
             }
-            Team team1 = TeamRepository.createTeamFromTeamID(team1Id);
+            Team team1 = com.tekion.intern.repository.TeamRepository.createTeamFromTeamID(team1Id);
             Team team2 = TeamRepository.createTeamFromTeamID(team2Id);
             //con.commit();
             con.close();
