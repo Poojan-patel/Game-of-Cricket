@@ -1,15 +1,19 @@
 package com.tekion.intern.repo;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
-import com.tekion.intern.dto.Player;
-import com.tekion.intern.dto.Team;
+import com.tekion.intern.beans.Player;
+import com.tekion.intern.beans.Team;
+import com.tekion.intern.models.TeamDTO;
 import com.tekion.intern.util.ReaderUtil;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class TeamRepository {
-    public static void insertTeamData(Team team) throws SQLException, ClassNotFoundException {
+    public Integer save(Team team) throws SQLException, ClassNotFoundException {
         String teamName = team.getTeamName();
         Connection con = MySqlConnector.getConnection();
         con.setAutoCommit(false);
@@ -24,29 +28,14 @@ public class TeamRepository {
 
             insertTeamPlayers(team.getPlayers(), teamId, con);
             con.commit();
+            return teamId;
         } catch (SQLException sqle) {
             con.rollback();
             throw sqle;
         }
     }
 
-    public static String getTeamNameFromTeamId(int teamId) throws SQLException, ClassNotFoundException {
-        Connection con = MySqlConnector.getConnection();
-        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("team", "getTeamNameFromTeamId"));
-        ps.setInt(1, teamId);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next())
-            return rs.getString(1);
-        return "";
-    }
-
-    public static Team createTeamFromTeamID(int teamId) throws SQLException, ClassNotFoundException {
-        String teamName = getTeamNameFromTeamId(teamId);
-        Team team = new Team(teamName, teamId);
-        return team;
-    }
-
-    private static void insertTeamPlayers(List<Player> players, int teamId, Connection conn) throws SQLException {
+    private void insertTeamPlayers(List<Player> players, int teamId, Connection conn) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(ReaderUtil.readSqlFromFile("team","insertTeamPlayers"), Statement.RETURN_GENERATED_KEYS);
         for (Player player : players) {
             stmt.setInt(1, teamId);
@@ -56,5 +45,21 @@ public class TeamRepository {
             stmt.addBatch();
         }
         stmt.executeBatch();
+    }
+
+    public List<TeamDTO> findAll() throws SQLException, ClassNotFoundException{
+        Connection con = MySqlConnector.getConnection();
+        List<TeamDTO> teams = new ArrayList<>();
+        try{
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("select team_id, name from team");
+            while(rs.next()){
+                teams.add(new TeamDTO(rs.getString(2), rs.getInt(1)));
+            }
+            con.close();
+        } catch (SQLException sql){
+            con.close();
+        }
+        return teams;
     }
 }

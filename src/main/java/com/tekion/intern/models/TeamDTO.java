@@ -44,4 +44,8 @@ public class TeamDTO {
             players.add(new PlayerDTO((String)singlePlayer.get("name"), (String)singlePlayer.get("playerType"), (String)singlePlayer.get("bowlingType")));
         }
     }
+
+    public int getTeamId() {
+        return teamId;
+    }
 }
