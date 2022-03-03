@@ -2,9 +2,11 @@ package com.tekion.intern.repo;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.util.ReaderUtil;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 
+@Repository
 public class TeamInPlayRepository {
 
     public static void updateBowlerByTeamAndMatchId(int bowlerId, int matchId, int teamId) throws SQLException, ClassNotFoundException{
@@ -68,5 +70,26 @@ public class TeamInPlayRepository {
             con.close();
             throw sqle;
         }
+    }
+
+    public int fetchTheLastOver(Integer matchId, Integer currentBowlTeamId) {
+        Connection con = null;
+        int bowlerId = 0;
+        try{
+            con = MySqlConnector.getConnection();
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("teaminplay", "findLastBowlerByTeamAndMatchId"));
+            ps.setInt(1, matchId);
+            ps.setInt(2, currentBowlTeamId);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next())
+                bowlerId = rs.getInt("bowler");
+            con.close();
+        } catch (SQLException sqle){
+            try{
+                con.close();
+            } catch (Exception ignored) {}
+            sqle.printStackTrace();
+        } catch (Exception ignored) {}
+        return bowlerId;
     }
 }

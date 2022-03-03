@@ -58,4 +58,8 @@ public class Match {
     public void setMatchState(Winner matchState) {
         this.matchState = matchState;
     }
+
+    public int getMaxovers() {
+        return maxovers;
+    }
 }

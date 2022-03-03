@@ -2,9 +2,14 @@ package com.tekion.intern.repo;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.util.ReaderUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
+@Repository
 public class BallEventsRepository{
     public static void insertEvent
             (int matchId, int teamId, int inning, int ballNumber, int batsmanId, int bowlerId, int score, String extras, String wicket)
@@ -97,5 +102,28 @@ public class BallEventsRepository{
                     "\tExtras: " + rs.getInt("Extras")
             );
         }
+    }
+
+    public Map<Integer, Integer> fetchBowlersWithThrownOversByTeamAndMatchId(Integer matchId, Integer currentBowlTeamId) {
+        Connection con = null;
+        Map<Integer, Integer> bowlerWithThrownOvers = null;
+        try{
+            con = MySqlConnector.getConnection();
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "fetchBowlersWithThrownOversByTeamAndMatchId"));
+            ps.setInt(1, matchId);
+            ps.setInt(2, currentBowlTeamId);
+            ResultSet rs = ps.executeQuery();
+            bowlerWithThrownOvers = new HashMap<>();
+            while(rs.next()){
+                bowlerWithThrownOvers.put(rs.getInt("bowler"), (int)Math.ceil(rs.getDouble("overs")));
+            }
+        } catch (SQLException sqle){
+            try{
+                con.close();
+            } catch (Exception ignored){}
+            sqle.printStackTrace();
+        } catch (Exception ignored){}
+
+        return bowlerWithThrownOvers;
     }
 }

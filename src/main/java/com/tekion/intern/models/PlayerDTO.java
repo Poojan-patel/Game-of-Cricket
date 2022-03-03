@@ -1,11 +1,17 @@
 package com.tekion.intern.models;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.tekion.intern.enums.PlayerType;
 import com.tekion.intern.enums.TypeOfBowler;
 
 public class PlayerDTO {
+    @JsonView
+    private int playerId;
+    @JsonView
     private String name;
+    @JsonView
     private PlayerType playerType;
+    @JsonView
     private TypeOfBowler typeOfBowler;
 
     public PlayerDTO(){
@@ -19,6 +25,10 @@ public class PlayerDTO {
             throw new IllegalStateException("Non Batsman Player Must have Bowling type Defined");
     }
 
+    public PlayerDTO(String name, String playerType, String typeOfBowling, int playerId) {
+        this(name, playerType, typeOfBowling);
+        this.playerId = playerId;
+    }
 
     public String getName() {
         return name;

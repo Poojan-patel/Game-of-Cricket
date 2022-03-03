@@ -1,12 +1,17 @@
 package com.tekion.intern.controller;
 
+import com.tekion.intern.beans.Match;
+import com.tekion.intern.beans.Player;
 import com.tekion.intern.models.MatchCreationRequest;
 import com.tekion.intern.models.MatchCreationResponse;
+import com.tekion.intern.models.PlayerDTO;
 import com.tekion.intern.models.TossSimulationResult;
 import com.tekion.intern.services.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/match")
@@ -23,10 +28,18 @@ public class MatchController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/stimulate/{matchId}")
+    @GetMapping("/play/{matchId}")
     public ResponseEntity<String> stimulateMatch(@PathVariable Integer matchId){
         //matchService.startTheMatch(matchId);
         return ResponseEntity.internalServerError().body("UnderConstruction");
+    }
+
+    @GetMapping("/bowlerslist/{matchId}")
+    public ResponseEntity<List<PlayerDTO>> getAvailableBowlers(@PathVariable Integer matchId){
+        Match match = matchService.checkMatchIdValidity(matchId);
+        Integer currentBowlTeamId = matchService.getCurrentBowlingTeam(match);
+        List<PlayerDTO> availableBowlers =  matchService.fetchAvailableBowlers(match, currentBowlTeamId, match.getMaxovers());
+        return ResponseEntity.ok(availableBowlers);
     }
 
     @GetMapping("/toss/{matchId}")
