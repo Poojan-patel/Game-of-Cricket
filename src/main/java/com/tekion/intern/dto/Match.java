@@ -39,7 +39,7 @@ public class Match {
         maxOversCanBeThrown = (int)Math.ceil(numOfOvers/5.0);
         team1 = new Team(team1Name, team1PlayerNames, team1PlayerTypes);
         team2 = new Team(team2Name, team2PlayerNames, team2PlayerTypes);
-        winner = Winner.STARTED;
+        winner = Winner.TOSS_LEFT;
         this.matchId = 0;
     }
 
@@ -48,7 +48,7 @@ public class Match {
         this.maxOversCanBeThrown = maxOversCanBeThrown;
         this.team1 = team1;
         this.team2 = team2;
-        winner = Winner.STARTED;
+        winner = Winner.TOSS_LEFT;
         this.matchId = matchId;
     }
 
