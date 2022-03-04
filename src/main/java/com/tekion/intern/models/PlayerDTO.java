@@ -13,6 +13,8 @@ public class PlayerDTO {
     private PlayerType playerType;
     @JsonView
     private TypeOfBowler typeOfBowler;
+    @JsonView
+    private int remainingOvers;
 
     public PlayerDTO(){
     }
@@ -25,9 +27,10 @@ public class PlayerDTO {
             throw new IllegalStateException("Non Batsman Player Must have Bowling type Defined");
     }
 
-    public PlayerDTO(String name, String playerType, String typeOfBowling, int playerId) {
+    public PlayerDTO(String name, String playerType, String typeOfBowling, int playerId, int remainingOvers) {
         this(name, playerType, typeOfBowling);
         this.playerId = playerId;
+        this.remainingOvers = remainingOvers;
     }
 
     public String getName() {
@@ -49,5 +52,9 @@ public class PlayerDTO {
                 ", playerType=" + playerType +
                 ", typeOfBowler=" + typeOfBowler +
                 '}';
+    }
+
+    public int getPlayerId() {
+        return playerId;
     }
 }

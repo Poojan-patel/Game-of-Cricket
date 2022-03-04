@@ -2,10 +2,7 @@ package com.tekion.intern.controller;
 
 import com.tekion.intern.beans.Match;
 import com.tekion.intern.beans.Player;
-import com.tekion.intern.models.MatchCreationRequest;
-import com.tekion.intern.models.MatchCreationResponse;
-import com.tekion.intern.models.PlayerDTO;
-import com.tekion.intern.models.TossSimulationResult;
+import com.tekion.intern.models.*;
 import com.tekion.intern.services.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +25,14 @@ public class MatchController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/play/{matchId}")
-    public ResponseEntity<String> stimulateMatch(@PathVariable Integer matchId){
+    @RequestMapping("/play/{matchId}")
+    public ResponseEntity<String> stimulateMatch(@PathVariable Integer matchId, @RequestBody BowlerForNextOver bowlerForNextOver){
         //matchService.startTheMatch(matchId);
+        Match match = matchService.checkMatchIdValidity(matchId);
+        Integer currentBowlTeamId = matchService.getCurrentBowlingTeam(match);
+        Player bowler = matchService.checkBowlerValidity(match, currentBowlTeamId, bowlerForNextOver.getBowlerId());
+        matchService.setBowlerForThisOver(match, currentBowlTeamId, bowler.getPlayerId());
+        matchService.playTheOver(match, currentBowlTeamId, bowler);
         return ResponseEntity.internalServerError().body("UnderConstruction");
     }
 
@@ -38,7 +40,7 @@ public class MatchController {
     public ResponseEntity<List<PlayerDTO>> getAvailableBowlers(@PathVariable Integer matchId){
         Match match = matchService.checkMatchIdValidity(matchId);
         Integer currentBowlTeamId = matchService.getCurrentBowlingTeam(match);
-        List<PlayerDTO> availableBowlers =  matchService.fetchAvailableBowlers(match, currentBowlTeamId, match.getMaxovers());
+        List<PlayerDTO> availableBowlers =  matchService.fetchAvailableBowlers(match, currentBowlTeamId);
         return ResponseEntity.ok(availableBowlers);
     }
 

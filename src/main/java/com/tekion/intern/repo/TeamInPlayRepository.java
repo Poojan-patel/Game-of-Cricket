@@ -1,6 +1,7 @@
 package com.tekion.intern.repo;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
+import com.tekion.intern.models.FieldBatsmenAndWickets;
 import com.tekion.intern.util.ReaderUtil;
 import org.springframework.stereotype.Repository;
 
@@ -9,9 +10,10 @@ import java.sql.*;
 @Repository
 public class TeamInPlayRepository {
 
-    public static void updateBowlerByTeamAndMatchId(int bowlerId, int matchId, int teamId) throws SQLException, ClassNotFoundException{
-        Connection con = MySqlConnector.getConnection();
+    public void updateBowlerByTeamAndMatchId(int bowlerId, int matchId, int teamId){
+        Connection con = null;
         try {
+            con = MySqlConnector.getConnection();
             con.setAutoCommit(false);
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("teaminplay", "updateBowlerByTeamAndMatchId"));
             ps.setInt(1, bowlerId);
@@ -22,15 +24,18 @@ public class TeamInPlayRepository {
             con.close();
         }
         catch(SQLException sqle){
-            con.rollback();
-            con.close();
-            throw sqle;
-        }
+            try {
+                con.rollback();
+                con.close();
+            } catch (Exception ignored){}
+            sqle.printStackTrace();
+        } catch (Exception ignored) {}
     }
 
-    public static void updateStrikesByTeamAndMatchId(int currentStrike, int currentNonStrike, int matchId, int teamId, int curWickets) throws SQLException, ClassNotFoundException{
-        Connection con = MySqlConnector.getConnection();
+    public void updateStrikesByTeamAndMatchId(int currentStrike, int currentNonStrike, int matchId, int teamId, int curWickets){
+        Connection con = null;
         try {
+            con = MySqlConnector.getConnection();
             con.setAutoCommit(false);
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("teaminplay", "updateStrikesByTeamAndMatchId"));
             if(currentStrike != -1) ps.setInt(1,currentStrike);
@@ -46,10 +51,12 @@ public class TeamInPlayRepository {
             con.commit();
             con.close();
         } catch (SQLException sqle){
-            con.rollback();
-            con.close();
-            throw sqle;
-        }
+            try {
+                con.rollback();
+                con.close();
+            } catch (Exception ignored) {}
+            sqle.printStackTrace();
+        } catch (Exception ignored) {}
     }
 
     public static void insertStrike(int currentStrike, int currentNonStrike, int matchId, int teamId) throws SQLException, ClassNotFoundException{
@@ -91,5 +98,27 @@ public class TeamInPlayRepository {
             sqle.printStackTrace();
         } catch (Exception ignored) {}
         return bowlerId;
+    }
+
+    public FieldBatsmenAndWickets fetchStrikeDetails(int matchId, int currentBatTeamId) {
+        Connection con = null;
+        FieldBatsmenAndWickets fieldBatsmenAndWickets = null;
+        try{
+            con = MySqlConnector.getConnection();
+            PreparedStatement ps = con.prepareStatement("select * from team_in_play where match_id = ? and team = ?");
+            ps.setInt(1, matchId);
+            ps.setInt(2, currentBatTeamId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                fieldBatsmenAndWickets = new FieldBatsmenAndWickets(rs.getInt("strike"), rs.getInt("nonstrike"), rs.getInt("currentwickets"));
+            }
+            con.close();
+        } catch (SQLException sqle){
+            try{
+                con.close();
+            } catch (Exception ignored) {}
+            sqle.printStackTrace();
+        } catch (Exception ignored) {}
+        return fieldBatsmenAndWickets;
     }
 }

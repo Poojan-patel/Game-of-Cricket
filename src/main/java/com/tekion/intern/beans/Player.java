@@ -11,7 +11,8 @@ public class Player {
     private String name;
     private PlayerType playerType;
     private TypeOfBowler typeOfBowler;
-    private int remainingOvers;
+    private int currentRuns;
+    private int currentBalls;
 
     public Player(PlayerDTO p){
         name = p.getName();
@@ -30,6 +31,12 @@ public class Player {
         this.playerId = playerId;
     }
 
+    public Player(String name, String playerType, String typeOfBowler, int playerId, int currentBalls, int currentRuns){
+        this(name, playerType, typeOfBowler, playerId);
+        this.currentBalls = currentBalls;
+        this.currentRuns = currentRuns;
+    }
+
     public String getName() {
         return name;
     }
@@ -42,11 +49,15 @@ public class Player {
         return typeOfBowler.toString();
     }
 
-    public void setRemainingOvers(int remainingOvers) {
-        this.remainingOvers = remainingOvers;
-    }
-
     public int getPlayerId() {
         return playerId;
+    }
+
+    public void incrementTotalBalls() {
+        currentBalls++;
+    }
+
+    public void incrementScore(int outcomeOfBallBowled) {
+        currentRuns += outcomeOfBallBowled;
     }
 }

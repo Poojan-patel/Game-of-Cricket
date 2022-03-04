@@ -2,8 +2,11 @@ package com.tekion.intern.services;
 
 import com.tekion.intern.beans.Match;
 import com.tekion.intern.beans.Player;
+import com.tekion.intern.beans.Strike;
 import com.tekion.intern.beans.Team;
 import com.tekion.intern.enums.PlayerType;
+import com.tekion.intern.enums.Winner;
+import com.tekion.intern.models.FieldBatsmenAndWickets;
 import com.tekion.intern.models.PlayerDTO;
 import com.tekion.intern.models.TeamDTO;
 import com.tekion.intern.repo.BallEventsRepository;
@@ -87,8 +90,7 @@ public class TeamService {
             thrownOvers = ((bowlersWhoThrownOvers.get(p.getPlayerId()) == null) ?0 :bowlersWhoThrownOvers.get(p.getPlayerId()));
             sum -= thrownOvers;
             if(p.getPlayerId() != lastBowler && thrownOvers < maxOvers){
-                p.setRemainingOvers(maxOvers - thrownOvers);
-                availableBowlers.add(new PlayerDTO(p.getName(), p.getPlayerType().toString(), p.getTypeOfBowler(), p.getPlayerId()));
+                availableBowlers.add(new PlayerDTO(p.getName(), p.getPlayerType().toString(), p.getTypeOfBowler(), p.getPlayerId(), maxOvers - thrownOvers));
                 if(maxOvers - thrownOvers > maxi){
                     maxi = maxOvers - thrownOvers;
                     minOverPlayer = availableBowlers.get(availableBowlers.size()-1);
@@ -102,4 +104,44 @@ public class TeamService {
             return Collections.singletonList(minOverPlayer);
         return availableBowlers;
     }
+
+    public void setBowlerForThisOver(Match match, Integer currentBowlTeamId, int bowlerId) {
+        teamInPlayRepository.updateBowlerByTeamAndMatchId(bowlerId, match.getMatchId(), currentBowlTeamId);
+    }
+
+    public Strike initializeStrike(Match match, int currentBowlTeamId, Player bowler) {
+        int scoreToChase = -1;
+        int currentBatTeamId = (match.getTeam1Id() == currentBowlTeamId) ? match.getTeam2Id() : match.getTeam1Id();
+        if(match.getMatchState() == Winner.TEAM2_BATTING){
+            scoreToChase = ballEventsRepository.fetchScoreToChase(match.getMatchId(), currentBowlTeamId);
+        }
+        FieldBatsmenAndWickets currentOnFieldBatsmen = teamInPlayRepository.fetchStrikeDetails(match.getMatchId(), currentBatTeamId);
+        List<Player> currentPlayers = playerRepository.fetchOnFieldBatsmenData(currentOnFieldBatsmen.getStrike(), currentOnFieldBatsmen.getNonStrike(), match.getMatchId(), currentBatTeamId);
+        Team battingTeam = teamRepository.fetchTeamScoreFromMatchId(match.getMatchId(), currentBatTeamId);
+        battingTeam.setPlayerList(currentPlayers);
+        battingTeam.setScoreToChase(scoreToChase);
+        return new Strike(match.getMatchId(), bowler, battingTeam);
+    }
+
+    public void updateStrike(Strike strike) {
+        Team battingTeam = strike.getBattingTeam();
+        int teamId = battingTeam.getTeamId();
+        int onStrike, offStrike;
+        int currentStrikeIndex = strike.getCurrentStrike();
+        onStrike = battingTeam.getPlayerIdByIndex(currentStrikeIndex);
+        offStrike = battingTeam.getPlayerIdByIndex(1 - currentStrikeIndex);
+        teamInPlayRepository.updateStrikesByTeamAndMatchId(onStrike, offStrike, battingTeam.getTeamId(), teamId, battingTeam.getCurrentWickets());
+    }
+
+    public void updateStrikeOnWicket(Strike strike) {
+        Team battingTeam = strike.getBattingTeam();
+        int maxOrder = battingTeam.getMaxOrderedPlayer();
+        battingTeam.incrementWickets();
+        Player newBatter = playerRepository.fetchNextBatsman(battingTeam.getTeamId(), maxOrder);
+        strike.setNewBatsman(newBatter);
+        int currentStrikeIndex = strike.getCurrentStrike();
+        teamInPlayRepository.updateStrikesByTeamAndMatchId(battingTeam.getPlayerIdByIndex(currentStrikeIndex), battingTeam.getPlayerIdByIndex(1-currentStrikeIndex), strike.getMatchId(), battingTeam.getTeamId(), battingTeam.getCurrentWickets());
+    }
+
+
 }

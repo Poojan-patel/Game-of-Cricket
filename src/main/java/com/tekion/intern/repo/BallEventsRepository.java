@@ -11,12 +11,12 @@ import java.util.Map;
 
 @Repository
 public class BallEventsRepository{
-    public static void insertEvent
+    public void insertEvent
             (int matchId, int teamId, int inning, int ballNumber, int batsmanId, int bowlerId, int score, String extras, String wicket)
-                throws SQLException, ClassNotFoundException
     {
-        Connection con = MySqlConnector.getConnection();
+        Connection con = null;
         try{
+            con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "insertEvent"));
             ps.setInt(1,matchId);
             ps.setInt(2,teamId);
@@ -39,9 +39,11 @@ public class BallEventsRepository{
             ps.execute();
             con.close();
         } catch(SQLException sqle){
-            con.close();
-            throw sqle;
-        }
+            try {
+                con.close();
+            } catch (Exception ignored) {}
+            sqle.printStackTrace();
+        } catch(Exception ignored){}
     }
 
     public static void generateFinalScoreBoard(int matchId) {
@@ -125,5 +127,27 @@ public class BallEventsRepository{
         } catch (Exception ignored){}
 
         return bowlerWithThrownOvers;
+    }
+
+    public int fetchScoreToChase(int matchId, int currentBowlTeamId) {
+        Connection con = null;
+        int scoreToChase = -1;
+        try{
+            con = MySqlConnector.getConnection();
+            PreparedStatement ps = con.prepareStatement("select sum(score) from BallEvents where match_id = ? and team = ?");
+            ps.setInt(1, matchId);
+            ps.setInt(2, currentBowlTeamId);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next())
+                scoreToChase = rs.getInt(1);
+            con.close();
+        } catch (SQLException sqle){
+            try{
+                con.close();
+            } catch (Exception ignored){}
+            sqle.printStackTrace();
+        } catch (Exception ignored){}
+
+        return scoreToChase;
     }
 }

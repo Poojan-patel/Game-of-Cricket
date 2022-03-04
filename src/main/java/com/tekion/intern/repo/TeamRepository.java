@@ -64,4 +64,26 @@ public class TeamRepository {
     }
 
 
+    public Team fetchTeamScoreFromMatchId(int matchId, int battingTeamId) {
+        Connection con = null;
+        Team team = null;
+        try{
+            con = MySqlConnector.getConnection();
+            PreparedStatement ps = con.prepareStatement("select * from team inner join\n" +
+                    "(select count(distinct ballnumber) Balls, sum(score) Score, team from BallEvents where match_id = ? and team = ?) as ScoreBoard\n" +
+                    "on ScoreBoard.team = team.team_id");
+            ps.setInt(1, matchId);
+            ps.setInt(2, battingTeamId);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                team = new Team(rs.getString("name"), rs.getInt("Score"), rs.getInt("Balls"), battingTeamId);
+            }
+        } catch (SQLException sqle){
+            try{
+                con.close();
+            } catch (Exception ignored) {}
+            sqle.printStackTrace();
+        } catch (Exception ignored) {}
+        return team;
+    }
 }
