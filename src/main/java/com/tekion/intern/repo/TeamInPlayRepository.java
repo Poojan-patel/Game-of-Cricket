@@ -48,7 +48,6 @@ public class TeamInPlayRepository {
             ps.setInt(3,curWickets);
             ps.setInt(4,matchId);
             ps.setInt(5,teamId);
-            System.out.println(ps.toString());
             ps.executeUpdate();
             con.commit();
             con.close();

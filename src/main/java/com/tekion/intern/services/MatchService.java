@@ -23,7 +23,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class MatchService {
-    private Scanner sc = new Scanner(System.in);
     private TeamRepository teamRepository;
     private MatchRepository matchRepository;
 
@@ -178,7 +177,6 @@ public class MatchService {
             if(unfairBallType != UnfairBallType.NA)
                 j--;
             isWicketPossible = (unfairBallType != UnfairBallType.NO);
-            sc.nextLine();
         }
         strike.changeStrike();
         teamService.updateStrike(strike);

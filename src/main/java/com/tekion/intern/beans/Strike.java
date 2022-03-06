@@ -1,14 +1,6 @@
 package com.tekion.intern.beans;
 
-import com.tekion.intern.beans.Team;
-import com.tekion.intern.repository.TeamInPlayRepository;
-
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-
 public class Strike {
-    //private List<Player> strikeHolders;
     private int currentStrike;
     private Player currentBowler;
     private int matchId;
@@ -29,10 +21,6 @@ public class Strike {
         return currentBowler.getPlayerId();
     }
 
-//    public void overChanged(){
-//        currentStrike = (currentStrike+1)%2;
-//    }
-
     public void changeStrike(){
         currentStrike = (currentStrike+1)%2;
     }
@@ -40,23 +28,6 @@ public class Strike {
     public int getCurrentStrike() {
         return currentStrike;
     }
-
-//    public int getCurrentNonStrike(){
-//        return 1-currentStrike;
-//    }
-
-
-//    public void removeOutPlayer(int outPlayer){
-//        team.removePlayer(outPlayer);
-//    }
-
-//    public int getCurrentBowler() {
-//        return currentBowler;
-//    }
-//
-//    public int getPreviousBowler() {
-//        return previousBowler;
-//    }
 
     public boolean isAllOut(){
         return team.isAllOut();

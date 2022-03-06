@@ -91,9 +91,7 @@ public class PlayerRepository {
             ps.setInt(3, strike);
             ps.setInt(4, nonStrike);
             ps.setInt(5, matchId);
-//            System.out.println(ps);
             ResultSet rs = ps.executeQuery();
-            //System.out.println(rs.getFetchSize());
             while (rs.next()){
                 currentPlayers.add(new Player(
                         rs.getString("name"), rs.getString("playertype"), rs.getString("bowling_pace"),
@@ -104,7 +102,6 @@ public class PlayerRepository {
             if(currentPlayers.get(0).getPlayerId() != strike){
                 Collections.swap(currentPlayers, 0,1);
             }
-            System.out.println(currentPlayers.get(0).getPlayerId() == strike);
         } catch(SQLException sqle){
             try {
                 con.close();

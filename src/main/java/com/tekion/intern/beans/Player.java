@@ -1,7 +1,5 @@
 package com.tekion.intern.beans;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.tekion.intern.enums.PlayerType;
 import com.tekion.intern.enums.TypeOfBowler;
 import com.tekion.intern.models.PlayerDTO;
