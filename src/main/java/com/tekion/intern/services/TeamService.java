@@ -120,17 +120,20 @@ public class TeamService {
         Team battingTeam = teamRepository.fetchTeamScoreFromMatchId(match.getMatchId(), currentBatTeamId);
         battingTeam.setPlayerList(currentPlayers);
         battingTeam.setScoreToChase(scoreToChase);
+        System.out.println("Chasing Score:" + battingTeam.getScoreToChase());
+        battingTeam.setCurrentWickets(currentOnFieldBatsmen.getCurrentWickets());
         return new Strike(match.getMatchId(), bowler, battingTeam);
     }
 
     public void updateStrike(Strike strike) {
         Team battingTeam = strike.getBattingTeam();
         int teamId = battingTeam.getTeamId();
+
         int onStrike, offStrike;
         int currentStrikeIndex = strike.getCurrentStrike();
         onStrike = battingTeam.getPlayerIdByIndex(currentStrikeIndex);
         offStrike = battingTeam.getPlayerIdByIndex(1 - currentStrikeIndex);
-        teamInPlayRepository.updateStrikesByTeamAndMatchId(onStrike, offStrike, battingTeam.getTeamId(), teamId, battingTeam.getCurrentWickets());
+        teamInPlayRepository.updateStrikesByTeamAndMatchId(onStrike, offStrike, strike.getMatchId(), teamId, battingTeam.getCurrentWickets());
     }
 
     public void updateStrikeOnWicket(Strike strike) {
@@ -144,4 +147,8 @@ public class TeamService {
     }
 
 
+    public void insertStrikesForNewMatch(int teamId, int matchId) {
+        List<Integer> playerIds = teamRepository.fetchFirstTwoPlayers(teamId);
+        teamInPlayRepository.insertStrike(playerIds.get(0), playerIds.get(1), matchId, teamId);
+    }
 }

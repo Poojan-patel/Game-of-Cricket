@@ -29,7 +29,9 @@ public class TeamInPlayRepository {
                 con.close();
             } catch (Exception ignored){}
             sqle.printStackTrace();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
     }
 
     public void updateStrikesByTeamAndMatchId(int currentStrike, int currentNonStrike, int matchId, int teamId, int curWickets){
@@ -46,7 +48,7 @@ public class TeamInPlayRepository {
             ps.setInt(3,curWickets);
             ps.setInt(4,matchId);
             ps.setInt(5,teamId);
-
+            System.out.println(ps.toString());
             ps.executeUpdate();
             con.commit();
             con.close();
@@ -56,12 +58,15 @@ public class TeamInPlayRepository {
                 con.close();
             } catch (Exception ignored) {}
             sqle.printStackTrace();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
     }
 
-    public static void insertStrike(int currentStrike, int currentNonStrike, int matchId, int teamId) throws SQLException, ClassNotFoundException{
-        Connection con = MySqlConnector.getConnection();
+    public void insertStrike(int currentStrike, int currentNonStrike, int matchId, int teamId){
+        Connection con = null;
         try {
+            con = MySqlConnector.getConnection();
             con.setAutoCommit(false);
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("teaminplay", "insertStrike"));
             ps.setInt(1, matchId);
@@ -73,9 +78,13 @@ public class TeamInPlayRepository {
             con.commit();
             con.close();
         } catch (SQLException sqle){
-            con.rollback();
-            con.close();
-            throw sqle;
+            try {
+                con.rollback();
+                con.close();
+            } catch (Exception ignored) {}
+            sqle.printStackTrace();
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
     }
 
@@ -96,7 +105,9 @@ public class TeamInPlayRepository {
                 con.close();
             } catch (Exception ignored) {}
             sqle.printStackTrace();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
         return bowlerId;
     }
 
@@ -118,7 +129,9 @@ public class TeamInPlayRepository {
                 con.close();
             } catch (Exception ignored) {}
             sqle.printStackTrace();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
         return fieldBatsmenAndWickets;
     }
 }

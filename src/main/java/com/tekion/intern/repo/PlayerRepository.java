@@ -6,10 +6,7 @@ import com.tekion.intern.beans.Team;
 import com.tekion.intern.util.ReaderUtil;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -74,7 +71,9 @@ public class PlayerRepository {
                 con.close();
             } catch (Exception ignored) {}
             sqle.printStackTrace();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
 
         return bowlers;
     }
@@ -85,12 +84,16 @@ public class PlayerRepository {
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(
-                    "select * from Player inner join (select count(distinct ballnumber) Balls, sum(score) Score, batsman from BallEvents where batsman in (?,?) and match_id = ? group by batsman) as ScoreCard on Player.player_id = ScoreCard.batsman"
+                    "select * from (select * from Player where player_id in (?,?)) Player left outer join (select count(distinct ballnumber) Balls, sum(score) Score, batsman from BallEvents where batsman in (?,?) and match_id = ? group by batsman) as ScoreCard on Player.player_id = ScoreCard.batsman"
             );
             ps.setInt(1, strike);
             ps.setInt(2, nonStrike);
-            ps.setInt(3, matchId);
+            ps.setInt(3, strike);
+            ps.setInt(4, nonStrike);
+            ps.setInt(5, matchId);
+//            System.out.println(ps);
             ResultSet rs = ps.executeQuery();
+            //System.out.println(rs.getFetchSize());
             while (rs.next()){
                 currentPlayers.add(new Player(
                         rs.getString("name"), rs.getString("playertype"), rs.getString("bowling_pace"),
@@ -101,12 +104,15 @@ public class PlayerRepository {
             if(currentPlayers.get(0).getPlayerId() != strike){
                 Collections.swap(currentPlayers, 0,1);
             }
+            System.out.println(currentPlayers.get(0).getPlayerId() == strike);
         } catch(SQLException sqle){
             try {
                 con.close();
             } catch (Exception ignored) {}
             sqle.printStackTrace();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
 
         return currentPlayers;
     }
@@ -117,7 +123,8 @@ public class PlayerRepository {
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement("select * from Player where team = ? and player_id > ? limit 1 offset 0");
-            ps.setInt(1, maxOrder);
+            ps.setInt(1, teamId);
+            ps.setInt(2, maxOrder);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 newPlayer = new Player(
@@ -130,7 +137,9 @@ public class PlayerRepository {
                 con.close();
             } catch (Exception ignored) {}
             sqle.printStackTrace();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
         return newPlayer;
     }
 }

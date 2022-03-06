@@ -9,7 +9,6 @@ import com.tekion.intern.enums.Winner;
 import com.tekion.intern.models.*;
 import com.tekion.intern.repo.BallEventsRepository;
 import com.tekion.intern.repo.MatchRepository;
-import com.tekion.intern.repo.PlayerRepository;
 import com.tekion.intern.repo.TeamRepository;
 import com.tekion.intern.util.MatchUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,24 +18,26 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class MatchService {
+    private Scanner sc = new Scanner(System.in);
     private TeamRepository teamRepository;
     private MatchRepository matchRepository;
-    private PlayerRepository playerRepository;
+
     private BallEventsRepository ballEventsRepository;
 
     private TeamService teamService;
 
     @Autowired
     public void setRepository(
-            TeamRepository teamRepository, MatchRepository matchRepository, PlayerRepository playerRepository, BallEventsRepository ballEventsRepository
+            TeamRepository teamRepository, MatchRepository matchRepository, BallEventsRepository ballEventsRepository
     ) {
          this.teamRepository = teamRepository;
          this.matchRepository = matchRepository;
-         this.playerRepository = playerRepository;
+
          this.ballEventsRepository = ballEventsRepository;
     }
 
@@ -91,7 +92,7 @@ public class MatchService {
             throw new IllegalStateException("Match Does not Exists");
     }
 
-    public TossSimulationResult stimulateToss(Integer matchId) {
+    public TossSimulationResult stimulateTossAndInsertStrike(Integer matchId) {
         Match match = matchRepository.findByMatchId(matchId);
         if(match == null)
             throw new IllegalStateException("Match Does not Exists");
@@ -111,7 +112,7 @@ public class MatchService {
         TossSimulationResult tossSimulationResult = new TossSimulationResult(
                 matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName()
         );
-
+        teamService.insertStrikesForNewMatch(match.getTeam1Id(), matchId);
         return tossSimulationResult;
     }
 
@@ -172,11 +173,37 @@ public class MatchService {
         for (int j = 0; j < 6; j++) {
             unfairBallType = playTheBall(strike, j + 1, strike.getCurrentOver(), isWicketPossible);
             if (strike.isAllOut() || ((battingTeam.getScoreToChase() != -1) && (battingTeam.getScoreToChase() < battingTeam.getTeamScore()))) {
-                return;
+                break;
             }
             if(unfairBallType != UnfairBallType.NA)
                 j--;
             isWicketPossible = (unfairBallType != UnfairBallType.NO);
+            sc.nextLine();
+        }
+        strike.changeStrike();
+        teamService.updateStrike(strike);
+        checkIfInningEnded(match, strike);
+    }
+
+    private void checkIfInningEnded(Match match, Strike strike){
+        Team battingTeam = strike.getBattingTeam();
+        if(battingTeam.getScoreToChase() != -1 && battingTeam.getScoreToChase() < battingTeam.getTeamScore()) {
+            match.setMatchState(Winner.TEAM2);
+            matchRepository.update(match);
+        }
+        else if(strike.isAllOut() || strike.getCurrentOver() == match.getOvers()){
+            System.out.println("Inning Ended");
+            if(match.getMatchState() == Winner.TEAM1_BATTING){
+                match.setMatchState(Winner.TEAM2_BATTING);
+                teamService.insertStrikesForNewMatch(match.getTeam2Id(), match.getMatchId());
+                matchRepository.update(match);
+            } else{
+                if(battingTeam.getScoreToChase() == battingTeam.getTeamScore())
+                    match.setMatchState(Winner.TIE);
+                else
+                    match.setMatchState(Winner.TEAM1);
+                matchRepository.update(match);
+            }
         }
     }
 
@@ -201,17 +228,17 @@ public class MatchService {
         else
             System.out.println("|| Player: " + battingTeam.getNameOfPlayer(currentPlayer));
         battingTeam.incrementTeamScore(outcomeOfBallBowled, currentPlayer);
-        strike.changeStrike(outcomeOfBallBowled);
 
         ballEventsRepository.insertEvent(
-                strike.getMatchId(), battingTeam.getTeamId(), 0, battingTeam.getPlayedBalls(),
+                strike.getMatchId(), battingTeam.getTeamId(), 0, over*6 + ballNumber,
                     (isTeamScore) ?-1 :battingTeam.getPlayerIdByIndex(currentPlayer),
                     strike.getCurrentBowlerPlayerId(), outcomeOfBallBowled, "", ""
         );
 
-
-        if(outcomeOfBallBowled%2 == 1)
+        if(outcomeOfBallBowled%2 == 1) {
+            strike.changeStrike();
             teamService.updateStrike(strike);
+        }
 
         if(outcomeOfBallBowled != 4 && outcomeOfBallBowled != 6) {
             int possibilityOfRunOut = ThreadLocalRandom.current().nextInt(0, 10);
@@ -227,16 +254,6 @@ public class MatchService {
         }
     }
 
-    /*
-        When a ball is delivered, choices can be, 1.. Wicket (C&B, B, Stumped, .., all except runout)
-        2.. ball with runs possible, can be zero
-        for 2nd, after generation of random run, we can randomly generate whether it was wide/no ball
-            if it is, then increment one run and play again the same ball, till there is one legitimate ball thrown where pattern ends
-                on a wide ball, any wicket can be possible, same as legitimate ball
-                on a no ball, on that ball as well as on next ball, free hit, only runout is possible. this possibility of wicket (mentioned is 1st type)
-                is handle by wicketPossible parameter.
-            if not, we will call legitimateBall, where also we will generate a random number for possibility of run out.
-     */
     private UnfairBallType playTheBall(Strike strike, int ballNumber, int over, boolean wicketPossible){
         if(ballNumber == 6){
             over++;
@@ -258,7 +275,7 @@ public class MatchService {
                 String typeOfUnFairBall;
                 System.out.println((typeOfUnFairBall = (possibilityOfUnFairBall == 0) ?"WIDE" :"NO BALL") + " : 1 run");
                 ballEventsRepository.insertEvent(
-                        strike.getMatchId(), battingTeam.getTeamId(), 0, battingTeam.getPlayedBalls(),
+                        strike.getMatchId(), battingTeam.getTeamId(), 0, over*6 + ballNumber,
                             -1,
                             strike.getCurrentBowlerPlayerId(), 1, typeOfUnFairBall, ""
                     );

@@ -39,7 +39,7 @@ public class MatchRepository {
                 con.close();
             } catch (Exception ignored){}
         } catch (Exception ignored){
-
+            ignored.printStackTrace();
         }
         return matchId;
     }
@@ -62,7 +62,7 @@ public class MatchRepository {
         } catch (SQLException sqle){
             sqle.printStackTrace();
         } catch (Exception e){
-
+            e.printStackTrace();
         } finally {
             try{
                 con.close();
@@ -91,7 +91,9 @@ public class MatchRepository {
                 con.close();
             } catch (Exception ignored){}
             sqle.printStackTrace();
-        } catch(Exception ignored) {}
+        } catch(Exception ignored) {
+            ignored.printStackTrace();
+        }
     }
 
 //    public static boolean getMatchByMatchId(int matchId) throws SQLException, ClassNotFoundException{

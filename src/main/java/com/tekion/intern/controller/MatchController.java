@@ -46,7 +46,8 @@ public class MatchController {
 
     @GetMapping("/toss/{matchId}")
     public ResponseEntity<TossSimulationResult> stimulateToss(@PathVariable Integer matchId){
-        TossSimulationResult tossSimulationResult = matchService.stimulateToss(matchId);
+        TossSimulationResult tossSimulationResult = matchService.stimulateTossAndInsertStrike(matchId);
+
         return ResponseEntity.ok(tossSimulationResult);
     }
 }

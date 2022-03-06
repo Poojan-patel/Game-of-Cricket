@@ -137,7 +137,7 @@ public class Team {
     }
 
     public void incrementTeamScore(int outcomeOfBallBowled, int currentPlayer) {
-        currentScore++;
+        currentScore+=outcomeOfBallBowled;
         playerList.get(currentPlayer).incrementScore(outcomeOfBallBowled);
     }
 

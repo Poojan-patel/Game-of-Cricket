@@ -33,18 +33,17 @@ public class Strike {
 //        currentStrike = (currentStrike+1)%2;
 //    }
 
-    public void changeStrike(int run){
-        if(run%2 == 1)
-            currentStrike = (currentStrike+1)%2;
+    public void changeStrike(){
+        currentStrike = (currentStrike+1)%2;
     }
 
     public int getCurrentStrike() {
         return currentStrike;
     }
 
-    public int getCurrentNonStrike(){
-        return 1-currentStrike;
-    }
+//    public int getCurrentNonStrike(){
+//        return 1-currentStrike;
+//    }
 
 
 //    public void removeOutPlayer(int outPlayer){

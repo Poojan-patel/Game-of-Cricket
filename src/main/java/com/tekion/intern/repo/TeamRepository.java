@@ -78,12 +78,43 @@ public class TeamRepository {
             while(rs.next()){
                 team = new Team(rs.getString("name"), rs.getInt("Score"), rs.getInt("Balls"), battingTeamId);
             }
+            if(team == null){
+                rs = ps.executeQuery("select name from team where team_id = " + battingTeamId);
+                while(rs.next()){
+                    team = new Team(rs.getString(1), 0, 0, battingTeamId);
+                }
+            }
         } catch (SQLException sqle){
             try{
                 con.close();
             } catch (Exception ignored) {}
             sqle.printStackTrace();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
         return team;
+    }
+
+    public List<Integer> fetchFirstTwoPlayers(int team1Id) {
+        Connection con = null;
+        List<Integer> players = new ArrayList<>();
+        try{
+            con = MySqlConnector.getConnection();
+            PreparedStatement ps = con.prepareStatement("select player_id from Player where team = ? limit 2");
+            ps.setInt(1, team1Id);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next())
+                players.add(rs.getInt(1));
+            con.close();
+        } catch (SQLException sqle){
+            try{
+                con.close();
+            } catch (Exception ignored) {}
+            sqle.printStackTrace();
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
+
+        return players;
     }
 }

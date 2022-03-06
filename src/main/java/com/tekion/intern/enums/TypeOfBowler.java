@@ -7,7 +7,7 @@ public enum TypeOfBowler {
     NA;
 
     public static TypeOfBowler fromStringToEnum(String type) {
-        if (type == null)
+        if (type == null || type.equals("NA"))
             return TypeOfBowler.NA;
         else if (type.equals("FAST"))
             return TypeOfBowler.FAST;

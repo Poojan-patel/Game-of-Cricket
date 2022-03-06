@@ -43,7 +43,9 @@ public class BallEventsRepository{
                 con.close();
             } catch (Exception ignored) {}
             sqle.printStackTrace();
-        } catch(Exception ignored){}
+        } catch(Exception ignored){
+            ignored.printStackTrace();
+        }
     }
 
     public static void generateFinalScoreBoard(int matchId) {
@@ -124,7 +126,9 @@ public class BallEventsRepository{
                 con.close();
             } catch (Exception ignored){}
             sqle.printStackTrace();
-        } catch (Exception ignored){}
+        } catch (Exception ignored){
+            ignored.printStackTrace();
+        }
 
         return bowlerWithThrownOvers;
     }
@@ -146,7 +150,9 @@ public class BallEventsRepository{
                 con.close();
             } catch (Exception ignored){}
             sqle.printStackTrace();
-        } catch (Exception ignored){}
+        } catch (Exception ignored){
+            ignored.printStackTrace();
+        }
 
         return scoreToChase;
     }
