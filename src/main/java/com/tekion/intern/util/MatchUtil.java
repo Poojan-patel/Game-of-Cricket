@@ -2,7 +2,6 @@ package com.tekion.intern.util;
 
 import com.tekion.intern.enums.PlayerType;
 import com.tekion.intern.enums.Winner;
-import com.tekion.intern.dto.Team;
 
 import java.io.IOException;
 import java.util.*;
@@ -65,18 +64,18 @@ public class MatchUtil {
         return typeOfWicketFallen.get(ThreadLocalRandom.current().nextInt(0,7));
     }
 
-    public static int selectBowler(Team bowlingTeam, Set<Integer> availableBowlers) {
-        System.out.println("Select your Bowler:\nPress");
-        List<Integer> bowlerSelectionList = new ArrayList<>();
-        int cnt = 1;
-        for(int i:availableBowlers){
-            System.out.println((cnt++) + ": " + bowlingTeam.getNameOfPlayer(i) + '-' + bowlingTeam.getTypeOfBowler(i));
-            bowlerSelectionList.add(i);
-        }
-
-        int choiceOfBowlerPosition = ReaderUtil.getIntegerInputInRange(1, availableBowlers.size());
-        return bowlerSelectionList.get(choiceOfBowlerPosition-1);
-    }
+//    public static int selectBowler(Team bowlingTeam, Set<Integer> availableBowlers) {
+//        System.out.println("Select your Bowler:\nPress");
+//        List<Integer> bowlerSelectionList = new ArrayList<>();
+//        int cnt = 1;
+//        for(int i:availableBowlers){
+//            System.out.println((cnt++) + ": " + bowlingTeam.getNameOfPlayer(i) + '-' + bowlingTeam.getTypeOfBowler(i));
+//            bowlerSelectionList.add(i);
+//        }
+//
+//        int choiceOfBowlerPosition = ReaderUtil.getIntegerInputInRange(1, availableBowlers.size());
+//        return bowlerSelectionList.get(choiceOfBowlerPosition-1);
+//    }
 
     public static void clearConsole() throws IOException, InterruptedException {
         if(os.contains("windows"))

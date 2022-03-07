@@ -2,15 +2,10 @@ package com.tekion.intern.repo;
 
 import com.tekion.intern.beans.Match;
 import com.tekion.intern.dbconnector.MySqlConnector;
-import com.tekion.intern.dto.Team;
-import com.tekion.intern.repository.TeamRepository;
 import com.tekion.intern.util.ReaderUtil;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 @Repository
 public class MatchRepository {
