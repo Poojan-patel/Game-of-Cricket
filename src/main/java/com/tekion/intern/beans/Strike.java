@@ -29,10 +29,6 @@ public class Strike {
         return currentStrike;
     }
 
-    public boolean isAllOut(){
-        return team.isAllOut();
-    }
-
     public Player getCurrentStrikePlayer() {
         return team.getPlayers().get(currentStrike);
     }
@@ -55,10 +51,6 @@ public class Strike {
 
     public int getMatchId() {
         return matchId;
-    }
-
-    public int getTeamId() {
-        return team.getTeamId();
     }
 
     public void setNewBatsman(Player newBatter) {

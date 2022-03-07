@@ -1,4 +1,4 @@
-package com.tekion.intern.repo;
+package com.tekion.intern.repository;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.models.FieldBatsmenAndWickets;

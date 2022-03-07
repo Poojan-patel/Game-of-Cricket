@@ -1,8 +1,7 @@
-package com.tekion.intern.repo;
+package com.tekion.intern.repository;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.beans.Player;
-import com.tekion.intern.beans.Team;
 import com.tekion.intern.util.ReaderUtil;
 import org.springframework.stereotype.Repository;
 
@@ -23,10 +22,10 @@ public class PlayerRepository {
             ps.setInt(1,teamId);
             ResultSet rs = ps.executeQuery();
 
-            String name = null;
-            int playerId = 0;
-            String playerType = null;
-            String bowlingPace = null;
+            String name;
+            int playerId;
+            String playerType;
+            String bowlingPace;
             bowlers = new ArrayList<>();
             while(rs.next()){
                 playerType = rs.getString("playertype");

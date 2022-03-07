@@ -1,9 +1,8 @@
-package com.tekion.intern.repo;
+package com.tekion.intern.repository;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.models.MatchResult;
 import com.tekion.intern.util.ReaderUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -54,13 +53,8 @@ public class BallEventsRepository{
         MatchResult matchResult = new MatchResult();
         try{
             con = MySqlConnector.getConnection();
-            //System.out.println("Team Scores");
             getTeamScore(matchId, con, matchResult);
-            //System.out.println("---------------------------------------------------");
-            //System.out.println("Batsman Scores");
             getBatsmanStats(matchId, con, matchResult);
-            //System.out.println("---------------------------------------------------");
-            //System.out.println("Bowling Stats");
             getBowlingStats(matchId, con, matchResult);
             con.close();
         } catch (SQLException sqle){
@@ -71,46 +65,6 @@ public class BallEventsRepository{
             e.printStackTrace();
         }
         return matchResult;
-    }
-
-    private static void getBowlingStats(int matchId, Connection con, MatchResult matchResult) throws SQLException {
-        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getBowlingStats"));
-        ps.setInt(1,matchId);
-        ResultSet rs = ps.executeQuery();
-        while(rs.next()){
-            matchResult.appendBowlingStats(
-                    rs.getString("name") + ": " +
-                    "Wickets:" + rs.getInt("Wicket") +
-                    " Overs:" + rs.getInt("Balls Thrown")/6 + "." + rs.getInt("Balls Thrown")%6 +
-                    " Extras: " + rs.getInt("Extra")
-            );
-        }
-    }
-
-    private static void getBatsmanStats(int matchId, Connection con, MatchResult matchResult) throws SQLException{
-        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getBatsmanStats"));
-        ps.setInt(1,matchId);
-        ResultSet rs = ps.executeQuery();
-        while(rs.next()){
-            matchResult.appendBattingStats(
-                    rs.getString("name") + ": " +
-                    rs.getInt("Score") + ", Balls:" + rs.getInt("Balls Played")
-            );
-        }
-    }
-
-    private static void getTeamScore(int matchId, Connection con, MatchResult matchResult) throws SQLException{
-        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getTeamScore"));
-        ps.setInt(1,matchId);
-        ResultSet rs = ps.executeQuery();
-        while(rs.next()){
-            matchResult.appendTeamScores(
-                    rs.getString("name") + ": " +
-                    rs.getInt("Total Score") + "/" + rs.getInt("Total Wickets") +
-                    " Overs: " + rs.getInt("Total Balls")/6 + "." + rs.getInt("Total Balls")%6 +
-                    " Extras: " + rs.getInt("Extras")
-            );
-        }
     }
 
     public Map<Integer, Integer> fetchBowlersWithThrownOversByTeamAndMatchId(Integer matchId, Integer currentBowlTeamId) {
@@ -161,4 +115,45 @@ public class BallEventsRepository{
 
         return scoreToChase;
     }
+
+    private void getBowlingStats(int matchId, Connection con, MatchResult matchResult) throws SQLException {
+        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getBowlingStats"));
+        ps.setInt(1,matchId);
+        ResultSet rs = ps.executeQuery();
+        while(rs.next()){
+            matchResult.appendBowlingStats(
+                    rs.getString("name") + ": " +
+                            "Wickets:" + rs.getInt("Wicket") +
+                            " Overs:" + rs.getInt("Balls Thrown")/6 + "." + rs.getInt("Balls Thrown")%6 +
+                            " Extras: " + rs.getInt("Extra")
+            );
+        }
+    }
+
+    private void getBatsmanStats(int matchId, Connection con, MatchResult matchResult) throws SQLException{
+        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getBatsmanStats"));
+        ps.setInt(1,matchId);
+        ResultSet rs = ps.executeQuery();
+        while(rs.next()){
+            matchResult.appendBattingStats(
+                    rs.getString("name") + ": " +
+                            rs.getInt("Score") + ", Balls:" + rs.getInt("Balls Played")
+            );
+        }
+    }
+
+    private void getTeamScore(int matchId, Connection con, MatchResult matchResult) throws SQLException{
+        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getTeamScore"));
+        ps.setInt(1,matchId);
+        ResultSet rs = ps.executeQuery();
+        while(rs.next()){
+            matchResult.appendTeamScores(
+                    rs.getString("name") + ": " +
+                            rs.getInt("Total Score") + "/" + rs.getInt("Total Wickets") +
+                            " Overs: " + rs.getInt("Total Balls")/6 + "." + rs.getInt("Total Balls")%6 +
+                            " Extras: " + rs.getInt("Extras")
+            );
+        }
+    }
+
 }

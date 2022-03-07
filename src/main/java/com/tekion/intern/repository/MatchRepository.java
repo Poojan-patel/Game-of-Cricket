@@ -1,4 +1,4 @@
-package com.tekion.intern.repo;
+package com.tekion.intern.repository;
 
 import com.tekion.intern.beans.Match;
 import com.tekion.intern.dbconnector.MySqlConnector;
@@ -10,7 +10,7 @@ import java.sql.*;
 @Repository
 public class MatchRepository {
 
-    public static int save(Match match){
+    public int save(Match match){
         Connection con = null;
         int matchId = 0;
         try {
@@ -47,7 +47,6 @@ public class MatchRepository {
             PreparedStatement stmt = con.prepareStatement(ReaderUtil.readSqlFromFile("matchtable", "getMatchByMatchId"));
             stmt.setInt(1, matchId);
             ResultSet rs = stmt.executeQuery();
-            //isExists = rs.next();
             while (rs.next()){
                 match = new Match(
                         rs.getInt("match_id"), rs.getInt("team1"), rs.getInt("team2"),
@@ -61,9 +60,7 @@ public class MatchRepository {
         } finally {
             try{
                 con.close();
-            } catch (Exception e){
-
-            }
+            } catch (Exception ignored){}
         }
         return match;
     }

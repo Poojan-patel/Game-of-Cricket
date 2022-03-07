@@ -6,13 +6,15 @@ public enum PlayerType {
     ALLROUNDER;
 
     public static PlayerType fromStringToEnum(String s){
-        if(s.equals("BOWLER"))
-            return PlayerType.BOWLER;
-        else if(s.equals("BATSMAN"))
-            return PlayerType.BATSMAN;
-        else if(s.equals("ALLROUNDER"))
-            return PlayerType.ALLROUNDER;
-        else
-            throw new IllegalArgumentException("Enum Value Illegal");
+        switch (s) {
+            case "BOWLER":
+                return PlayerType.BOWLER;
+            case "BATSMAN":
+                return PlayerType.BATSMAN;
+            case "ALLROUNDER":
+                return PlayerType.ALLROUNDER;
+            default:
+                throw new IllegalArgumentException("Enum Value Illegal");
+        }
     }
 }

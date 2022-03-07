@@ -15,6 +15,10 @@ public class Team {
     private int currentWickets;
     private int scoreToChase;
 
+    public Team() {
+
+    }
+
     public Team(TeamDTO t) {
         teamName = t.getTeamName();
         playerList = new ArrayList<>();
@@ -31,10 +35,6 @@ public class Team {
         this.scoreToChase = scoreToChase;
     }
 
-    public Team() {
-
-    }
-
     public Team(String teamName, int currentScore, int playedBalls, int teamId){
         this.teamName = teamName;
         this.currentScore = currentScore;
@@ -45,7 +45,6 @@ public class Team {
     public int getPlayedBalls(){
         return playedBalls;
     }
-
 
     public void setCurrentWickets(int currentWickets) {
         this.currentWickets = currentWickets;
@@ -65,23 +64,8 @@ public class Team {
         return playerList;
     }
 
-    public void fetchNewPlayer(int currentStrike) {
-    }
-
     public void setPlayerList(List<Player> playerList) {
         this.playerList = playerList;
-    }
-
-    public void setTeamName(String teamName) {
-        this.teamName = teamName;
-    }
-
-    public void setCurrentScore(int currentScore) {
-        this.currentScore = currentScore;
-    }
-
-    public void setPlayedBalls(int playedBalls) {
-        this.playedBalls = playedBalls;
     }
 
     public void incrementTotalBalls(int currentStrike) {

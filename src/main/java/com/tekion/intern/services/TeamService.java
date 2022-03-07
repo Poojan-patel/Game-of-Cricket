@@ -1,23 +1,18 @@
 package com.tekion.intern.services;
 
-import com.tekion.intern.beans.Match;
-import com.tekion.intern.beans.Player;
-import com.tekion.intern.beans.Strike;
-import com.tekion.intern.beans.Team;
+import com.tekion.intern.beans.*;
 import com.tekion.intern.enums.PlayerType;
 import com.tekion.intern.enums.Winner;
 import com.tekion.intern.models.FieldBatsmenAndWickets;
 import com.tekion.intern.models.PlayerDTO;
 import com.tekion.intern.models.TeamDTO;
-import com.tekion.intern.repo.BallEventsRepository;
-import com.tekion.intern.repo.PlayerRepository;
-import com.tekion.intern.repo.TeamInPlayRepository;
-import com.tekion.intern.repo.TeamRepository;
+import com.tekion.intern.repository.BallEventsRepository;
+import com.tekion.intern.repository.PlayerRepository;
+import com.tekion.intern.repository.TeamInPlayRepository;
+import com.tekion.intern.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.rmi.UnexpectedException;
-import java.sql.SQLException;
 import java.util.*;
 
 @Service
@@ -53,24 +48,8 @@ public class TeamService {
         return saveTeam(team);
     }
 
-    private Integer saveTeam(TeamDTO teamDTO) {
-        Team team = new Team(teamDTO);
-        Integer teamId = teamRepository.save(team);
-        if(teamId <= 0)
-            throw new IllegalStateException("Team could not be saved");
-        return teamId;
-    }
-
     public List<TeamDTO> getAllTeams() {
-        List<TeamDTO> allTeams = new ArrayList<>();
-        try {
-            allTeams = teamRepository.findAll();
-        } catch (SQLException sqle){
-            sqle.printStackTrace();
-        } catch (Exception e){
-
-        }
-        return allTeams;
+        return teamRepository.findAll();
     }
 
     public List<PlayerDTO> getAllAvailableBowlers(Match match, Integer currentBowlTeamId, Integer maxOvers) {
@@ -142,9 +121,16 @@ public class TeamService {
         teamInPlayRepository.updateStrikesByTeamAndMatchId(battingTeam.getPlayerIdByIndex(currentStrikeIndex), battingTeam.getPlayerIdByIndex(1-currentStrikeIndex), strike.getMatchId(), battingTeam.getTeamId(), battingTeam.getCurrentWickets());
     }
 
-
     public void insertStrikesForNewMatch(int teamId, int matchId) {
         List<Integer> playerIds = teamRepository.fetchFirstTwoPlayers(teamId);
         teamInPlayRepository.insertStrike(playerIds.get(0), playerIds.get(1), matchId, teamId);
+    }
+
+    private Integer saveTeam(TeamDTO teamDTO) {
+        Team team = new Team(teamDTO);
+        Integer teamId = teamRepository.save(team);
+        if(teamId <= 0)
+            throw new IllegalStateException("Team could not be saved");
+        return teamId;
     }
 }

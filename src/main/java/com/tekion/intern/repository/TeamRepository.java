@@ -1,4 +1,4 @@
-package com.tekion.intern.repo;
+package com.tekion.intern.repository;
 
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.beans.Player;
@@ -41,22 +41,11 @@ public class TeamRepository {
         return 0;
     }
 
-    private void insertTeamPlayers(List<Player> players, int teamId, Connection conn) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement(ReaderUtil.readSqlFromFile("team","insertTeamPlayers"), Statement.RETURN_GENERATED_KEYS);
-        for (Player player : players) {
-            stmt.setInt(1, teamId);
-            stmt.setString(2, player.getName());
-            stmt.setString(3, player.getPlayerType().toString());
-            stmt.setString(4, player.getTypeOfBowler());
-            stmt.addBatch();
-        }
-        stmt.executeBatch();
-    }
-
-    public List<TeamDTO> findAll() throws SQLException, ClassNotFoundException{
-        Connection con = MySqlConnector.getConnection();
+    public List<TeamDTO> findAll(){
+        Connection con = null;
         List<TeamDTO> teams = new ArrayList<>();
         try{
+            con = MySqlConnector.getConnection();
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("select team_id, name from team");
             while(rs.next()){
@@ -64,7 +53,11 @@ public class TeamRepository {
             }
             con.close();
         } catch (SQLException sql){
-            con.close();
+            try {
+                con.close();
+            } catch (Exception ignored) {}
+        } catch (Exception e){
+            e.printStackTrace();
         }
         return teams;
     }
@@ -122,5 +115,17 @@ public class TeamRepository {
         }
 
         return players;
+    }
+
+    private void insertTeamPlayers(List<Player> players, int teamId, Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement(ReaderUtil.readSqlFromFile("team","insertTeamPlayers"), Statement.RETURN_GENERATED_KEYS);
+        for (Player player : players) {
+            stmt.setInt(1, teamId);
+            stmt.setString(2, player.getName());
+            stmt.setString(3, player.getPlayerType().toString());
+            stmt.setString(4, player.getTypeOfBowler());
+            stmt.addBatch();
+        }
+        stmt.executeBatch();
     }
 }

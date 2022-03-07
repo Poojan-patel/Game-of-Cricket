@@ -1,21 +1,16 @@
 package com.tekion.intern.services;
 
-import com.tekion.intern.beans.Match;
-import com.tekion.intern.beans.Player;
-import com.tekion.intern.beans.Strike;
-import com.tekion.intern.beans.Team;
+import com.tekion.intern.beans.*;
 import com.tekion.intern.enums.UnfairBallType;
 import com.tekion.intern.enums.Winner;
 import com.tekion.intern.models.*;
-import com.tekion.intern.repo.BallEventsRepository;
-import com.tekion.intern.repo.MatchRepository;
-import com.tekion.intern.repo.TeamRepository;
+import com.tekion.intern.repository.BallEventsRepository;
+import com.tekion.intern.repository.MatchRepository;
+import com.tekion.intern.repository.TeamRepository;
 import com.tekion.intern.util.MatchUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -24,9 +19,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MatchService {
     private TeamRepository teamRepository;
     private MatchRepository matchRepository;
-
     private BallEventsRepository ballEventsRepository;
-
     private TeamService teamService;
 
     @Autowired
@@ -35,7 +28,6 @@ public class MatchService {
     ) {
          this.teamRepository = teamRepository;
          this.matchRepository = matchRepository;
-
          this.ballEventsRepository = ballEventsRepository;
     }
 
@@ -55,33 +47,7 @@ public class MatchService {
         Match match = new Match(matchRequest.getTeam1Id(), matchRequest.getTeam2Id(), matchRequest.getOvers());
         int matchId = 0;
         matchId = matchRepository.save(match);
-        MatchCreationResponse response = new MatchCreationResponse(matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName(), matchRequest.getOvers());
-        return response;
-    }
-
-    private List<TeamDTO> checkTeamExistance(int team1Id, int team2Id) {
-        List<TeamDTO> allTeams = new ArrayList<>();
-        try {
-            allTeams = teamRepository.findAll();
-        } catch (SQLException sqle){
-            sqle.printStackTrace();
-        } catch (Exception e){
-
-        }
-        TeamDTO team1 = null;
-        TeamDTO team2 = null;
-        for(TeamDTO t: allTeams){
-            if(t.getTeamId() == team1Id){
-                team1 = t;
-            }
-            if(t.getTeamId() == team2Id){
-                team2 = t;
-            }
-        }
-        if((team1 == null) || (team2 == null)){
-            throw new IllegalStateException("Either or Both of the Team does not Exists");
-        }
-        return Arrays.asList(team1, team2);
+        return new MatchCreationResponse(matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName(), matchRequest.getOvers());
     }
 
     public TossSimulationResult stimulateTossAndInsertStrike(Integer matchId) {
@@ -106,12 +72,6 @@ public class MatchService {
         );
         teamService.insertStrikesForNewMatch(match.getTeam1Id(), matchId);
         return tossSimulationResult;
-    }
-
-    private void swapTeams(Match match) {
-        int team1Id = match.getTeam1Id();
-        match.setTeam1Id(match.getTeam2Id());
-        match.setTeam2Id(team1Id);
     }
 
     public Match checkMatchIdValidity(Integer matchId) {
@@ -161,7 +121,7 @@ public class MatchService {
         OverCompletionResult overCompletionResult = new OverCompletionResult();
         for (int j = 0; j < 6; j++) {
             unfairBallType = playTheBall(strike, overCompletionResult, isWicketPossible);
-            if (strike.isAllOut() || ((battingTeam.getScoreToChase() != -1) && (battingTeam.getScoreToChase() < battingTeam.getTeamScore()))) {
+            if (battingTeam.isAllOut() || ((battingTeam.getScoreToChase() != -1) && (battingTeam.getScoreToChase() < battingTeam.getTeamScore()))) {
                 break;
             }
             if(unfairBallType != UnfairBallType.NA)
@@ -190,7 +150,6 @@ public class MatchService {
 
     private void getOverCompletionResult(Strike strike, Match match, OverCompletionResult overCompletionResult) {
         Team battingTeam = strike.getBattingTeam();
-        int currentBowlTeamId = (match.getTeam1Id() == battingTeam.getTeamId()) ? match.getTeam2Id() : match.getTeam1Id();
         overCompletionResult.setStrike(strike.getCurrentStrikePlayer().toString());
 
         if(strike.getCurrentNonStrikePlayer() != null) {
@@ -199,7 +158,7 @@ public class MatchService {
 
         overCompletionResult.setTeamScore(battingTeam.toString());
 
-        if(strike.getBattingTeam().getScoreToChase() != -1 && battingTeam.getScoreToChase() > battingTeam.getTeamScore()){
+        if(battingTeam.getScoreToChase() != -1 && battingTeam.getScoreToChase() > battingTeam.getTeamScore()){
             overCompletionResult.setScoreToChase((battingTeam.getScoreToChase() - battingTeam.getTeamScore()) + " runs left in " + (match.getOvers()*6 - battingTeam.getPlayedBalls()) + " balls");
         }
 
@@ -214,11 +173,10 @@ public class MatchService {
             match.setMatchState(Winner.TEAM2);
             matchRepository.update(match);
         }
-        else if(strike.isAllOut() || strike.getCurrentOver() == match.getOvers()){
-            //System.out.println("Inning Ended");
+        else if(battingTeam.isAllOut() || strike.getCurrentOver() == match.getOvers()){
             if(match.getMatchState() == Winner.TEAM1_BATTING){
                 match.setMatchState(Winner.TEAM2_BATTING);
-                overCompletionResult.setIntermediateResult(strike.getBattingTeam().getTeamName() + " will start fielding");
+                overCompletionResult.setIntermediateResult(battingTeam.getTeamName() + " will start fielding");
                 teamService.insertStrikesForNewMatch(match.getTeam2Id(), match.getMatchId());
                 matchRepository.update(match);
             } else{
@@ -241,10 +199,8 @@ public class MatchService {
         String typeOfWicketFallen = MatchUtil.getRandomTypeOfWicket();
         Team battingTeam = strike.getBattingTeam();
         overCompletionResult.appendBallLogs(over + "." + ballNumber + ": Wicket-" + (battingTeam.getCurrentWickets()+1) + "(" + typeOfWicketFallen + ") || Player: " + battingTeam.getNameOfPlayer(strike.getCurrentStrike()));
-        //System.out.println(typeOfWicketFallen);
-        //System.out.println(over + "." + ballNumber + ": Wicket-" + (battingTeam.getCurrentWickets()+1) + " || Player: " + battingTeam.getNameOfPlayer(strike.getCurrentStrike()));
         ballEventsRepository.insertEvent(
-                strike.getMatchId(), strike.getTeamId(), 0, battingTeam.getPlayedBalls(), battingTeam.getPlayerIdByIndex(strike.getCurrentStrike()),
+                strike.getMatchId(), battingTeam.getTeamId(), 0, battingTeam.getPlayedBalls(), battingTeam.getPlayerIdByIndex(strike.getCurrentStrike()),
                 strike.getCurrentBowlerPlayerId(), 0, "", typeOfWicketFallen
         );
         teamService.updateStrikeOnWicket(strike);
@@ -259,17 +215,14 @@ public class MatchService {
             over++;
         }
         int currentPlayer = strike.getCurrentStrike();
-        //System.out.print(over + "." + ballNumber + ": " + outcomeOfBallBowled + " run ");
-        if(isTeamScore)
+        if(isTeamScore) {
             overCompletionResult.appendBallLogs(over + "." + ballNumber + ": " + outcomeOfBallBowled + " run ");
-            //System.out.print("\n");
-        else
-            overCompletionResult.appendBallLogs(over + "." + ballNumber + ": " + outcomeOfBallBowled + " run || Player: " + battingTeam.getNameOfPlayer(currentPlayer));
-            //System.out.println("|| Player: " + battingTeam.getNameOfPlayer(currentPlayer));
-        if(!isTeamScore)
-            battingTeam.incrementTeamScore(outcomeOfBallBowled, currentPlayer);
-        else
             battingTeam.incrementTeamScoreForUnfair(outcomeOfBallBowled);
+        }
+        else {
+            overCompletionResult.appendBallLogs(over + "." + ballNumber + ": " + outcomeOfBallBowled + " run || Player: " + battingTeam.getNameOfPlayer(currentPlayer));
+            battingTeam.incrementTeamScore(outcomeOfBallBowled, currentPlayer);
+        }
 
         ballEventsRepository.insertEvent(
                 strike.getMatchId(), battingTeam.getTeamId(), 0, over*6 + ballNumber,
@@ -291,7 +244,6 @@ public class MatchService {
             int possibilityOfRunOut = ThreadLocalRandom.current().nextInt(0, 10);
             if (possibilityOfRunOut == 9) {
                 overCompletionResult.appendBallLogs("RunOut-" + battingTeam.getNameOfPlayer(strike.getCurrentStrike()));
-                //System.out.println("RunOut-" + battingTeam.getNameOfPlayer(strike.getCurrentStrike()));
                 ballEventsRepository.insertEvent(
                         strike.getMatchId(), battingTeam.getTeamId(), 0, battingTeam.getPlayedBalls(),
                         battingTeam.getPlayerIdByIndex(strike.getCurrentStrike()),
@@ -324,7 +276,6 @@ public class MatchService {
                 battingTeam.incrementTeamScoreForUnfair(1);
                 String typeOfUnFairBall = (possibilityOfUnFairBall == 0) ?"WIDE" :"NO BALL";
                 overCompletionResult.appendBallLogs(over + "." + ballNumber + ": 1 run (" + typeOfUnFairBall + ")");
-                //System.out.println(typeOfUnFairBall + " : 1 run");
                 ballEventsRepository.insertEvent(
                         strike.getMatchId(), battingTeam.getTeamId(), 0, over*6 + ballNumber,
                             -1,
@@ -332,7 +283,6 @@ public class MatchService {
                     );
 
                 legitimateBall(strike, outcomeOfBallBowled, overCompletionResult, true);
-                // System.out.println("-----------------------------------------------------------------");
                 // returning Enum will ensure the caller, not to update the ball number
                 return (possibilityOfUnFairBall == 0) ?UnfairBallType.WIDE : UnfairBallType.NO;
             }
@@ -344,5 +294,27 @@ public class MatchService {
         }
     }
 
+    private List<TeamDTO> checkTeamExistance(int team1Id, int team2Id) {
+        List<TeamDTO> allTeams = teamRepository.findAll();
+        TeamDTO team1 = null;
+        TeamDTO team2 = null;
+        for(TeamDTO t: allTeams){
+            if(t.getTeamId() == team1Id){
+                team1 = t;
+            }
+            if(t.getTeamId() == team2Id){
+                team2 = t;
+            }
+        }
+        if((team1 == null) || (team2 == null)){
+            throw new IllegalStateException("Either or Both of the Team does not Exists");
+        }
+        return Arrays.asList(team1, team2);
+    }
 
+    private void swapTeams(Match match) {
+        int team1Id = match.getTeam1Id();
+        match.setTeam1Id(match.getTeam2Id());
+        match.setTeam2Id(team1Id);
+    }
 }
