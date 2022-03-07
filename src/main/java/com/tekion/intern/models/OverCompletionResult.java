@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import java.util.List;
 
-public class OverCompletionResult {
+public class OverCompletionResult implements ScoreBoard{
     @JsonView
     private String teamScore;
     @JsonView

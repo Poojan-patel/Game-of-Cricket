@@ -13,13 +13,14 @@ import java.util.List;
 
 @Repository
 public class TeamRepository {
-    public Integer save(Team team) throws SQLException, ClassNotFoundException {
+    public Integer save(Team team){
+        Connection con = null;
         String teamName = team.getTeamName();
-        Connection con = MySqlConnector.getConnection();
-        con.setAutoCommit(false);
-        PreparedStatement stmt = con.prepareStatement(ReaderUtil.readSqlFromFile("team", "insertTeamData"), Statement.RETURN_GENERATED_KEYS);
-        stmt.setString(1, teamName);
-        try {
+        try{
+            con = MySqlConnector.getConnection();
+            con.setAutoCommit(false);
+            PreparedStatement stmt = con.prepareStatement(ReaderUtil.readSqlFromFile("team", "insertTeamData"), Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, teamName);
             stmt.execute();
             ResultSet rs = stmt.getGeneratedKeys();
             int teamId = 0;
@@ -30,9 +31,14 @@ public class TeamRepository {
             con.commit();
             return teamId;
         } catch (SQLException sqle) {
-            con.rollback();
-            throw sqle;
+            try{
+                con.rollback();
+            } catch (Exception ignored) {}
+        } catch (Exception ignored){
+            ignored.printStackTrace();
         }
+
+        return 0;
     }
 
     private void insertTeamPlayers(List<Player> players, int teamId, Connection conn) throws SQLException {

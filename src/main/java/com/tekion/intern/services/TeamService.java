@@ -16,6 +16,7 @@ import com.tekion.intern.repo.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.rmi.UnexpectedException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -54,14 +55,9 @@ public class TeamService {
 
     private Integer saveTeam(TeamDTO teamDTO) {
         Team team = new Team(teamDTO);
-        Integer teamId = 0;
-        try {
-            teamId = teamRepository.save(team);
-        } catch(SQLException sqle){
-            sqle.printStackTrace();
-        } catch (Exception e){
-
-        }
+        Integer teamId = teamRepository.save(team);
+        if(teamId <= 0)
+            throw new IllegalStateException("Team could not be saved");
         return teamId;
     }
 
