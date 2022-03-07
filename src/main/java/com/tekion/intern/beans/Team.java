@@ -61,15 +61,6 @@ public class Team {
         return teamName;
     }
 
-    @Override
-    public String toString() {
-        return "Team{" +
-                "teamName='" + teamName + '\'' +
-                ", teamId=" + teamId +
-                ", playerList=" + playerList +
-                '}';
-    }
-
     public List<Player> getPlayers() {
         return playerList;
     }
@@ -132,16 +123,21 @@ public class Team {
         return currentScore;
     }
 
-    public void incrementTeamScoreForUnfair() {
-        currentScore++;
+    public void incrementTeamScoreForUnfair(int outcomeOfBallBowled) {
+        currentScore += outcomeOfBallBowled;
     }
 
     public void incrementTeamScore(int outcomeOfBallBowled, int currentPlayer) {
-        currentScore+=outcomeOfBallBowled;
+        currentScore += outcomeOfBallBowled;
         playerList.get(currentPlayer).incrementScore(outcomeOfBallBowled);
     }
 
     public int getNumberOfPlayers() {
         return 10;
+    }
+
+    @Override
+    public String toString(){
+        return teamName + ": " + currentScore + "/" + currentWickets + String.format(" in %d.%d overs", playedBalls/6, playedBalls%6);
     }
 }

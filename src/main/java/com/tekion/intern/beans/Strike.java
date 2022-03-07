@@ -37,6 +37,10 @@ public class Strike {
         return team.getPlayers().get(currentStrike);
     }
 
+    public Player getCurrentNonStrikePlayer() {
+        return team.getPlayers().get(1-currentStrike);
+    }
+
     public Team getBattingTeam() {
         return team;
     }
@@ -59,5 +63,9 @@ public class Strike {
 
     public void setNewBatsman(Player newBatter) {
         team.setNewPlayerAtStrike(currentStrike, newBatter);
+    }
+
+    public Player getCurrentBowler() {
+        return currentBowler;
     }
 }

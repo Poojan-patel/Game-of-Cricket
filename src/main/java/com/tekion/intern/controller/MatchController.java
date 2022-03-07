@@ -26,14 +26,14 @@ public class MatchController {
     }
 
     @RequestMapping("/play/{matchId}")
-    public ResponseEntity<String> stimulateMatch(@PathVariable Integer matchId, @RequestBody BowlerForNextOver bowlerForNextOver){
+    public ResponseEntity<OverCompletionResult> stimulateMatch(@PathVariable Integer matchId, @RequestBody BowlerForNextOver bowlerForNextOver){
         //matchService.startTheMatch(matchId);
         Match match = matchService.checkMatchIdValidity(matchId);
         Integer currentBowlTeamId = matchService.getCurrentBowlingTeam(match);
         Player bowler = matchService.checkBowlerValidity(match, currentBowlTeamId, bowlerForNextOver.getBowlerId());
         matchService.setBowlerForThisOver(match, currentBowlTeamId, bowler.getPlayerId());
-        matchService.playTheOver(match, currentBowlTeamId, bowler);
-        return ResponseEntity.internalServerError().body("UnderConstruction");
+        OverCompletionResult overCompletionResult = matchService.playTheOver(match, currentBowlTeamId, bowler);
+        return ResponseEntity.ok(overCompletionResult);
     }
 
     @GetMapping("/bowlerslist/{matchId}")

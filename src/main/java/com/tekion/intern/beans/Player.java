@@ -58,4 +58,14 @@ public class Player {
     public void incrementScore(int outcomeOfBallBowled) {
         currentRuns += outcomeOfBallBowled;
     }
+
+    @Override
+    public String toString() {
+        return
+                playerId +
+                ". " + name +
+                " - " + playerType + ((playerType == PlayerType.BATSMAN) ? "" : "," + typeOfBowler) +
+                ", Runs: " + currentRuns +
+                ", Balls: " + currentBalls;
+    }
 }
