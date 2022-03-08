@@ -105,7 +105,7 @@ public class MatchService {
     }
 
     private boolean isMatchEnded(Match match){
-        return (match.getMatchState() == MatchState.TEAM1 || match.getMatchState() == MatchState.TEAM2 || match.getMatchState() == MatchState.TIE);
+        return (match.getMatchState() == MatchState.TEAM1_WON || match.getMatchState() == MatchState.TEAM2_WON || match.getMatchState() == MatchState.TIE);
     }
 
     private void getOverCompletionResult(Strike strike, Match match, OverCompletionResult overCompletionResult, int currentBowlTeamId) {
@@ -133,7 +133,7 @@ public class MatchService {
         Team battingTeam = strike.getBattingTeam();
         if(battingTeam.getScoreToChase() != -1 && battingTeam.getScoreToChase() < battingTeam.getTeamScore()) {
             overCompletionResult.setIntermediateResult(strike.getBattingTeam().getTeamName() + " Win the game");
-            match.setMatchState(MatchState.TEAM2);
+            match.setMatchState(MatchState.TEAM2_WON);
             matchRepository.update(match);
         }
         else if(battingTeam.isAllOut() || strike.getCurrentOver() == match.getOvers()){
@@ -148,7 +148,7 @@ public class MatchService {
                     overCompletionResult.setIntermediateResult("match Tied");
                 }
                 else {
-                    match.setMatchState(MatchState.TEAM1);
+                    match.setMatchState(MatchState.TEAM1_WON);
                     overCompletionResult.setIntermediateResult("Team 1 Won the game");
                 }
                 matchRepository.update(match);

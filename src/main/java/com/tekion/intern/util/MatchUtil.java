@@ -33,9 +33,9 @@ public class MatchUtil {
         MatchState matchState;
         int diff = team1Score - team2Score;
         if(diff > 0){
-            matchState = MatchState.TEAM1;
+            matchState = MatchState.TEAM1_WON;
         } else if(diff < 0){
-            matchState = MatchState.TEAM2;
+            matchState = MatchState.TEAM2_WON;
         } else{
             matchState = MatchState.TIE;
         }

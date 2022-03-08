@@ -1,8 +1,8 @@
 package com.tekion.intern.enums;
 
 public enum MatchState {
-    TEAM1,
-    TEAM2,
+    TEAM1_WON,
+    TEAM2_WON,
     TIE,
     TOSS_LEFT,
     TEAM1_BATTING,
@@ -12,10 +12,10 @@ public enum MatchState {
         switch (winner){
             case "TIE":
                 return MatchState.TIE;
-            case "TEAM1":
-                return MatchState.TEAM1;
-            case "TEAM2":
-                return MatchState.TEAM2;
+            case "TEAM1_WON":
+                return MatchState.TEAM1_WON;
+            case "TEAM2_WON":
+                return MatchState.TEAM2_WON;
             case "TEAM1_BATTING":
                 return MatchState.TEAM1_BATTING;
             case "TEAM2_BATTING":
