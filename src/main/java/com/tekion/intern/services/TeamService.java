@@ -1,8 +1,8 @@
 package com.tekion.intern.services;
 
 import com.tekion.intern.beans.*;
+import com.tekion.intern.enums.MatchState;
 import com.tekion.intern.enums.PlayerType;
-import com.tekion.intern.enums.Winner;
 import com.tekion.intern.models.FieldBatsmenAndWickets;
 import com.tekion.intern.models.PlayerDTO;
 import com.tekion.intern.models.TeamDTO;
@@ -35,15 +35,18 @@ public class TeamService {
 
     public Integer validateTeam(TeamDTO team) throws IllegalStateException{
         List<PlayerDTO> players = team.getPlayers();
-        if(players == null || players.size() != 11)
+        if(players == null || players.size() != 11) {
             throw new IllegalStateException("Players should be 11");
+        }
         int numOfBowlers = 0;
         for(PlayerDTO p: players){
-            if(p.getPlayerType() != PlayerType.BATSMAN)
+            if(p.getPlayerType() != PlayerType.BATSMAN) {
                 numOfBowlers++;
+            }
         }
-        if(numOfBowlers < 5)
+        if(numOfBowlers < 5) {
             throw new IllegalStateException("There must be At least 5 bowlers available in your team");
+        }
 
         return saveTeam(team);
     }
@@ -73,10 +76,12 @@ public class TeamService {
             }
         }
 
-        if(allBowlers.size() > 6 || match.getOvers()%5 != 0)
+        if(allBowlers.size() > 6 || match.getOvers()%5 != 0) {
             return availableBowlers;
-        if(maxi > sum/2)
+        }
+        if(maxi > sum/2) {
             return Collections.singletonList(minOverPlayer);
+        }
         return availableBowlers;
     }
 
@@ -87,15 +92,15 @@ public class TeamService {
     public Strike initializeStrike(Match match, int currentBowlTeamId, Player bowler) {
         int scoreToChase = -1;
         int currentBatTeamId = (match.getTeam1Id() == currentBowlTeamId) ? match.getTeam2Id() : match.getTeam1Id();
-        if(match.getMatchState() == Winner.TEAM2_BATTING){
+        if(match.getMatchState() == MatchState.TEAM2_BATTING){
             scoreToChase = ballEventsRepository.fetchScoreToChase(match.getMatchId(), currentBowlTeamId);
         }
+
         FieldBatsmenAndWickets currentOnFieldBatsmen = teamInPlayRepository.fetchStrikeDetails(match.getMatchId(), currentBatTeamId);
-        List<Player> currentPlayers = playerRepository.fetchOnFieldBatsmenData(currentOnFieldBatsmen.getStrike(), currentOnFieldBatsmen.getNonStrike(), match.getMatchId(), currentBatTeamId);
+        List<Player> currentPlayers = playerRepository.fetchOnFieldBatsmenData(currentOnFieldBatsmen.getStrike(), currentOnFieldBatsmen.getNonStrike(), match.getMatchId());
         Team battingTeam = teamRepository.fetchTeamScoreFromMatchId(match.getMatchId(), currentBatTeamId);
         battingTeam.setPlayerList(currentPlayers);
         battingTeam.setScoreToChase(scoreToChase);
-        System.out.println("Chasing Score:" + battingTeam.getScoreToChase());
         battingTeam.setCurrentWickets(currentOnFieldBatsmen.getCurrentWickets());
         return new Strike(match.getMatchId(), bowler, battingTeam);
     }
@@ -129,8 +134,9 @@ public class TeamService {
     private Integer saveTeam(TeamDTO teamDTO) {
         Team team = new Team(teamDTO);
         Integer teamId = teamRepository.save(team);
-        if(teamId <= 0)
+        if(teamId <= 0) {
             throw new IllegalStateException("Team could not be saved");
+        }
         return teamId;
     }
 }

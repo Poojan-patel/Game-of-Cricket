@@ -80,6 +80,7 @@ public class MatchRepository {
             con.close();
         } catch (SQLException sqle){
             try{
+                con.rollback();
                 con.close();
             } catch (Exception ignored){}
             sqle.printStackTrace();

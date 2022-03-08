@@ -14,18 +14,18 @@ Flow of algorithm:
 MatchController
 1. MatchController's main() will take necessary input from user like numOfPlayers, numOfOvers, playerName, playerType, teamName, etc
 2. MatchController's main() will create a new Match instance with constructor with these read args
-3. MatchController will ask for bat or bowl to winner of toss
+3. MatchController will ask for bat or bowl to matchState of toss
 4. call will be passes to match object
 
 Match
-1. Match will have fields like team1, team2, winner, totalAvailableBalls and a strike object to manage players on strike
+1. Match will have fields like team1, team2, matchState, totalAvailableBalls and a strike object to manage players on strike
 2. when MatchController calls stimulateGame(), based on the tossWinner's decision, game will started
 3. startInning() will be called and scoreToChase will be taken into consideration for the chaser team
   1. Inning will have total overs given during construction. method' call returns back when 1. Either all over completes 2. All out declared
 4. startInning() will be called for chaser team
   1. same as above, but one more condition, 3. if scoreToChase < currentInningScore, then also methods call will return
 5. during an inning, strike will be changed on odd runs or over completion
-5. winner will be declared based on the score of both teams
+5. matchState will be declared based on the score of both teams
 
 Team
 1. Match constructor will call Team constructor to construct both the team one by one
@@ -42,6 +42,6 @@ Strike:
 2. It will update the strike on a ball, on an over completion
 
 Util:
-1. Util Contains different methods like random number generation, winner decider, etc.
+1. Util Contains different methods like random number generation, matchState decider, etc.
 
 

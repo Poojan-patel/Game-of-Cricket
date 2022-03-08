@@ -23,8 +23,9 @@ public class PlayerDTO {
         this.name = name;
         this.playerType = PlayerType.fromStringToEnum(playerType);
         this.typeOfBowler = TypeOfBowler.fromStringToEnum(typeOfBowling);
-        if(this.playerType != PlayerType.BATSMAN && this.typeOfBowler == TypeOfBowler.NA)
+        if(this.playerType != PlayerType.BATSMAN && this.typeOfBowler == TypeOfBowler.NA) {
             throw new IllegalStateException("Non Batsman Player Must have Bowling type Defined");
+        }
     }
 
     public PlayerDTO(String name, String playerType, String typeOfBowling, int playerId, int remainingOvers) {

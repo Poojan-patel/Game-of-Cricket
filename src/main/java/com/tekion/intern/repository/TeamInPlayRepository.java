@@ -40,11 +40,19 @@ public class TeamInPlayRepository {
             con = MySqlConnector.getConnection();
             con.setAutoCommit(false);
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("teaminplay", "updateStrikesByTeamAndMatchId"));
-            if(currentStrike != -1) ps.setInt(1,currentStrike);
-            else ps.setNull(1, Types.INTEGER);
+            if(currentStrike != -1) {
+                ps.setInt(1, currentStrike);
+            }
+            else {
+                ps.setNull(1, Types.INTEGER);
+            }
 
-            if(currentNonStrike != -1) ps.setInt(2,currentNonStrike);
-            else ps.setNull(2,Types.INTEGER);
+            if(currentNonStrike != -1) {
+                ps.setInt(2, currentNonStrike);
+            }
+            else {
+                ps.setNull(2, Types.INTEGER);
+            }
             ps.setInt(3,curWickets);
             ps.setInt(4,matchId);
             ps.setInt(5,teamId);
@@ -98,14 +106,14 @@ public class TeamInPlayRepository {
             ResultSet rs = ps.executeQuery();
             while(rs.next())
                 bowlerId = rs.getInt("bowler");
-            con.close();
         } catch (SQLException sqle){
-            try{
-                con.close();
-            } catch (Exception ignored) {}
             sqle.printStackTrace();
         } catch (Exception ignored) {
             ignored.printStackTrace();
+        } finally {
+            try{
+                con.close();
+            } catch (Exception ignored) {}
         }
         return bowlerId;
     }
@@ -122,14 +130,14 @@ public class TeamInPlayRepository {
             while (rs.next()){
                 fieldBatsmenAndWickets = new FieldBatsmenAndWickets(rs.getInt("strike"), rs.getInt("nonstrike"), rs.getInt("currentwickets"));
             }
-            con.close();
         } catch (SQLException sqle){
-            try{
-                con.close();
-            } catch (Exception ignored) {}
             sqle.printStackTrace();
         } catch (Exception ignored) {
             ignored.printStackTrace();
+        } finally {
+            try{
+                con.close();
+            } catch (Exception ignored) {}
         }
         return fieldBatsmenAndWickets;
     }

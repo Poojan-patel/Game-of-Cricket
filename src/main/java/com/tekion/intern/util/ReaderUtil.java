@@ -40,10 +40,12 @@ public class ReaderUtil {
         while(true){
             try{
                 input = Integer.parseInt(sc.nextLine());
-                if(input < lower)
+                if(input < lower) {
                     System.out.println("Value should not be less than " + lower);
-                else
+                }
+                else {
                     break;
+                }
             } catch(NumberFormatException nfe){
                 System.out.println("Enter an integer");
             }

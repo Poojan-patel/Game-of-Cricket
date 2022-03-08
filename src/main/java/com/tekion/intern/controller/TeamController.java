@@ -20,7 +20,6 @@ public class TeamController {
     @PostMapping("/create")
     public ResponseEntity<String> createTeam(@RequestBody TeamDTO team){
         Integer teamId = teamService.validateTeam(team);
-
         return ResponseEntity.accepted().body(teamId.toString());
     }
 

@@ -1,7 +1,8 @@
 package com.tekion.intern.util;
 
+import com.tekion.intern.beans.Match;
+import com.tekion.intern.enums.MatchState;
 import com.tekion.intern.enums.PlayerType;
-import com.tekion.intern.enums.Winner;
 
 import java.io.IOException;
 import java.util.*;
@@ -28,17 +29,17 @@ public class MatchUtil {
         typeOfWicketFallen = Arrays.asList("BOLD", "CAUGHT AND BOLD", "STUMPED", "HIT WICKET", "LBW", "DOUBLE HIT", "BALL OBSTRUCTION");
     }
 
-    public static Winner decideWinner(int team1Score, int team2Score){
-        Winner winner;
+    public static MatchState decideWinner(int team1Score, int team2Score){
+        MatchState matchState;
         int diff = team1Score - team2Score;
         if(diff > 0){
-            winner = Winner.TEAM1;
+            matchState = MatchState.TEAM1;
         } else if(diff < 0){
-            winner = Winner.TEAM2;
+            matchState = MatchState.TEAM2;
         } else{
-            winner = Winner.TIE;
+            matchState = MatchState.TIE;
         }
-        return winner;
+        return matchState;
     }
 
     public static int stimulateToss(){
@@ -65,16 +66,31 @@ public class MatchUtil {
     }
 
     public static void clearConsole() throws IOException, InterruptedException {
-        if(os.contains("windows"))
+        if(os.contains("windows")) {
             new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-        else
+        }
+        else {
             new ProcessBuilder("clear").inheritIO().start().waitFor();
+        }
     }
 
-    public static int decideBatterFirst(int headOrTail, int choiceOfInning) {
+    public static int decideFirstBatter(int headOrTail, int choiceOfInning) {
         if(headOrTail + choiceOfInning == 1){
             return 1;
         } else
             return 2;
+    }
+
+    public static Integer getCurrentBowlingTeam(Match match) {
+        MatchState currentMatchState = match.getMatchState();
+        if(currentMatchState != MatchState.TEAM1_BATTING && currentMatchState != MatchState.TEAM2_BATTING){
+            throw new IllegalStateException("Either match is finished or not started yet!");
+        }
+        if(currentMatchState == MatchState.TEAM1_BATTING) {
+            return match.getTeam2Id();
+        }
+        else {
+            return match.getTeam1Id();
+        }
     }
 }

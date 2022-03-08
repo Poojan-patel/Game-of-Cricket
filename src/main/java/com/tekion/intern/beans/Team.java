@@ -98,8 +98,9 @@ public class Team {
     }
 
     public int getPlayerIdByIndex(int index){
-        if(playerList.get(index) == null)
+        if(playerList.get(index) == null) {
             return -1;
+        }
         return playerList.get(index).getPlayerId();
     }
 

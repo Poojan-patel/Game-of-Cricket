@@ -1,6 +1,6 @@
 package com.tekion.intern.beans;
 
-import com.tekion.intern.enums.Winner;
+import com.tekion.intern.enums.MatchState;
 
 public class Match {
     private int matchId;
@@ -8,14 +8,14 @@ public class Match {
     private int team2Id;
     private int overs;
     private int maxovers;
-    private Winner matchState;
+    private MatchState matchState;
 
     public Match(int team1Id, int team2Id, int overs) {
         this.team1Id = team1Id;
         this.team2Id = team2Id;
         this.overs = overs;
         this.maxovers = (int)Math.ceil(overs/5.0);
-        matchState = Winner.TOSS_LEFT;
+        matchState = MatchState.TOSS_LEFT;
     }
 
     public Match(int matchId, int team1Id, int team2Id, int overs, int maxovers, String matchState) {
@@ -24,7 +24,7 @@ public class Match {
         this.team2Id = team2Id;
         this.overs = overs;
         this.maxovers = maxovers;
-        this.matchState = Winner.fromString(matchState);
+        this.matchState = MatchState.fromString(matchState);
     }
 
     public int getTeam1Id() {
@@ -43,7 +43,7 @@ public class Match {
         return matchId;
     }
 
-    public Winner getMatchState() {
+    public MatchState getMatchState() {
         return matchState;
     }
 
@@ -55,7 +55,7 @@ public class Match {
         this.team2Id = team2Id;
     }
 
-    public void setMatchState(Winner matchState) {
+    public void setMatchState(MatchState matchState) {
         this.matchState = matchState;
     }
 

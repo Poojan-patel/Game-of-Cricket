@@ -24,8 +24,9 @@ public class TeamRepository {
             stmt.execute();
             ResultSet rs = stmt.getGeneratedKeys();
             int teamId = 0;
-            if (rs.next())
+            if (rs.next()) {
                 teamId = rs.getInt(1);
+            }
 
             insertTeamPlayers(team.getPlayers(), teamId, con);
             con.commit();
@@ -51,13 +52,14 @@ public class TeamRepository {
             while(rs.next()){
                 teams.add(new TeamDTO(rs.getString(2), rs.getInt(1)));
             }
-            con.close();
         } catch (SQLException sql){
+            sql.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
             try {
                 con.close();
             } catch (Exception ignored) {}
-        } catch (Exception e){
-            e.printStackTrace();
         }
         return teams;
     }
@@ -84,12 +86,13 @@ public class TeamRepository {
                 }
             }
         } catch (SQLException sqle){
-            try{
-                con.close();
-            } catch (Exception ignored) {}
             sqle.printStackTrace();
         } catch (Exception ignored) {
             ignored.printStackTrace();
+        } finally {
+            try{
+                con.close();
+            } catch (Exception ignored) {}
         }
         return team;
     }
@@ -106,12 +109,13 @@ public class TeamRepository {
                 players.add(rs.getInt(1));
             con.close();
         } catch (SQLException sqle){
-            try{
-                con.close();
-            } catch (Exception ignored) {}
             sqle.printStackTrace();
         } catch (Exception ignored) {
             ignored.printStackTrace();
+        } finally {
+            try{
+                con.close();
+            } catch (Exception ignored) {}
         }
 
         return players;

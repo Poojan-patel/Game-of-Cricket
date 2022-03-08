@@ -7,15 +7,20 @@ public enum TypeOfBowler {
     NA;
 
     public static TypeOfBowler fromStringToEnum(String type) {
-        if (type == null || type.equals("NA"))
+        if(type == null) {
             return TypeOfBowler.NA;
-        else if (type.equals("FAST"))
-            return TypeOfBowler.FAST;
-        else if (type.equals("SPIN"))
-            return TypeOfBowler.SPIN;
-        else if (type.equals("MEDIUM"))
-            return TypeOfBowler.MEDIUM;
-        else
-            throw new IllegalArgumentException("Enum Value not defined");
+        }
+        switch (type) {
+            case "NA":
+                return TypeOfBowler.NA;
+            case "FAST":
+                return TypeOfBowler.FAST;
+            case "SPIN":
+                return TypeOfBowler.SPIN;
+            case "MEDIUM":
+                return TypeOfBowler.MEDIUM;
+            default:
+                throw new IllegalArgumentException("Enum Value not defined");
+        }
     }
 }

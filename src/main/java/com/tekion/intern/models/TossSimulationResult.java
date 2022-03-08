@@ -16,6 +16,6 @@ public class TossSimulationResult {
         this.matchId = matchId;
         this.team1Name = team1Name;
         this.team2Name = team2Name;
-        this.tossWinner = team1Name + " will start the batting First";
+        this.tossWinner = team1Name + " will start batting First";
     }
 }

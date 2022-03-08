@@ -1,8 +1,8 @@
 package com.tekion.intern.services;
 
 import com.tekion.intern.beans.*;
+import com.tekion.intern.enums.MatchState;
 import com.tekion.intern.enums.UnfairBallType;
-import com.tekion.intern.enums.Winner;
 import com.tekion.intern.models.*;
 import com.tekion.intern.repository.BallEventsRepository;
 import com.tekion.intern.repository.MatchRepository;
@@ -36,37 +36,29 @@ public class MatchService {
         this.teamService = teamService;
     }
 
-    public MatchCreationResponse validateTeamsForMatchCreation(MatchCreationRequest matchRequest){
-        if(matchRequest.getTeam1Id() == matchRequest.getTeam2Id()){
-            throw new IllegalStateException("Both Team Cannot be Same");
-        }
-        if(matchRequest.getOvers() < 5){
-            throw new IllegalStateException("Match must be 5 overs long");
-        }
-        List<TeamDTO> selectedTeams = checkTeamExistance(matchRequest.getTeam1Id(), matchRequest.getTeam2Id());
+    public MatchCreationResponse createNewMatch(MatchCreationRequest matchRequest, List<TeamDTO> selectedTeams){
         Match match = new Match(matchRequest.getTeam1Id(), matchRequest.getTeam2Id(), matchRequest.getOvers());
         int matchId = 0;
         matchId = matchRepository.save(match);
         return new MatchCreationResponse(matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName(), matchRequest.getOvers());
     }
 
-    public TossSimulationResult stimulateTossAndInsertStrike(Integer matchId) {
-        Match match = matchRepository.findByMatchId(matchId);
-        if(match == null)
-            throw new IllegalStateException("Match Does not Exists");
-        if(match.getMatchState() != Winner.TOSS_LEFT){
+    public TossSimulationResult stimulateTossAndInsertStrike(Match match) {
+        int matchId = match.getMatchId();
+        if(match.getMatchState() != MatchState.TOSS_LEFT){
             throw new IllegalStateException("Toss is already Stimulated\n Try to start playing the Game");
         }
         int headOrTail = MatchUtil.stimulateToss();
         int choiceOfInning = MatchUtil.stimulateToss();
 
-        int whichTeamToBatFirst = MatchUtil.decideBatterFirst(headOrTail, choiceOfInning);
-        if(whichTeamToBatFirst != 1)
+        int whichTeamToBatFirst = MatchUtil.decideFirstBatter(headOrTail, choiceOfInning);
+        if(whichTeamToBatFirst != 1) {
             swapTeams(match);
+        }
 
-        match.setMatchState(Winner.TEAM1_BATTING);
+        match.setMatchState(MatchState.TEAM1_BATTING);
         matchRepository.update(match);
-        List<TeamDTO> selectedTeams = checkTeamExistance(match.getTeam1Id(), match.getTeam2Id());
+        List<TeamDTO> selectedTeams = getSelectedTeams(match.getTeam1Id(), match.getTeam2Id());
         TossSimulationResult tossSimulationResult = new TossSimulationResult(
                 matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName()
         );
@@ -74,46 +66,13 @@ public class MatchService {
         return tossSimulationResult;
     }
 
-    public Match checkMatchIdValidity(Integer matchId) {
-        Match match = matchRepository.findByMatchId(matchId);
-        if(match == null){
-            throw new IllegalStateException("Match Id does not exists");
-        }
-        return match;
-    }
-
-    public Integer getCurrentBowlingTeam(Match match) {
-        Winner currentMatchStat = match.getMatchState();
-        if(currentMatchStat != Winner.TEAM1_BATTING && currentMatchStat != Winner.TEAM2_BATTING){
-            throw new IllegalStateException("Either match is finished or not started yet!");
-        }
-        if(currentMatchStat == Winner.TEAM1_BATTING)
-            return match.getTeam2Id();
-        else
-            return match.getTeam1Id();
-    }
-
     public List<PlayerDTO> fetchAvailableBowlers(Match match, Integer currentBowlTeamId) {
         int maxOvers = match.getMaxovers();
         return teamService.getAllAvailableBowlers(match, currentBowlTeamId, maxOvers);
     }
 
-    public Player checkBowlerValidity(Match match, Integer currentBowlTeamId, Integer chosenBowler) {
-        List<PlayerDTO> availableBowlers = fetchAvailableBowlers(match, currentBowlTeamId);
-
-        for(PlayerDTO p: availableBowlers){
-            if(p.getPlayerId() == chosenBowler){
-                return new Player(p.getName(), p.getPlayerType().toString(), p.getTypeOfBowler().toString(), p.getPlayerId());
-            }
-        }
-        throw new IllegalStateException("Bowler is Not Valid, select another Bowler");
-    }
-
-    public void setBowlerForThisOver(Match match, Integer currentBowlTeamId, int bowlerId) {
-        teamService.setBowlerForThisOver(match, currentBowlTeamId, bowlerId);
-    }
-
     public ScoreBoard playTheOver(Match match, int currentBowlTeamId, Player bowler) {
+        setBowlerForThisOver(match, currentBowlTeamId, bowler.getPlayerId());
         Strike strike = teamService.initializeStrike(match, currentBowlTeamId, bowler);
         Team battingTeam = strike.getBattingTeam();
         UnfairBallType unfairBallType;
@@ -124,15 +83,16 @@ public class MatchService {
             if (battingTeam.isAllOut() || ((battingTeam.getScoreToChase() != -1) && (battingTeam.getScoreToChase() < battingTeam.getTeamScore()))) {
                 break;
             }
-            if(unfairBallType != UnfairBallType.NA)
+            if(unfairBallType != UnfairBallType.NA) {
                 j--;
+            }
             isWicketPossible = (unfairBallType != UnfairBallType.NO);
         }
         strike.changeStrike();
         teamService.updateStrike(strike);
         checkIfInningEnded(match, strike, overCompletionResult);
         if(!isMatchEnded(match)) {
-            getOverCompletionResult(strike, match, overCompletionResult);
+            getOverCompletionResult(strike, match, overCompletionResult, currentBowlTeamId);
             return overCompletionResult;
         }
         else{
@@ -145,10 +105,10 @@ public class MatchService {
     }
 
     private boolean isMatchEnded(Match match){
-        return (match.getMatchState() == Winner.TEAM1 || match.getMatchState() == Winner.TEAM2 || match.getMatchState() == Winner.TIE);
+        return (match.getMatchState() == MatchState.TEAM1 || match.getMatchState() == MatchState.TEAM2 || match.getMatchState() == MatchState.TIE);
     }
 
-    private void getOverCompletionResult(Strike strike, Match match, OverCompletionResult overCompletionResult) {
+    private void getOverCompletionResult(Strike strike, Match match, OverCompletionResult overCompletionResult, int currentBowlTeamId) {
         Team battingTeam = strike.getBattingTeam();
         overCompletionResult.setStrike(strike.getCurrentStrikePlayer().toString());
 
@@ -163,29 +123,32 @@ public class MatchService {
         }
 
         overCompletionResult.setBowler(strike.getCurrentBowler().getName());
-        overCompletionResult.setBowlerForNextOver(fetchAvailableBowlers(match, battingTeam.getTeamId()));
+        if(match.getMatchState() == MatchState.TEAM1_BATTING)
+            overCompletionResult.setBowlerForNextOver(fetchAvailableBowlers(match, match.getTeam2Id()));
+        else
+            overCompletionResult.setBowlerForNextOver(fetchAvailableBowlers(match, match.getTeam1Id()));
     }
 
     private void checkIfInningEnded(Match match, Strike strike, OverCompletionResult overCompletionResult){
         Team battingTeam = strike.getBattingTeam();
         if(battingTeam.getScoreToChase() != -1 && battingTeam.getScoreToChase() < battingTeam.getTeamScore()) {
             overCompletionResult.setIntermediateResult(strike.getBattingTeam().getTeamName() + " Win the game");
-            match.setMatchState(Winner.TEAM2);
+            match.setMatchState(MatchState.TEAM2);
             matchRepository.update(match);
         }
         else if(battingTeam.isAllOut() || strike.getCurrentOver() == match.getOvers()){
-            if(match.getMatchState() == Winner.TEAM1_BATTING){
-                match.setMatchState(Winner.TEAM2_BATTING);
+            if(match.getMatchState() == MatchState.TEAM1_BATTING){
+                match.setMatchState(MatchState.TEAM2_BATTING);
                 overCompletionResult.setIntermediateResult(battingTeam.getTeamName() + " will start fielding");
                 teamService.insertStrikesForNewMatch(match.getTeam2Id(), match.getMatchId());
                 matchRepository.update(match);
             } else{
                 if(battingTeam.getScoreToChase() == battingTeam.getTeamScore()) {
-                    match.setMatchState(Winner.TIE);
+                    match.setMatchState(MatchState.TIE);
                     overCompletionResult.setIntermediateResult("match Tied");
                 }
                 else {
-                    match.setMatchState(Winner.TEAM1);
+                    match.setMatchState(MatchState.TEAM1);
                     overCompletionResult.setIntermediateResult("Team 1 Won the game");
                 }
                 matchRepository.update(match);
@@ -194,6 +157,7 @@ public class MatchService {
     }
 
     private void outcomeOnWicketBall(Strike strike, OverCompletionResult overCompletionResult){
+        strike.incrementTotalBalls();
         int over = strike.getCurrentOver();
         int ballNumber = strike.getBattingTeam().getPlayedBalls() % 6;
         String typeOfWicketFallen = MatchUtil.getRandomTypeOfWicket();
@@ -224,10 +188,8 @@ public class MatchService {
             battingTeam.incrementTeamScore(outcomeOfBallBowled, currentPlayer);
         }
 
-        ballEventsRepository.insertEvent(
-                strike.getMatchId(), battingTeam.getTeamId(), 0, over*6 + ballNumber,
-                    (isTeamScore) ?-1 :battingTeam.getPlayerIdByIndex(currentPlayer),
-                    strike.getCurrentBowlerPlayerId(), outcomeOfBallBowled, "", ""
+        ballEventsRepository.insertEvent(strike.getMatchId(), battingTeam.getTeamId(), 0, over*6 + ballNumber,
+                (isTeamScore) ?-1 :battingTeam.getPlayerIdByIndex(currentPlayer), strike.getCurrentBowlerPlayerId(), outcomeOfBallBowled, "", ""
         );
 
         if(outcomeOfBallBowled%2 == 1) {
@@ -266,35 +228,38 @@ public class MatchService {
         int outcomeOfBallBowled = MatchUtil.generateRandomScore(currentPlayer.getPlayerType(), wicketPossible);
 
         if(outcomeOfBallBowled == -1){
-            strike.incrementTotalBalls();
             outcomeOnWicketBall(strike, overCompletionResult);
             return UnfairBallType.NA;
         }
         else{
-            int possibilityOfUnFairBall = ThreadLocalRandom.current().nextInt(0,9);
-            if(possibilityOfUnFairBall <= 1){
-                battingTeam.incrementTeamScoreForUnfair(1);
-                String typeOfUnFairBall = (possibilityOfUnFairBall == 0) ?"WIDE" :"NO BALL";
-                overCompletionResult.appendBallLogs(over + "." + ballNumber + ": 1 run (" + typeOfUnFairBall + ")");
-                ballEventsRepository.insertEvent(
-                        strike.getMatchId(), battingTeam.getTeamId(), 0, over*6 + ballNumber,
-                            -1,
-                            strike.getCurrentBowlerPlayerId(), 1, typeOfUnFairBall, ""
-                    );
-
-                legitimateBall(strike, outcomeOfBallBowled, overCompletionResult, true);
-                // returning Enum will ensure the caller, not to update the ball number
-                return (possibilityOfUnFairBall == 0) ?UnfairBallType.WIDE : UnfairBallType.NO;
-            }
-            else {
-                battingTeam.incrementTotalBalls(strike.getCurrentStrike());
-                legitimateBall(strike, outcomeOfBallBowled, overCompletionResult, false);
-                return UnfairBallType.NA;
-            }
+            return checkPossibilityOfUnFairBall(strike, overCompletionResult, ballNumber, over, outcomeOfBallBowled);
         }
     }
 
-    private List<TeamDTO> checkTeamExistance(int team1Id, int team2Id) {
+    private UnfairBallType checkPossibilityOfUnFairBall(Strike strike, OverCompletionResult overCompletionResult, int ballNumber, int over, int outcomeOfBallBowled) {
+        Team battingTeam = strike.getBattingTeam();
+        int possibilityOfUnFairBall = ThreadLocalRandom.current().nextInt(0,9);
+
+        if(possibilityOfUnFairBall <= 1){
+            battingTeam.incrementTeamScoreForUnfair(1);
+            String typeOfUnFairBall = (possibilityOfUnFairBall == 0) ?"WIDE" :"NO BALL";
+            overCompletionResult.appendBallLogs(over + "." + ballNumber + ": 1 run (" + typeOfUnFairBall + ")");
+            ballEventsRepository.insertEvent(strike.getMatchId(), battingTeam.getTeamId(), 0, over *6 + ballNumber,
+                    -1, strike.getCurrentBowlerPlayerId(), 1, typeOfUnFairBall, ""
+            );
+
+            legitimateBall(strike, outcomeOfBallBowled, overCompletionResult, true);
+            // returning Enum will ensure the caller, not to update the ball number
+            return (possibilityOfUnFairBall == 0) ? UnfairBallType.WIDE : UnfairBallType.NO;
+        }
+        else {
+            battingTeam.incrementTotalBalls(strike.getCurrentStrike());
+            legitimateBall(strike, outcomeOfBallBowled, overCompletionResult, false);
+            return UnfairBallType.NA;
+        }
+    }
+
+    private List<TeamDTO> getSelectedTeams(int team1Id, int team2Id) {
         List<TeamDTO> allTeams = teamRepository.findAll();
         TeamDTO team1 = null;
         TeamDTO team2 = null;
@@ -306,9 +271,6 @@ public class MatchService {
                 team2 = t;
             }
         }
-        if((team1 == null) || (team2 == null)){
-            throw new IllegalStateException("Either or Both of the Team does not Exists");
-        }
         return Arrays.asList(team1, team2);
     }
 
@@ -316,5 +278,8 @@ public class MatchService {
         int team1Id = match.getTeam1Id();
         match.setTeam1Id(match.getTeam2Id());
         match.setTeam2Id(team1Id);
+    }
+    private void setBowlerForThisOver(Match match, Integer currentBowlTeamId, int bowlerId) {
+        teamService.setBowlerForThisOver(match, currentBowlTeamId, bowlerId);
     }
 }

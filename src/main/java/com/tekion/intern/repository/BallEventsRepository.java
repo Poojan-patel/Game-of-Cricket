@@ -24,27 +24,43 @@ public class BallEventsRepository{
             ps.setInt(4,ballNumber);
             ps.setInt(7,score);
 
-            if(batsmanId != -1) ps.setInt(5, batsmanId);
-            else                ps.setNull(5, Types.INTEGER);
+            if(batsmanId != -1) {
+                ps.setInt(5, batsmanId);
+            }
+            else {
+                ps.setNull(5, Types.INTEGER);
+            }
 
-            if(bowlerId != -1)  ps.setInt(6, bowlerId);
-            else                ps.setNull(6, Types.INTEGER);
+            if(bowlerId != -1) {
+                ps.setInt(6, bowlerId);
+            }
+            else {
+                ps.setNull(6, Types.INTEGER);
+            }
 
-            if(extras.equals(""))   ps.setNull(8,Types.VARCHAR);
-            else                    ps.setString(8,extras);
+            if(extras.equals("")) {
+                ps.setNull(8, Types.VARCHAR);
+            }
+            else {
+                ps.setString(8, extras);
+            }
 
-            if(wicket.equals(""))   ps.setNull(9, Types.VARCHAR);
-            else                    ps.setString(9,wicket);
+            if(wicket.equals("")) {
+                ps.setNull(9, Types.VARCHAR);
+            }
+            else {
+                ps.setString(9, wicket);
+            }
 
             ps.execute();
-            con.close();
         } catch(SQLException sqle){
+            sqle.printStackTrace();
+        } catch(Exception e){
+            e.printStackTrace();
+        } finally {
             try {
                 con.close();
             } catch (Exception ignored) {}
-            sqle.printStackTrace();
-        } catch(Exception ignored){
-            ignored.printStackTrace();
         }
     }
 
@@ -56,13 +72,14 @@ public class BallEventsRepository{
             getTeamScore(matchId, con, matchResult);
             getBatsmanStats(matchId, con, matchResult);
             getBowlingStats(matchId, con, matchResult);
-            con.close();
         } catch (SQLException sqle){
+            sqle.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
             try {
                 con.close();
             } catch (Exception ignored) {}
-        } catch (Exception e){
-            e.printStackTrace();
         }
         return matchResult;
     }
@@ -81,12 +98,13 @@ public class BallEventsRepository{
                 bowlerWithThrownOvers.put(rs.getInt("bowler"), (int)Math.ceil(rs.getDouble("overs")));
             }
         } catch (SQLException sqle){
-            try{
-                con.close();
-            } catch (Exception ignored){}
             sqle.printStackTrace();
         } catch (Exception ignored){
             ignored.printStackTrace();
+        } finally {
+            try{
+                con.close();
+            } catch (Exception ignored){}
         }
 
         return bowlerWithThrownOvers;
@@ -103,14 +121,14 @@ public class BallEventsRepository{
             ResultSet rs = ps.executeQuery();
             while(rs.next())
                 scoreToChase = rs.getInt(1);
-            con.close();
         } catch (SQLException sqle){
-            try{
-                con.close();
-            } catch (Exception ignored){}
             sqle.printStackTrace();
         } catch (Exception ignored){
             ignored.printStackTrace();
+        } finally {
+            try{
+                con.close();
+            } catch (Exception ignored){}
         }
 
         return scoreToChase;

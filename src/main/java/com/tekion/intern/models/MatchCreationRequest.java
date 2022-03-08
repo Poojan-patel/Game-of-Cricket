@@ -1,8 +1,5 @@
 package com.tekion.intern.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
-
 public class MatchCreationRequest {
     private int team1Id;
     private int team2Id;

@@ -19,7 +19,7 @@ public class PlayerRepository {
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchBowlersForBowlingTeamByTeamId"));
-            ps.setInt(1,teamId);
+            ps.setInt(1, teamId);
             ResultSet rs = ps.executeQuery();
 
             String name;
@@ -49,7 +49,7 @@ public class PlayerRepository {
         return bowlers;
     }
 
-    public List<Player> fetchOnFieldBatsmenData(int strike, int nonStrike, int matchId, int currentBatTeamId) {
+    public List<Player> fetchOnFieldBatsmenData(int strike, int nonStrike, int matchId) {
         Connection con = null;
         List<Player> currentPlayers = new ArrayList<>();
         try{
@@ -63,23 +63,23 @@ public class PlayerRepository {
             ps.setInt(4, nonStrike);
             ps.setInt(5, matchId);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()){
+            while (rs.next()) {
                 currentPlayers.add(new Player(
                         rs.getString("name"), rs.getString("playertype"), rs.getString("bowling_pace"),
                         rs.getInt("player_id"), rs.getInt("Balls"), rs.getInt("Score"))
                 );
             }
-            con.close();
             if(currentPlayers.get(0).getPlayerId() != strike){
                 Collections.swap(currentPlayers, 0,1);
             }
         } catch(SQLException sqle){
-            try {
-                con.close();
-            } catch (Exception ignored) {}
             sqle.printStackTrace();
         } catch (Exception ignored) {
             ignored.printStackTrace();
+        } finally {
+            try {
+                con.close();
+            } catch (Exception ignored) {}
         }
 
         return currentPlayers;
@@ -99,14 +99,14 @@ public class PlayerRepository {
                         rs.getString("name"), rs.getString("playertype"),
                         rs.getString("bowling_pace"), rs.getInt("player_id"), 0, 0);
             }
-            con.close();
         } catch(SQLException sqle){
-            try {
-                con.close();
-            } catch (Exception ignored) {}
             sqle.printStackTrace();
         } catch (Exception ignored) {
             ignored.printStackTrace();
+        } finally {
+            try {
+                con.close();
+            } catch (Exception ignored) {}
         }
         return newPlayer;
     }
