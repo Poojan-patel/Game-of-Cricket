@@ -164,13 +164,14 @@ public class MatchService {
         Team battingTeam = strike.getBattingTeam();
         overCompletionResult.appendBallLogs(over + "." + ballNumber + ": Wicket-" + (battingTeam.getCurrentWickets()+1) + "(" + typeOfWicketFallen + ") || Player: " + battingTeam.getNameOfPlayer(strike.getCurrentStrike()));
         ballEventsRepository.insertEvent(
-                strike.getMatchId(), battingTeam.getTeamId(), 0, battingTeam.getPlayedBalls(), battingTeam.getPlayerIdByIndex(strike.getCurrentStrike()),
+                strike.getMatchId(), battingTeam.getTeamId(), battingTeam.getPlayedBalls(), battingTeam.getPlayerIdByIndex(strike.getCurrentStrike()),
                 strike.getCurrentBowlerPlayerId(), 0, "", typeOfWicketFallen
         );
         teamService.updateStrikeOnWicket(strike);
     }
 
-    private void legitimateBall(Strike strike, int outcomeOfBallBowled, OverCompletionResult overCompletionResult, boolean isTeamScore){
+    private void legitimateBall(Strike strike, int outcomeOfBallBowled, OverCompletionResult overCompletionResult, String typeOfUnFairBall){
+        boolean isTeamScore = !typeOfUnFairBall.equals("");
         Team battingTeam = strike.getBattingTeam();
         int over = strike.getCurrentOver();
         int ballNumber = battingTeam.getPlayedBalls()%6 + ((isTeamScore) ?1 :0);
@@ -187,9 +188,9 @@ public class MatchService {
             overCompletionResult.appendBallLogs(over + "." + ballNumber + ": " + outcomeOfBallBowled + " run || Player: " + battingTeam.getNameOfPlayer(currentPlayer));
             battingTeam.incrementTeamScore(outcomeOfBallBowled, currentPlayer);
         }
-
-        ballEventsRepository.insertEvent(strike.getMatchId(), battingTeam.getTeamId(), 0, over*6 + ballNumber,
-                (isTeamScore) ?-1 :battingTeam.getPlayerIdByIndex(currentPlayer), strike.getCurrentBowlerPlayerId(), outcomeOfBallBowled, "", ""
+        outcomeOfBallBowled += ((isTeamScore) ?1 :0);
+        ballEventsRepository.insertEvent(strike.getMatchId(), battingTeam.getTeamId(), over*6 + ballNumber,
+                (isTeamScore) ?-1 :battingTeam.getPlayerIdByIndex(currentPlayer), strike.getCurrentBowlerPlayerId(), outcomeOfBallBowled, typeOfUnFairBall, ""
         );
 
         if(outcomeOfBallBowled%2 == 1) {
@@ -197,17 +198,18 @@ public class MatchService {
             teamService.updateStrike(strike);
         }
 
-        checkIfRunOut(strike, outcomeOfBallBowled, overCompletionResult);
+        checkIfRunOut(strike, outcomeOfBallBowled, overCompletionResult, isTeamScore);
     }
 
-    private void checkIfRunOut(Strike strike, int outcomeOfBallBowled, OverCompletionResult overCompletionResult) {
+    private void checkIfRunOut(Strike strike, int outcomeOfBallBowled, OverCompletionResult overCompletionResult, boolean isTeamScore) {
         Team battingTeam = strike.getBattingTeam();
+        int currentBallNumber = battingTeam.getPlayedBalls() + ((isTeamScore) ?1 :0);
         if(outcomeOfBallBowled != 4 && outcomeOfBallBowled != 6) {
             int possibilityOfRunOut = ThreadLocalRandom.current().nextInt(0, 10);
             if (possibilityOfRunOut == 9) {
                 overCompletionResult.appendBallLogs("RunOut-" + battingTeam.getNameOfPlayer(strike.getCurrentStrike()));
                 ballEventsRepository.insertEvent(
-                        strike.getMatchId(), battingTeam.getTeamId(), 0, battingTeam.getPlayedBalls(),
+                        strike.getMatchId(), battingTeam.getTeamId(), currentBallNumber,
                         battingTeam.getPlayerIdByIndex(strike.getCurrentStrike()),
                         -1, 0, "", "RUN OUT"
                 );
@@ -244,17 +246,14 @@ public class MatchService {
             battingTeam.incrementTeamScoreForUnfair(1);
             String typeOfUnFairBall = (possibilityOfUnFairBall == 0) ?"WIDE" :"NO BALL";
             overCompletionResult.appendBallLogs(over + "." + ballNumber + ": 1 run (" + typeOfUnFairBall + ")");
-            ballEventsRepository.insertEvent(strike.getMatchId(), battingTeam.getTeamId(), 0, over *6 + ballNumber,
-                    -1, strike.getCurrentBowlerPlayerId(), 1, typeOfUnFairBall, ""
-            );
 
-            legitimateBall(strike, outcomeOfBallBowled, overCompletionResult, true);
+            legitimateBall(strike, outcomeOfBallBowled, overCompletionResult, typeOfUnFairBall);
             // returning Enum will ensure the caller, not to update the ball number
             return (possibilityOfUnFairBall == 0) ? UnfairBallType.WIDE : UnfairBallType.NO;
         }
         else {
             battingTeam.incrementTotalBalls(strike.getCurrentStrike());
-            legitimateBall(strike, outcomeOfBallBowled, overCompletionResult, false);
+            legitimateBall(strike, outcomeOfBallBowled, overCompletionResult, "");
             return UnfairBallType.NA;
         }
     }

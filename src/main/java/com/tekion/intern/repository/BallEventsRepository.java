@@ -12,7 +12,7 @@ import java.util.Map;
 @Repository
 public class BallEventsRepository{
     public void insertEvent
-            (int matchId, int teamId, int inning, int ballNumber, int batsmanId, int bowlerId, int score, String extras, String wicket)
+            (int matchId, int teamId, int ballNumber, int batsmanId, int bowlerId, int score, String extras, String wicket)
     {
         Connection con = null;
         try{
@@ -20,36 +20,36 @@ public class BallEventsRepository{
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "insertEvent"));
             ps.setInt(1,matchId);
             ps.setInt(2,teamId);
-            ps.setInt(3,inning);
-            ps.setInt(4,ballNumber);
-            ps.setInt(7,score);
+            //ps.setInt(3,inning);
+            ps.setInt(3,ballNumber);
+            ps.setInt(6,score);
 
             if(batsmanId != -1) {
-                ps.setInt(5, batsmanId);
+                ps.setInt(4, batsmanId);
+            }
+            else {
+                ps.setNull(4, Types.INTEGER);
+            }
+
+            if(bowlerId != -1) {
+                ps.setInt(5, bowlerId);
             }
             else {
                 ps.setNull(5, Types.INTEGER);
             }
 
-            if(bowlerId != -1) {
-                ps.setInt(6, bowlerId);
-            }
-            else {
-                ps.setNull(6, Types.INTEGER);
-            }
-
             if(extras.equals("")) {
-                ps.setNull(8, Types.VARCHAR);
+                ps.setNull(7, Types.VARCHAR);
             }
             else {
-                ps.setString(8, extras);
+                ps.setString(7, extras);
             }
 
             if(wicket.equals("")) {
-                ps.setNull(9, Types.VARCHAR);
+                ps.setNull(8, Types.VARCHAR);
             }
             else {
-                ps.setString(9, wicket);
+                ps.setString(8, wicket);
             }
 
             ps.execute();
