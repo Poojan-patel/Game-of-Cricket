@@ -1,0 +1,1 @@
+select sum(score) from BallEvents where match_id = ? and team = ?

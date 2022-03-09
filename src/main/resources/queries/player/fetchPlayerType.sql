@@ -1,0 +1,1 @@
+select playertype from Player where player_id = ?

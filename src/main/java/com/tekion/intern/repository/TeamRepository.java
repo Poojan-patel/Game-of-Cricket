@@ -4,6 +4,7 @@ import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.beans.Player;
 import com.tekion.intern.beans.Team;
 import com.tekion.intern.models.BattingTeam;
+import com.tekion.intern.models.PlayerDTO;
 import com.tekion.intern.models.TeamDTO;
 import com.tekion.intern.util.ReaderUtil;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @Repository
 public class TeamRepository {
-    public Integer save(Team team){
+    public Integer save(TeamDTO team){
         Connection con = null;
         String teamName = team.getTeamName();
         try{
@@ -49,7 +50,7 @@ public class TeamRepository {
         try{
             con = MySqlConnector.getConnection();
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select team_id, name from team");
+            ResultSet rs = stmt.executeQuery(ReaderUtil.readSqlFromFile("team", "getAll"));
             while(rs.next()){
                 teams.add(new TeamDTO(rs.getString(2), rs.getInt(1)));
             }
@@ -71,9 +72,7 @@ public class TeamRepository {
         BattingTeam team = null;
         try{
             con = MySqlConnector.getConnection();
-            PreparedStatement ps = con.prepareStatement("select * from team inner join\n" +
-                    "(select count(distinct ballnumber) Balls, sum(score) Score, team from BallEvents where match_id = ? and team = ?) as ScoreBoard\n" +
-                    "on ScoreBoard.team = team.team_id");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("team", "fetchTeamScoreFromMatchId"));
             ps.setInt(1, matchId);
             ps.setInt(2, battingTeamId);
             ResultSet rs = ps.executeQuery();
@@ -103,7 +102,7 @@ public class TeamRepository {
         List<Integer> players = new ArrayList<>();
         try{
             con = MySqlConnector.getConnection();
-            PreparedStatement ps = con.prepareStatement("select player_id from Player where team = ? limit 2");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("team", "fetchFirstTwoPlayers"));
             ps.setInt(1, team1Id);
             ResultSet rs = ps.executeQuery();
             while (rs.next())
@@ -122,13 +121,13 @@ public class TeamRepository {
         return players;
     }
 
-    private void insertTeamPlayers(List<Player> players, int teamId, Connection conn) throws SQLException {
+    private void insertTeamPlayers(List<PlayerDTO> players, int teamId, Connection conn) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(ReaderUtil.readSqlFromFile("team","insertTeamPlayers"), Statement.RETURN_GENERATED_KEYS);
-        for (Player player : players) {
+        for (PlayerDTO player : players) {
             stmt.setInt(1, teamId);
             stmt.setString(2, player.getName());
             stmt.setString(3, player.getPlayerType().toString());
-            stmt.setString(4, player.getTypeOfBowler());
+            stmt.setString(4, player.getTypeOfBowler().toString());
             stmt.addBatch();
         }
         stmt.executeBatch();

@@ -3,7 +3,6 @@ package com.tekion.intern.controller;
 import com.tekion.intern.beans.Match;
 import com.tekion.intern.beans.Player;
 import com.tekion.intern.models.*;
-import com.tekion.intern.repository.MatchRepository;
 import com.tekion.intern.services.MatchService;
 import com.tekion.intern.util.MatchUtil;
 import com.tekion.intern.validators.MatchValidators;

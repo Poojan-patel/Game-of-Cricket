@@ -1,0 +1,1 @@
+select player_id from Player where team = ? and player_id > ? limit 1 offset 0

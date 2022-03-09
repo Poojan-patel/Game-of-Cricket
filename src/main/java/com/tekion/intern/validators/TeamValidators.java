@@ -1,7 +1,6 @@
 package com.tekion.intern.validators;
 
 import com.tekion.intern.models.MatchCreationRequest;
-import com.tekion.intern.models.MatchCreationResponse;
 import com.tekion.intern.models.TeamDTO;
 import com.tekion.intern.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;

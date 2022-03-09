@@ -124,7 +124,7 @@ public class TeamInPlayRepository {
         Strike strike = null;
         try{
             con = MySqlConnector.getConnection();
-            PreparedStatement ps = con.prepareStatement("select * from team_in_play where match_id = ? and team = ?");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("teaminplay", "fetchStrikeDetails"));
             ps.setInt(1, matchId);
             ps.setInt(2, currentBatTeamId);
             ResultSet rs = ps.executeQuery();

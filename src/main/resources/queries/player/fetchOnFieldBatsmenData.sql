@@ -1,0 +1,1 @@
+select * from (select * from Player where player_id in (?,?)) Player left outer join (select count(distinct ballnumber) Balls, sum(score) Score, batsman from BallEvents where batsman in (?,?) and match_id = ? group by batsman) as ScoreCard on Player.player_id = ScoreCard.batsman

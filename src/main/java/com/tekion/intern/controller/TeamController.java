@@ -12,10 +12,12 @@ import java.util.logging.Logger;
 @RestController
 @RequestMapping("/team")
 public class TeamController {
-    private Logger logger = Logger.getLogger("teamcontroller");
+    private TeamService teamService;
 
     @Autowired
-    private TeamService teamService;
+    public void setService(TeamService teamService){
+        this.teamService = teamService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<String> createTeam(@RequestBody TeamDTO team){

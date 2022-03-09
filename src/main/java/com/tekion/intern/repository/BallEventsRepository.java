@@ -114,7 +114,7 @@ public class BallEventsRepository{
         int scoreToChase = -1;
         try{
             con = MySqlConnector.getConnection();
-            PreparedStatement ps = con.prepareStatement("select sum(score) from BallEvents where match_id = ? and team = ?");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "fetchScoreToChase"));
             ps.setInt(1, matchId);
             ps.setInt(2, currentBowlTeamId);
             ResultSet rs = ps.executeQuery();

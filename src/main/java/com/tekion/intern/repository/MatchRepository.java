@@ -70,7 +70,7 @@ public class MatchRepository {
         try{
             con = MySqlConnector.getConnection();
             con.setAutoCommit(false);
-            PreparedStatement ps = con.prepareStatement("update MatchTable set team1 = ?, team2 = ?, winner = ? where match_id = ?");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("matchtable", "update"));
             ps.setInt(1, match.getTeam1Id());
             ps.setInt(2, match.getTeam2Id());
             ps.setString(3, match.getMatchState().toString());

@@ -1,0 +1,1 @@
+select name, player_id from Player where team = ?

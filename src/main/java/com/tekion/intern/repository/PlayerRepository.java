@@ -54,9 +54,7 @@ public class PlayerRepository {
         List<BatsmanStats> currentPlayers = new ArrayList<>();
         try{
             con = MySqlConnector.getConnection();
-            PreparedStatement ps = con.prepareStatement(
-                    "select * from (select * from Player where player_id in (?,?)) Player left outer join (select count(distinct ballnumber) Balls, sum(score) Score, batsman from BallEvents where batsman in (?,?) and match_id = ? group by batsman) as ScoreCard on Player.player_id = ScoreCard.batsman"
-            );
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchOnFieldBatsmenData"));
             ps.setInt(1, strike);
             ps.setInt(2, nonStrike);
             ps.setInt(3, strike);
@@ -89,7 +87,7 @@ public class PlayerRepository {
         int newPlayer = -1;
         try{
             con = MySqlConnector.getConnection();
-            PreparedStatement ps = con.prepareStatement("select player_id from Player where team = ? and player_id > ? limit 1 offset 0");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchNextBatsman"));
             ps.setInt(1, teamId);
             ps.setInt(2, maxOrder);
             ResultSet rs = ps.executeQuery();
@@ -113,7 +111,7 @@ public class PlayerRepository {
         PlayerType playerType = null;
         try{
             con = MySqlConnector.getConnection();
-            PreparedStatement ps = con.prepareStatement("select playertype from Player where player_id = ?");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchPlayerType"));
             ps.setInt(1, playerId);
             ResultSet rs = ps.executeQuery();
             while(rs.next())
@@ -135,7 +133,7 @@ public class PlayerRepository {
         String name = null;
         try{
             con = MySqlConnector.getConnection();
-            PreparedStatement ps = con.prepareStatement("select name from Player where player_id = ?");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchPlayerNameByPlayerId"));
             ps.setInt(1, bowlerId);
             ResultSet rs = ps.executeQuery();
             while(rs.next())
@@ -158,7 +156,7 @@ public class PlayerRepository {
         Map<Integer, String> playerNamesFromIds = new HashMap<>();
         try{
             con = MySqlConnector.getConnection();
-            PreparedStatement ps = con.prepareStatement("select name, player_id from Player where team = ?");
+            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchPlayerNamesByTeamId"));
             ps.setInt(1, teamId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()){

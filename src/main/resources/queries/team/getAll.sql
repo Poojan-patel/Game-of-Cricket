@@ -1,1 +1,1 @@
-select * from team
+select team_id, name from team
