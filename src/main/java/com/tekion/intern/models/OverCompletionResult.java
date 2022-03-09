@@ -3,6 +3,7 @@ package com.tekion.intern.models;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import java.util.List;
+import java.util.Map;
 
 public class OverCompletionResult implements ScoreBoard{
     @JsonView
@@ -22,8 +23,8 @@ public class OverCompletionResult implements ScoreBoard{
     @JsonView
     private String intermediateResult;
 
-    public OverCompletionResult(){
-        ballLogs = new BallLogs();
+    public OverCompletionResult(Map<Integer, String> playerNamesFromIds){
+        ballLogs = new BallLogs(playerNamesFromIds);
     }
 
     public void setTeamScore(String teamScore) {
@@ -48,6 +49,10 @@ public class OverCompletionResult implements ScoreBoard{
 
     public void appendBallLogs(String ballEvent) {
         ballLogs.appendLog(ballEvent);
+    }
+
+    public void appendBallLogs(String ballEvent, int playerId) {
+        ballLogs.appendLog(ballEvent, playerId);
     }
 
     public void setBowlerForNextOver(List<PlayerDTO> bowlerForNextOver) {

@@ -68,11 +68,6 @@ public class Team {
         this.playerList = playerList;
     }
 
-    public void incrementTotalBalls(int currentStrike) {
-        playedBalls++;
-        playerList.get(currentStrike).incrementTotalBalls();
-    }
-
     public void incrementWickets() {
         currentWickets++;
     }
@@ -110,11 +105,6 @@ public class Team {
 
     public void incrementTeamScoreForUnfair(int outcomeOfBallBowled) {
         currentScore += outcomeOfBallBowled;
-    }
-
-    public void incrementTeamScore(int outcomeOfBallBowled, int currentPlayer) {
-        currentScore += outcomeOfBallBowled;
-        playerList.get(currentPlayer).incrementScore(outcomeOfBallBowled);
     }
 
     public int getNumberOfPlayers() {

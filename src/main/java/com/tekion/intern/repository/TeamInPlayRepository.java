@@ -1,7 +1,7 @@
 package com.tekion.intern.repository;
 
+import com.tekion.intern.beans.Strike;
 import com.tekion.intern.dbconnector.MySqlConnector;
-import com.tekion.intern.models.FieldBatsmenAndWickets;
 import com.tekion.intern.util.ReaderUtil;
 import org.springframework.stereotype.Repository;
 
@@ -34,28 +34,29 @@ public class TeamInPlayRepository {
         }
     }
 
-    public void updateStrikesByTeamAndMatchId(int currentStrike, int currentNonStrike, int matchId, int teamId, int curWickets){
+    public void updateStrikesByTeamAndMatchId(Strike strike){
+
         Connection con = null;
         try {
             con = MySqlConnector.getConnection();
             con.setAutoCommit(false);
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("teaminplay", "updateStrikesByTeamAndMatchId"));
-            if(currentStrike != -1) {
-                ps.setInt(1, currentStrike);
+            if(strike.getStrike() != -1) {
+                ps.setInt(1, strike.getStrike());
             }
             else {
                 ps.setNull(1, Types.INTEGER);
             }
 
-            if(currentNonStrike != -1) {
-                ps.setInt(2, currentNonStrike);
+            if(strike.getNonStrike() != -1) {
+                ps.setInt(2, strike.getNonStrike());
             }
             else {
                 ps.setNull(2, Types.INTEGER);
             }
-            ps.setInt(3,curWickets);
-            ps.setInt(4,matchId);
-            ps.setInt(5,teamId);
+            ps.setInt(3, strike.getCurrentWickets());
+            ps.setInt(4, strike.getMatchId());
+            ps.setInt(5, strike.getTeamId());
             ps.executeUpdate();
             con.commit();
             con.close();
@@ -118,9 +119,9 @@ public class TeamInPlayRepository {
         return bowlerId;
     }
 
-    public FieldBatsmenAndWickets fetchStrikeDetails(int matchId, int currentBatTeamId) {
+    public Strike fetchStrikeDetails(int matchId, int currentBatTeamId) {
         Connection con = null;
-        FieldBatsmenAndWickets fieldBatsmenAndWickets = null;
+        Strike strike = null;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement("select * from team_in_play where match_id = ? and team = ?");
@@ -128,7 +129,10 @@ public class TeamInPlayRepository {
             ps.setInt(2, currentBatTeamId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()){
-                fieldBatsmenAndWickets = new FieldBatsmenAndWickets(rs.getInt("strike"), rs.getInt("nonstrike"), rs.getInt("currentwickets"));
+                strike = new Strike(
+                        rs.getInt("strike"), rs.getInt("nonstrike"), rs.getInt("bowler"),
+                        matchId, rs.getInt("team"), rs.getInt("currentwickets")
+                );
             }
         } catch (SQLException sqle){
             sqle.printStackTrace();
@@ -139,6 +143,6 @@ public class TeamInPlayRepository {
                 con.close();
             } catch (Exception ignored) {}
         }
-        return fieldBatsmenAndWickets;
+        return strike;
     }
 }

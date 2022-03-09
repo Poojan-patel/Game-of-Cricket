@@ -3,7 +3,7 @@ package com.tekion.intern.services;
 import com.tekion.intern.beans.*;
 import com.tekion.intern.enums.MatchState;
 import com.tekion.intern.enums.PlayerType;
-import com.tekion.intern.models.FieldBatsmenAndWickets;
+import com.tekion.intern.models.BattingTeam;
 import com.tekion.intern.models.PlayerDTO;
 import com.tekion.intern.models.TeamDTO;
 import com.tekion.intern.repository.BallEventsRepository;
@@ -90,40 +90,32 @@ public class TeamService {
     }
 
     public Strike initializeStrike(Match match, int currentBowlTeamId, Player bowler) {
+        int currentBatTeamId = (match.getTeam1Id() == currentBowlTeamId) ? match.getTeam2Id() : match.getTeam1Id();
+        return teamInPlayRepository.fetchStrikeDetails(match.getMatchId(), currentBatTeamId);
+    }
+
+    public BattingTeam initializeBattingTeam(Match match, int currentBowlTeamId) {
         int scoreToChase = -1;
         int currentBatTeamId = (match.getTeam1Id() == currentBowlTeamId) ? match.getTeam2Id() : match.getTeam1Id();
         if(match.getMatchState() == MatchState.TEAM2_BATTING){
             scoreToChase = ballEventsRepository.fetchScoreToChase(match.getMatchId(), currentBowlTeamId);
         }
-
-        FieldBatsmenAndWickets currentOnFieldBatsmen = teamInPlayRepository.fetchStrikeDetails(match.getMatchId(), currentBatTeamId);
-        List<Player> currentPlayers = playerRepository.fetchOnFieldBatsmenData(currentOnFieldBatsmen.getStrike(), currentOnFieldBatsmen.getNonStrike(), match.getMatchId());
-        Team battingTeam = teamRepository.fetchTeamScoreFromMatchId(match.getMatchId(), currentBatTeamId);
-        battingTeam.setPlayerList(currentPlayers);
+        BattingTeam battingTeam = teamRepository.fetchTeamScoreFromMatchId(match.getMatchId(), currentBatTeamId);
         battingTeam.setScoreToChase(scoreToChase);
-        battingTeam.setCurrentWickets(currentOnFieldBatsmen.getCurrentWickets());
-        return new Strike(match.getMatchId(), bowler, battingTeam);
+
+        return battingTeam;
     }
 
     public void updateStrike(Strike strike) {
-        Team battingTeam = strike.getBattingTeam();
-        int teamId = battingTeam.getTeamId();
-
-        int onStrike, offStrike;
-        int currentStrikeIndex = strike.getCurrentStrike();
-        onStrike = battingTeam.getPlayerIdByIndex(currentStrikeIndex);
-        offStrike = battingTeam.getPlayerIdByIndex(1 - currentStrikeIndex);
-        teamInPlayRepository.updateStrikesByTeamAndMatchId(onStrike, offStrike, strike.getMatchId(), teamId, battingTeam.getCurrentWickets());
+        teamInPlayRepository.updateStrikesByTeamAndMatchId(strike);
     }
 
     public void updateStrikeOnWicket(Strike strike) {
-        Team battingTeam = strike.getBattingTeam();
-        int maxOrder = battingTeam.getMaxOrderedPlayer();
-        battingTeam.incrementWickets();
-        Player newBatter = playerRepository.fetchNextBatsman(battingTeam.getTeamId(), maxOrder);
+        int maxOrder = strike.getMaxOrderedPlayer();
+        strike.incrementWickets();
+        int newBatter = playerRepository.fetchNextBatsman(strike.getTeamId(), maxOrder);
         strike.setNewBatsman(newBatter);
-        int currentStrikeIndex = strike.getCurrentStrike();
-        teamInPlayRepository.updateStrikesByTeamAndMatchId(battingTeam.getPlayerIdByIndex(currentStrikeIndex), battingTeam.getPlayerIdByIndex(1-currentStrikeIndex), strike.getMatchId(), battingTeam.getTeamId(), battingTeam.getCurrentWickets());
+        teamInPlayRepository.updateStrikesByTeamAndMatchId(strike);
     }
 
     public void insertStrikesForNewMatch(int teamId, int matchId) {

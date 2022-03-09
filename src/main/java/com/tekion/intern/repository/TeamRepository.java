@@ -3,6 +3,7 @@ package com.tekion.intern.repository;
 import com.tekion.intern.dbconnector.MySqlConnector;
 import com.tekion.intern.beans.Player;
 import com.tekion.intern.beans.Team;
+import com.tekion.intern.models.BattingTeam;
 import com.tekion.intern.models.TeamDTO;
 import com.tekion.intern.util.ReaderUtil;
 import org.springframework.stereotype.Repository;
@@ -65,9 +66,9 @@ public class TeamRepository {
     }
 
 
-    public Team fetchTeamScoreFromMatchId(int matchId, int battingTeamId) {
+    public BattingTeam fetchTeamScoreFromMatchId(int matchId, int battingTeamId) {
         Connection con = null;
-        Team team = null;
+        BattingTeam team = null;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement("select * from team inner join\n" +
@@ -77,12 +78,12 @@ public class TeamRepository {
             ps.setInt(2, battingTeamId);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
-                team = new Team(rs.getString("name"), rs.getInt("Score"), rs.getInt("Balls"), battingTeamId);
+                team = new BattingTeam(rs.getString("name"), rs.getInt("Score"), rs.getInt("Balls"), battingTeamId);
             }
             if(team == null){
                 rs = ps.executeQuery("select name from team where team_id = " + battingTeamId);
                 while(rs.next()){
-                    team = new Team(rs.getString(1), 0, 0, battingTeamId);
+                    team = new BattingTeam(rs.getString(1), 0, 0, battingTeamId);
                 }
             }
         } catch (SQLException sqle){

@@ -1,63 +1,65 @@
 package com.tekion.intern.beans;
 
 public class Strike {
-    private int currentStrike;
-    private Player currentBowler;
+    private int strike;
+    private int nonStrike;
+    private int bowler;
     private int matchId;
-    private Team team;
+    private int teamId;
+    private int currentWickets;
 
-    public Strike(int matchId, Player bowler, Team team){
-        this.currentStrike = 0;
-        this.currentBowler = bowler;
-        this.team = team;
+    public Strike(int strike, int nonStrike, int bowler, int matchId, int teamId, int currentWickets) {
+        this.strike = strike;
+        this.nonStrike = nonStrike;
+        this.bowler = bowler;
         this.matchId = matchId;
-    }
-
-    public int getCurrentOver(){
-        return team.getPlayedBalls()/6;
-    }
-
-    public int getCurrentBowlerPlayerId(){
-        return currentBowler.getPlayerId();
+        this.teamId = teamId;
+        this.currentWickets = currentWickets;
     }
 
     public void changeStrike(){
-        currentStrike = (currentStrike+1)%2;
+        int tempForSwap = strike;
+        strike = nonStrike;
+        nonStrike = tempForSwap;
     }
 
-    public int getCurrentStrike() {
-        return currentStrike;
-    }
-
-    public Player getCurrentStrikePlayer() {
-        return team.getPlayers().get(currentStrike);
-    }
-
-    public Player getCurrentNonStrikePlayer() {
-        return team.getPlayers().get(1-currentStrike);
-    }
-
-    public Team getBattingTeam() {
-        return team;
-    }
-
-    public void incrementTotalBalls() {
-        team.incrementTotalBalls(currentStrike);
-    }
-
-    public void updateWickets() {
-        team.incrementWickets();
+    public int getStrike() {
+        return strike;
     }
 
     public int getMatchId() {
         return matchId;
     }
 
-    public void setNewBatsman(Player newBatter) {
-        team.setNewPlayerAtStrike(currentStrike, newBatter);
+    public void setNewBatsman(int newBatter) {
+        strike = newBatter;
     }
 
-    public Player getCurrentBowler() {
-        return currentBowler;
+    public boolean isAllOut() {
+        return (currentWickets == 10);
+    }
+
+    public int getTeamId() {
+        return teamId;
+    }
+
+    public int getCurrentWickets() {
+        return currentWickets;
+    }
+
+    public int getNonStrike() {
+        return nonStrike;
+    }
+
+    public int getBowler() {
+        return bowler;
+    }
+
+    public int getMaxOrderedPlayer() {
+        return Integer.max(strike, nonStrike);
+    }
+
+    public void incrementWickets() {
+        currentWickets++;
     }
 }

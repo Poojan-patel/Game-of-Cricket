@@ -20,7 +20,6 @@ public class BallEventsRepository{
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "insertEvent"));
             ps.setInt(1,matchId);
             ps.setInt(2,teamId);
-            //ps.setInt(3,inning);
             ps.setInt(3,ballNumber);
             ps.setInt(6,score);
 
