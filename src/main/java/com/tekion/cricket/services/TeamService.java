@@ -6,26 +6,34 @@ import com.tekion.cricket.beans.Strike;
 import com.tekion.cricket.models.BattingTeam;
 import com.tekion.cricket.models.PlayerDTO;
 import com.tekion.cricket.models.TeamDTO;
+import com.tekion.cricket.repository.BallEventsRepository;
+import com.tekion.cricket.repository.PlayerRepository;
+import com.tekion.cricket.repository.TeamInPlayRepository;
+import com.tekion.cricket.repository.TeamRepository;
 
 import java.util.List;
 
 //@Service
 public interface TeamService{
-    public Integer validateTeam(TeamDTO team);
+    void setRepository(
+            PlayerRepository playerRepository, TeamRepository teamRepo, BallEventsRepository ballEventsRepository, TeamInPlayRepository teamInPlayRepository
+    );
 
-    public List<TeamDTO> getAllTeams();
+    Integer validateTeam(TeamDTO team);
 
-    public List<PlayerDTO> getAllAvailableBowlers(Match match, Integer currentBowlTeamId, Integer maxOvers);
+    List<TeamDTO> getAllTeams();
 
-    public void setBowlerForThisOver(Match match, Integer currentBowlTeamId, int bowlerId);
+    List<PlayerDTO> getAllAvailableBowlers(Match match, Integer currentBowlTeamId, Integer maxOvers);
 
-    public Strike initializeStrike(Match match, int currentBowlTeamId, Player bowler);
+    void setBowlerForThisOver(Match match, Integer currentBowlTeamId, int bowlerId);
 
-    public BattingTeam initializeBattingTeam(Match match, int currentBowlTeamId);
+    Strike initializeStrike(Match match, int currentBowlTeamId, Player bowler);
 
-    public void updateStrike(Strike strike);
+    BattingTeam initializeBattingTeam(Match match, int currentBowlTeamId);
 
-    public void updateStrikeOnWicket(Strike strike);
+    void updateStrike(Strike strike);
 
-    public void insertStrikesForNewMatch(int teamId, int matchId);
+    void updateStrikeOnWicket(Strike strike);
+
+    void insertStrikesForNewMatch(int teamId, int matchId);
 }
