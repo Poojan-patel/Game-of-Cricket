@@ -14,6 +14,30 @@ import java.util.List;
 @Repository
 public class TeamRepositoryImpl implements TeamRepository{
     @Override
+    public String getTeamNameByTeamId(int teamId) {
+        Connection con = null;
+        String teamName = "";
+        try{
+            con = MySqlConnector.getConnection();
+            PreparedStatement ps = con.prepareStatement("select name from team where team_id = ?");
+            ps.setInt(1, teamId);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                teamName = rs.getString(1);
+            }
+        } catch (SQLException sqle){
+            sqle.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            try{
+                con.close();
+            } catch (Exception ignored) {}
+        }
+        return teamName;
+    }
+
+    @Override
     public Integer save(TeamDTO team){
         Connection con = null;
         String teamName = team.getTeamName();

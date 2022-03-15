@@ -28,4 +28,6 @@ public interface MatchService {
     ScoreBoard playTheOver(Match match, int currentBowlTeamId, Player bowler);
 
     MatchResult generateFinalScoreBoard(Integer matchId);
+
+    MatchRecreateResponse recreateMatch(Match match);
 }

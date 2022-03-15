@@ -69,4 +69,11 @@ public class MatchController {
         TossSimulationResult tossSimulationResult = matchService.stimulateTossAndInsertStrike(match);
         return ResponseEntity.ok(tossSimulationResult);
     }
+
+    @GetMapping("/recreate/{matchId}")
+    public ResponseEntity<MatchRecreateResponse> recreateMatch(@PathVariable Integer matchId){
+        Match match = matchValidators.checkMatchIdValidity(matchId);
+        MatchRecreateResponse matchRecreateResponse = matchService.recreateMatch(match);
+        return ResponseEntity.ok(matchRecreateResponse);
+    }
 }

@@ -1,12 +1,9 @@
 package com.tekion.cricket.repository;
 
-import com.tekion.cricket.dbconnector.MySqlConnector;
+import com.tekion.cricket.beans.BallEvent;
 import com.tekion.cricket.models.MatchResult;
-import com.tekion.cricket.util.ReaderUtil;
-import org.springframework.stereotype.Repository;
 
-import java.sql.*;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public interface BallEventsRepository{
@@ -19,4 +16,5 @@ public interface BallEventsRepository{
 
     int fetchScoreToChase(int matchId, int currentBowlTeamId);
 
+    List<BallEvent> fetchAllEventsByMatchAndTeamId(int matchId, int teamId);
 }

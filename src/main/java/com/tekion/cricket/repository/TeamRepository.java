@@ -13,4 +13,6 @@ public interface TeamRepository {
     BattingTeam fetchTeamScoreFromMatchId(int matchId, int battingTeamId);
 
     List<Integer> fetchFirstTwoPlayers(int team1Id);
+
+    String getTeamNameByTeamId(int team2Id);
 }

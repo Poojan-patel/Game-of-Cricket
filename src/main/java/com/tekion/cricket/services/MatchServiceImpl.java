@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -110,6 +111,67 @@ public class MatchServiceImpl implements  MatchService{
     @Override
     public MatchResult generateFinalScoreBoard(Integer matchId){
         return ballEventsRepository.generateFinalScoreBoard(matchId);
+    }
+
+    @Override
+    public MatchRecreateResponse recreateMatch(Match match) {
+        if(!isMatchEnded(match)){
+            throw new IllegalStateException("Match has not completed yet");
+        }
+        MatchResult matchResult = generateFinalScoreBoard(match.getMatchId());
+        Map<Integer, String> playerIdToNameMap = playerRepository.fetchPlayerNamesByTeamId(match.getTeam1Id());
+        playerIdToNameMap.putAll(playerRepository.fetchPlayerNamesByTeamId(match.getTeam2Id()));
+        MatchRecreateResponse matchRecreateResponse = new MatchRecreateResponse(playerIdToNameMap);
+        matchRecreateResponse.setMatchResult(matchResult);
+        setBallByBallStats(matchRecreateResponse, match);
+        return matchRecreateResponse;
+    }
+
+    private void setBallByBallStats(MatchRecreateResponse matchRecreateResponse, Match match) {
+        List<BallEvent> team1BallEvents = ballEventsRepository.fetchAllEventsByMatchAndTeamId(match.getMatchId(), match.getTeam1Id());
+        List<BallEvent> team2BallEvents = ballEventsRepository.fetchAllEventsByMatchAndTeamId(match.getMatchId(), match.getTeam2Id());
+        String team1Name = teamRepository.getTeamNameByTeamId(match.getTeam1Id());
+        String team2Name = teamRepository.getTeamNameByTeamId(match.getTeam2Id());
+        setBallByBallStatsForSingleTeam(matchRecreateResponse, team1BallEvents, team1Name);
+        setBallByBallStatsForSingleTeam(matchRecreateResponse, team2BallEvents, team2Name);
+
+    }
+
+    private void setBallByBallStatsForSingleTeam(MatchRecreateResponse matchRecreateResponse, List<BallEvent> ballEvents, String teamName) {
+        matchRecreateResponse.appendLog("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        matchRecreateResponse.appendLog(teamName + " has Started Batting");
+        int wicketCounter = 0;
+        int currentBall = 0;
+        for(BallEvent ballEvent: ballEvents){
+            if(ballEvent.getBallNumber()%6 == 1 && currentBall != ballEvent.getBallNumber()){
+                    currentBall = ballEvent.getBallNumber();
+                    matchRecreateResponse.appendLog("-------------------------------------------");
+                    matchRecreateResponse.appendLog("Over: " + (currentBall/6 + 1) + " || Bowler: %s", ballEvent.getBowler());
+            }
+            if(ballEvent.getUnfairBallType() != UnfairBallType.NA){
+                appendBallStatForUnFairBall(matchRecreateResponse, ballEvent);
+                continue;
+            }
+            if(ballEvent.getWicketType() != null) {
+                wicketCounter++;
+                appendBallStatForWicketBall(matchRecreateResponse, ballEvent, wicketCounter);
+            } else{
+                matchRecreateResponse.appendLog(ballEvent.getBallNumber()/6 + "." + ballEvent.getBallNumber()%6 + ": " + ballEvent.getScore() +
+                        " run || Player: %s", ballEvent.getBatsman()
+                );
+            }
+        }
+    }
+
+    private void appendBallStatForWicketBall(MatchRecreateResponse matchRecreateResponse, BallEvent ballEvent, int currentWickets) {
+        matchRecreateResponse.appendLog(ballEvent.getBallNumber()/6 + "." + ballEvent.getBallNumber()%6 + ": " + "Wicket-" +
+                currentWickets + " (" + ballEvent.getWicketType() + ") || Player: %s", ballEvent.getBatsman()
+        );
+    }
+
+    private void appendBallStatForUnFairBall(MatchRecreateResponse matchRecreateResponse, BallEvent ballEvent) {
+        matchRecreateResponse.appendLog(ballEvent.getBallNumber()/6 + "." + ballEvent.getBallNumber()%6 + ": " + ballEvent.getUnfairBallType() + " BALL (1 Run)");
+        matchRecreateResponse.appendLog(ballEvent.getBallNumber()/6 + "." + ballEvent.getBallNumber()%6 + ": " + (ballEvent.getScore()-1) + " run");
     }
 
     private boolean isMatchEnded(Match match){
@@ -280,6 +342,7 @@ public class MatchServiceImpl implements  MatchService{
         match.setTeam1Id(match.getTeam2Id());
         match.setTeam2Id(team1Id);
     }
+
     private void setBowlerForThisOver(Match match, Integer currentBowlTeamId, int bowlerId) {
         teamService.setBowlerForThisOver(match, currentBowlTeamId, bowlerId);
     }

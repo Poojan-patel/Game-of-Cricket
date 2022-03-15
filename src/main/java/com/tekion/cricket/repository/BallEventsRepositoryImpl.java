@@ -1,12 +1,15 @@
 package com.tekion.cricket.repository;
 
+import com.tekion.cricket.beans.BallEvent;
 import com.tekion.cricket.dbconnector.MySqlConnector;
 import com.tekion.cricket.models.MatchResult;
 import com.tekion.cricket.util.ReaderUtil;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -145,6 +148,34 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
                             " Extras: " + rs.getInt("Extra")
             );
         }
+    }
+
+    @Override
+    public List<BallEvent> fetchAllEventsByMatchAndTeamId(int matchId, int teamId) {
+        Connection con = null;
+        List<BallEvent> ballEvents = new ArrayList<>();
+        try{
+            con = MySqlConnector.getConnection();
+            PreparedStatement ps = con.prepareStatement("select * from BallEvents where match_id = ? and team = ?");
+            ps.setInt(1, matchId);
+            ps.setInt(2, teamId);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                ballEvents.add(new BallEvent(rs.getInt("event_id"), rs.getInt("match_id"), rs.getInt("team"),
+                        rs.getInt("ballnumber"), rs.getInt("batsman"), rs.getInt("bowler"), rs.getInt("score"),
+                        rs.getString("extra"), rs.getString("wicket"))
+                );
+            }
+        } catch(SQLException sqle){
+            sqle.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            try{
+                con.close();
+            } catch (Exception ignored){}
+        }
+        return ballEvents;
     }
 
     private void getBatsmanStats(int matchId, Connection con, MatchResult matchResult) throws SQLException{
