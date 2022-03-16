@@ -8,6 +8,9 @@ public class Strike {
     private int teamId;
     private int currentWickets;
 
+    /*
+    Constructor for creation of POJO from db data
+     */
     public Strike(int strike, int nonStrike, int bowler, int matchId, int teamId, int currentWickets) {
         this.strike = strike;
         this.nonStrike = nonStrike;
@@ -15,6 +18,16 @@ public class Strike {
         this.matchId = matchId;
         this.teamId = teamId;
         this.currentWickets = currentWickets;
+    }
+
+    /*
+    Constructor for persisting data in database
+     */
+    public Strike(int strike, int nonStrike, int matchId, int teamId) {
+        this.strike = strike;
+        this.nonStrike = nonStrike;
+        this.matchId = matchId;
+        this.teamId = teamId;
     }
 
     public void changeStrike(){

@@ -10,14 +10,7 @@ import com.tekion.cricket.repository.TeamRepository;
 
 import java.util.List;
 
-//@Service
 public interface MatchService {
-
-    void setRepository(
-            TeamRepository teamRepository, MatchRepository matchRepository, BallEventsRepository ballEventsRepository, PlayerRepository playerRepository
-    );
-
-    void setService(TeamService teamService);
 
     MatchCreationResponse createNewMatch(MatchCreationRequest matchRequest, List<TeamDTO> selectedTeams);
 
@@ -30,4 +23,6 @@ public interface MatchService {
     MatchResult generateFinalScoreBoard(Integer matchId);
 
     MatchRecreateResponse recreateMatch(Match match);
+
+    Match findByMatchId(Integer matchId);
 }

@@ -6,11 +6,19 @@ public enum UnfairBallType {
     NA;
 
     public static UnfairBallType fromStringToEnum(String unfairBall){
-        if(unfairBall == null)
+        if(unfairBall == null) {
             return UnfairBallType.NA;
-        else if(unfairBall.equals("WIDE"))
-            return UnfairBallType.WIDE;
-        else
-            return UnfairBallType.NO;
+        }
+        switch(unfairBall){
+            case "WIDE":
+                return UnfairBallType.WIDE;
+            case "NO":
+            case "NO BALL":
+                return UnfairBallType.NO;
+            case "":
+                return UnfairBallType.NA;
+            default:
+                throw new IllegalStateException("State Doesn't Exists");
+        }
     }
 }

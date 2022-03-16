@@ -7,12 +7,15 @@ import java.util.List;
 
 public class MatchResult implements ScoreBoard{
     @JsonView
+    private String winner;
+
+    @JsonView
     private List<String> teamScores;
+
     @JsonView
     private List<String> battingStats;
     @JsonView
     private List<String> bowlingStats;
-
     public MatchResult() {
         teamScores = new ArrayList<>();
         battingStats = new ArrayList<>();
@@ -29,5 +32,9 @@ public class MatchResult implements ScoreBoard{
 
     public void appendBowlingStats(String bowlingStat){
         bowlingStats.add(bowlingStat);
+    }
+
+    public void setWinner(String winner) {
+        this.winner = winner;
     }
 }

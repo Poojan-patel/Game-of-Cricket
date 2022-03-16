@@ -1,1 +1,0 @@
-select bowler from team_in_play where match_id = ? and team != ?

@@ -1,7 +1,5 @@
 package com.tekion.cricket.beans;
 
-import com.tekion.cricket.enums.UnfairBallType;
-
 public class BallEvent {
     private int eventId;
     private int matchId;
@@ -10,18 +8,31 @@ public class BallEvent {
     private int batsman;
     private int bowler;
     private int score;
-    private UnfairBallType unfairBallType;
+
+    /** {@link com.tekion.cricket.enums.UnfairBallType}
+     */
+    private String unfairBallType;
     private String wicketType;
 
+    /*
+    Constructor for creation of POJO from db data
+     */
     public BallEvent(int eventId, int matchId, int team, int ballNumber, int batsman, int bowler, int score, String unfairBallType, String wicketType) {
+        this(matchId, team, ballNumber, batsman, bowler, score, unfairBallType, wicketType);
         this.eventId = eventId;
+    }
+
+    /*
+    Constructor for persisting data in database
+     */
+    public BallEvent(int matchId, int team, int ballNumber, int batsman, int bowler, int score, String unfairBallType, String wicketType) {
         this.matchId = matchId;
         this.team = team;
         this.ballNumber = ballNumber;
         this.batsman = batsman;
         this.bowler = bowler;
         this.score = score;
-        this.unfairBallType = UnfairBallType.fromStringToEnum(unfairBallType);
+        this.unfairBallType = unfairBallType;
         this.wicketType = wicketType;
     }
 
@@ -41,11 +52,19 @@ public class BallEvent {
         return score;
     }
 
-    public UnfairBallType getUnfairBallType() {
+    public String getUnfairBallType() {
         return unfairBallType;
     }
 
     public String getWicketType() {
         return wicketType;
+    }
+
+    public int getMatchId() {
+        return matchId;
+    }
+
+    public int getTeam() {
+        return team;
     }
 }

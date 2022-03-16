@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface BallEventsRepository{
-    void insertEvent
-            (int matchId, int teamId, int ballNumber, int batsmanId, int bowlerId, int score, String extras, String wicket);
+    void save
+            (BallEvent ballEvent);
 
     MatchResult generateFinalScoreBoard(int matchId);
 

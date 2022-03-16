@@ -34,8 +34,8 @@ public class MatchRepositoryImpl implements MatchRepository{
                 con.rollback();
                 con.close();
             } catch (Exception ignored){}
-        } catch (Exception ignored){
-            ignored.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
         }
         return matchId;
     }
@@ -52,7 +52,7 @@ public class MatchRepositoryImpl implements MatchRepository{
             while (rs.next()){
                 match = new Match(
                         rs.getInt("match_id"), rs.getInt("team1"), rs.getInt("team2"),
-                        rs.getInt("overs"), rs.getInt("maxovers"), rs.getString("winner")
+                        rs.getInt("overs"), rs.getInt("maxovers"), rs.getString("matchstate")
                 );
             }
         } catch (SQLException sqle){
@@ -76,7 +76,7 @@ public class MatchRepositoryImpl implements MatchRepository{
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("matchtable", "update"));
             ps.setInt(1, match.getTeam1Id());
             ps.setInt(2, match.getTeam2Id());
-            ps.setString(3, match.getMatchState().toString());
+            ps.setString(3, match.getMatchState());
             ps.setInt(4, match.getMatchId());
             ps.executeUpdate();
             con.commit();
@@ -87,8 +87,8 @@ public class MatchRepositoryImpl implements MatchRepository{
                 con.close();
             } catch (Exception ignored){}
             sqle.printStackTrace();
-        } catch(Exception ignored) {
-            ignored.printStackTrace();
+        } catch(Exception e) {
+            e.printStackTrace();
         }
     }
 }

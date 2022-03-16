@@ -5,8 +5,8 @@ public enum PlayerType {
     BATSMAN,
     ALLROUNDER;
 
-    public static PlayerType fromStringToEnum(String s){
-        switch (s) {
+    public static PlayerType fromStringToEnum(String playerType){
+        switch (playerType) {
             case "BOWLER":
                 return PlayerType.BOWLER;
             case "BATSMAN":

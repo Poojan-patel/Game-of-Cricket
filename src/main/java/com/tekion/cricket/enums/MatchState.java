@@ -8,7 +8,7 @@ public enum MatchState {
     TEAM1_BATTING,
     TEAM2_BATTING;
 
-    public static MatchState fromString(String winner) {
+    public static MatchState fromStringToEnum(String winner) {
         switch (winner){
             case "TIE":
                 return MatchState.TIE;

@@ -1,1 +1,1 @@
-update MatchTable set team1 = ?, team2 = ?, winner = ? where match_id = ?
+update MatchTable set team1 = ?, team2 = ?, matchstate = ? where match_id = ?

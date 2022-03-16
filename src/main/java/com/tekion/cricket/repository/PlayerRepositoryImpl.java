@@ -7,15 +7,13 @@ import com.tekion.cricket.models.BatsmanStats;
 import com.tekion.cricket.util.ReaderUtil;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 @Repository
 public class PlayerRepositoryImpl implements PlayerRepository{
 
+    @Override
     public List<Player> fetchBowlersForBowlingTeamByTeamId(Integer teamId){
         Connection con = null;
         List<Player> bowlers = null;
@@ -35,9 +33,7 @@ public class PlayerRepositoryImpl implements PlayerRepository{
                 name = rs.getString("name");
                 playerId = rs.getInt("player_id");
                 bowlingPace = rs.getString("bowling_pace");
-
-                Player newPlayer =  new Player(name, playerType, bowlingPace, playerId);
-                bowlers.add(newPlayer);
+                bowlers.add(new Player(name, playerType, bowlingPace, playerId));
             }
             con.close();
         } catch(SQLException sqle){
@@ -52,6 +48,7 @@ public class PlayerRepositoryImpl implements PlayerRepository{
         return bowlers;
     }
 
+    @Override
     public List<BatsmanStats> fetchOnFieldBatsmenData(int strike, int nonStrike, int matchId) {
         Connection con = null;
         List<BatsmanStats> currentPlayers = new ArrayList<>();
@@ -85,6 +82,7 @@ public class PlayerRepositoryImpl implements PlayerRepository{
         return currentPlayers;
     }
 
+    @Override
     public int fetchNextBatsman(Integer teamId, int maxOrder) {
         Connection con = null;
         int newPlayer = -1;
@@ -109,6 +107,7 @@ public class PlayerRepositoryImpl implements PlayerRepository{
         return newPlayer;
     }
 
+    @Override
     public PlayerType fetchPlayerType(int playerId) {
         Connection con = null;
         PlayerType playerType = null;
@@ -131,13 +130,14 @@ public class PlayerRepositoryImpl implements PlayerRepository{
         return playerType;
     }
 
-    public String fetchPlayerNameByPlayerId(int bowlerId) {
+    @Override
+    public String fetchPlayerNameByPlayerId(int playerId) {
         Connection con = null;
         String name = null;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchPlayerNameByPlayerId"));
-            ps.setInt(1, bowlerId);
+            ps.setInt(1, playerId);
             ResultSet rs = ps.executeQuery();
             while(rs.next())
                 name = rs.getString(1);
@@ -154,6 +154,7 @@ public class PlayerRepositoryImpl implements PlayerRepository{
         return name;
     }
 
+    @Override
     public Map<Integer, String> fetchPlayerNamesByTeamId(int teamId) {
         Connection con = null;
         Map<Integer, String> playerNamesFromIds = new HashMap<>();
@@ -176,5 +177,33 @@ public class PlayerRepositoryImpl implements PlayerRepository{
         }
 
         return playerNamesFromIds;
+    }
+
+    @Override
+    public void saveBatch(List<Player> players, Integer teamId) {
+        Connection con = null;
+        try {
+            con = MySqlConnector.getConnection();
+            con.setAutoCommit(false);
+            PreparedStatement stmt = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "insertTeamPlayers"), Statement.RETURN_GENERATED_KEYS);
+            for (Player player : players) {
+                stmt.setInt(1, teamId);
+                stmt.setString(2, player.getName());
+                stmt.setString(3, player.getPlayerType());
+                stmt.setString(4, player.getTypeOfBowler());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            con.commit();
+            con.close();
+        } catch (SQLException sqle){
+            try {
+                con.rollback();
+                con.close();
+            } catch (Exception ignored) {}
+            sqle.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

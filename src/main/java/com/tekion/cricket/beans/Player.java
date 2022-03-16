@@ -1,29 +1,36 @@
 package com.tekion.cricket.beans;
 
-import com.tekion.cricket.enums.PlayerType;
-import com.tekion.cricket.enums.TypeOfBowler;
 import com.tekion.cricket.models.PlayerDTO;
 
 public class Player {
     private int playerId;
     private String name;
-    private PlayerType playerType;
-    private TypeOfBowler typeOfBowler;
 
+    /** {@link com.tekion.cricket.enums.PlayerType}
+     */
+    private String playerType;
+
+    /** {@link com.tekion.cricket.enums.TypeOfBowler}
+     */
+    private String typeOfBowler;
+    private int teamId;
+
+    /*
+    Constructor for persisting data in database
+     */
     public Player(PlayerDTO p){
         name = p.getName();
-        playerType = p.getPlayerType();
-        typeOfBowler = p.getTypeOfBowler();
+        playerType = p.getPlayerType().toString();
+        typeOfBowler = p.getTypeOfBowler().toString();
     }
 
-    public Player() {
-
-    }
-
+    /*
+    Constructor for persisting data in database and creation of POJO from db
+     */
     public Player(String name, String playerType, String typeOfBowler, int playerId){
         this.name = name;
-        this.playerType = PlayerType.fromStringToEnum(playerType);
-        this.typeOfBowler = TypeOfBowler.fromStringToEnum(typeOfBowler);
+        this.playerType = playerType;
+        this.typeOfBowler = typeOfBowler;
         this.playerId = playerId;
     }
 
@@ -31,12 +38,12 @@ public class Player {
         return name;
     }
 
-    public PlayerType getPlayerType() {
+    public String getPlayerType() {
         return playerType;
     }
 
     public String getTypeOfBowler() {
-        return typeOfBowler.toString();
+        return typeOfBowler;
     }
 
     public int getPlayerId() {
@@ -48,6 +55,6 @@ public class Player {
         return
                 playerId +
                 ". " + name +
-                " - " + playerType + ((playerType == PlayerType.BATSMAN) ? "" : "," + typeOfBowler);
+                " - " + playerType + (("BATSMAN".equals(playerType)) ? "" : "," + typeOfBowler);
     }
 }

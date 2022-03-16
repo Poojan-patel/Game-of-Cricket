@@ -1,0 +1,1 @@
+insert into Strike(match_id, team, strike, nonstrike) values(?,?,?,?)

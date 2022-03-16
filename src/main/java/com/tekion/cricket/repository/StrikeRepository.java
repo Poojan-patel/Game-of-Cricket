@@ -2,13 +2,13 @@ package com.tekion.cricket.repository;
 
 import com.tekion.cricket.beans.Strike;
 
-public interface TeamInPlayRepository {
+public interface StrikeRepository {
 
     void updateBowlerByTeamAndMatchId(int bowlerId, int matchId, int teamId);
 
     void updateStrikesByTeamAndMatchId(Strike strike);
 
-    void insertStrike(int currentStrike, int currentNonStrike, int matchId, int teamId);
+    void insertStrike(Strike strike);
 
     int fetchTheLastOver(Integer matchId, Integer currentBowlTeamId);
 

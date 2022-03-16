@@ -13,20 +13,14 @@ import java.util.List;
 @Service
 public class MatchValidators {
     private MatchService matchService;
-    private MatchRepository matchRepository;
 
     @Autowired
     public void setService(MatchService matchService){
         this.matchService = matchService;
     }
 
-    @Autowired
-    public void setRepository(MatchRepository matchRepository){
-        this.matchRepository = matchRepository;
-    }
-
     public Match checkMatchIdValidity(Integer matchId) {
-        Match match = matchRepository.findByMatchId(matchId);
+        Match match = matchService.findByMatchId(matchId);
         if(match == null){
             throw new IllegalStateException("Match Id does not exists");
         }

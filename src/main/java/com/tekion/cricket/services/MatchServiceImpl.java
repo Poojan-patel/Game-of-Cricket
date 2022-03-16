@@ -43,15 +43,14 @@ public class MatchServiceImpl implements  MatchService{
     @Override
     public MatchCreationResponse createNewMatch(MatchCreationRequest matchRequest, List<TeamDTO> selectedTeams){
         Match match = new Match(matchRequest.getTeam1Id(), matchRequest.getTeam2Id(), matchRequest.getOvers());
-        int matchId = 0;
-        matchId = matchRepository.save(match);
+        int matchId = matchRepository.save(match);
         return new MatchCreationResponse(matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName(), matchRequest.getOvers());
     }
 
     @Override
     public TossSimulationResult stimulateTossAndInsertStrike(Match match) {
         int matchId = match.getMatchId();
-        if(match.getMatchState() != MatchState.TOSS_LEFT){
+        if(MatchState.fromStringToEnum(match.getMatchState()) != MatchState.TOSS_LEFT){
             throw new IllegalStateException("Toss is already Stimulated\n Try to start playing the Game");
         }
         int headOrTail = MatchUtil.stimulateToss();
@@ -62,13 +61,13 @@ public class MatchServiceImpl implements  MatchService{
             swapTeams(match);
         }
 
-        match.setMatchState(MatchState.TEAM1_BATTING);
+        match.setMatchState(MatchState.TEAM1_BATTING.toString());
         matchRepository.update(match);
         List<TeamDTO> selectedTeams = getSelectedTeams(match.getTeam1Id(), match.getTeam2Id());
         TossSimulationResult tossSimulationResult = new TossSimulationResult(
                 matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName()
         );
-        teamService.insertStrikesForNewMatch(match.getTeam1Id(), matchId);
+        teamService.insertStrikesForNewInning(match.getTeam1Id(), matchId);
         return tossSimulationResult;
     }
 
@@ -99,7 +98,7 @@ public class MatchServiceImpl implements  MatchService{
         strike.changeStrike();
         teamService.updateStrike(strike);
         checkIfInningEnded(match, strike, battingTeam, overCompletionResult);
-        if(!isMatchEnded(match)) {
+        if(!MatchUtil.isMatchEnded(match)) {
             getOverCompletionResult(strike, battingTeam, match, overCompletionResult, currentBowlTeamId);
             return overCompletionResult;
         }
@@ -115,7 +114,7 @@ public class MatchServiceImpl implements  MatchService{
 
     @Override
     public MatchRecreateResponse recreateMatch(Match match) {
-        if(!isMatchEnded(match)){
+        if(!MatchUtil.isMatchEnded(match)){
             throw new IllegalStateException("Match has not completed yet");
         }
         MatchResult matchResult = generateFinalScoreBoard(match.getMatchId());
@@ -125,6 +124,11 @@ public class MatchServiceImpl implements  MatchService{
         matchRecreateResponse.setMatchResult(matchResult);
         setBallByBallStats(matchRecreateResponse, match);
         return matchRecreateResponse;
+    }
+
+    @Override
+    public Match findByMatchId(Integer matchId) {
+        return matchRepository.findByMatchId(matchId);
     }
 
     private void setBallByBallStats(MatchRecreateResponse matchRecreateResponse, Match match) {
@@ -148,7 +152,7 @@ public class MatchServiceImpl implements  MatchService{
                     matchRecreateResponse.appendLog("-------------------------------------------");
                     matchRecreateResponse.appendLog("Over: " + (currentBall/6 + 1) + " || Bowler: %s", ballEvent.getBowler());
             }
-            if(ballEvent.getUnfairBallType() != UnfairBallType.NA){
+            if(UnfairBallType.fromStringToEnum(ballEvent.getUnfairBallType()) != UnfairBallType.NA){
                 appendBallStatForUnFairBall(matchRecreateResponse, ballEvent);
                 continue;
             }
@@ -174,10 +178,6 @@ public class MatchServiceImpl implements  MatchService{
         matchRecreateResponse.appendLog(ballEvent.getBallNumber()/6 + "." + ballEvent.getBallNumber()%6 + ": " + (ballEvent.getScore()-1) + " run");
     }
 
-    private boolean isMatchEnded(Match match){
-        return (match.getMatchState() == MatchState.TEAM1_WON || match.getMatchState() == MatchState.TEAM2_WON || match.getMatchState() == MatchState.TIE);
-    }
-
     private void getOverCompletionResult(Strike strike, BattingTeam battingTeam, Match match, OverCompletionResult overCompletionResult, int currentBowlTeamId) {
         List<BatsmanStats> batsmanStats = playerRepository.fetchOnFieldBatsmenData(strike.getStrike(), strike.getNonStrike(), strike.getMatchId());
         if(batsmanStats.size() == 1)
@@ -193,7 +193,7 @@ public class MatchServiceImpl implements  MatchService{
         }
 
         overCompletionResult.setBowler(playerRepository.fetchPlayerNameByPlayerId(strike.getBowler()));
-        if(match.getMatchState() == MatchState.TEAM1_BATTING)
+        if(MatchState.fromStringToEnum(match.getMatchState()) == MatchState.TEAM1_BATTING)
             overCompletionResult.setBowlerForNextOver(fetchAvailableBowlers(match, match.getTeam2Id()));
         else
             overCompletionResult.setBowlerForNextOver(fetchAvailableBowlers(match, match.getTeam1Id()));
@@ -203,22 +203,22 @@ public class MatchServiceImpl implements  MatchService{
 
         if(battingTeam.getScoreToChase() != -1 && battingTeam.getScoreToChase() < battingTeam.getTeamScore()) {
             overCompletionResult.setIntermediateResult(battingTeam.getTeamName() + " Win the game");
-            match.setMatchState(MatchState.TEAM2_WON);
+            match.setMatchState(MatchState.TEAM2_WON.toString());
             matchRepository.update(match);
         }
         else if(strike.isAllOut() || battingTeam.getCurrentOver() == match.getOvers()){
-            if(match.getMatchState() == MatchState.TEAM1_BATTING){
-                match.setMatchState(MatchState.TEAM2_BATTING);
+            if(MatchState.fromStringToEnum(match.getMatchState()) == MatchState.TEAM1_BATTING){
+                match.setMatchState(MatchState.TEAM2_BATTING.toString());
                 overCompletionResult.setIntermediateResult(battingTeam.getTeamName() + " will start fielding");
-                teamService.insertStrikesForNewMatch(match.getTeam2Id(), match.getMatchId());
+                teamService.insertStrikesForNewInning(match.getTeam2Id(), match.getMatchId());
                 matchRepository.update(match);
             } else{
                 if(battingTeam.getScoreToChase() == battingTeam.getTeamScore()) {
-                    match.setMatchState(MatchState.TIE);
+                    match.setMatchState(MatchState.TIE.toString());
                     overCompletionResult.setIntermediateResult("match Tied");
                 }
                 else {
-                    match.setMatchState(MatchState.TEAM1_WON);
+                    match.setMatchState(MatchState.TEAM1_WON.toString());
                     overCompletionResult.setIntermediateResult("Team 1 Won the game");
                 }
                 matchRepository.update(match);
@@ -250,7 +250,7 @@ public class MatchServiceImpl implements  MatchService{
 
         if(possibilityOfUnFairBall <= 1){
             battingTeam.incrementRuns(1);
-            String typeOfUnFairBall = (possibilityOfUnFairBall == 0) ?"WIDE" :"NO BALL";
+            String typeOfUnFairBall = (possibilityOfUnFairBall == 0) ?"WIDE" :"NO";
             overCompletionResult.appendBallLogs(over + "." + ballNumber + ": 1 run (" + typeOfUnFairBall + ")");
             legitimateBall(strike, battingTeam, outcomeOfBallBowled, overCompletionResult, typeOfUnFairBall);
             // returning Enum will ensure the caller, not to update the ball number
@@ -269,9 +269,9 @@ public class MatchServiceImpl implements  MatchService{
         int ballNumber = battingTeam.getPlayedBalls() % 6;
         String typeOfWicketFallen = MatchUtil.getRandomTypeOfWicket();
         overCompletionResult.appendBallLogs(over + "." + ballNumber + ": Wicket-" + (strike.getCurrentWickets()+1) + "(" + typeOfWicketFallen + ") || Player: %s", strike.getStrike());
-        ballEventsRepository.insertEvent(
+        ballEventsRepository.save(new BallEvent(
                 strike.getMatchId(), battingTeam.getTeamId(), battingTeam.getPlayedBalls(), strike.getStrike(),
-                strike.getBowler(), 0, "", typeOfWicketFallen
+                strike.getBowler(), 0, "", typeOfWicketFallen)
         );
         teamService.updateStrikeOnWicket(strike);
     }
@@ -294,8 +294,9 @@ public class MatchServiceImpl implements  MatchService{
             battingTeam.incrementRuns(outcomeOfBallBowled);
         }
 
-        ballEventsRepository.insertEvent(strike.getMatchId(), battingTeam.getTeamId(), over*6 + ballNumber,
-                (isTeamScore) ?-1 :currentPlayer, strike.getBowler(), outcomeOfBallBowled + ((isTeamScore) ?1 :0), typeOfUnFairBall, ""
+        ballEventsRepository.save(new BallEvent(
+                strike.getMatchId(), battingTeam.getTeamId(), over*6 + ballNumber,
+                (isTeamScore) ?-1 :currentPlayer, strike.getBowler(), outcomeOfBallBowled + ((isTeamScore) ?1 :0), typeOfUnFairBall, "")
         );
 
         if(outcomeOfBallBowled%2 == 1) {
@@ -313,9 +314,10 @@ public class MatchServiceImpl implements  MatchService{
             if (possibilityOfRunOut == 9) {
                 // overCompletionResult.appendBallLogs("RunOut-" + battingTeam.getNameOfPlayer(strike.getStrike()));
                 overCompletionResult.appendBallLogs("RunOut-%s", strike.getStrike());
-                ballEventsRepository.insertEvent(
+
+                ballEventsRepository.save(new BallEvent(
                         strike.getMatchId(), battingTeam.getTeamId(), currentBallNumber,
-                        strike.getStrike(), -1, 0, "", "RUN OUT"
+                        strike.getStrike(), -1, 0, "", "RUN OUT")
                 );
                 teamService.updateStrikeOnWicket(strike);
             }

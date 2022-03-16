@@ -1,0 +1,1 @@
+select * from BallEvents where match_id = ? and team = ?

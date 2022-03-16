@@ -16,9 +16,6 @@ public class PlayerDTO {
     @JsonView
     private int remainingOvers;
 
-    public PlayerDTO(){
-    }
-
     public PlayerDTO(String name, String playerType, String typeOfBowling) {
         this.name = name;
         this.playerType = PlayerType.fromStringToEnum(playerType);

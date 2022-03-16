@@ -3,23 +3,17 @@ package com.tekion.cricket.services;
 import com.tekion.cricket.beans.Match;
 import com.tekion.cricket.beans.Player;
 import com.tekion.cricket.beans.Strike;
+import com.tekion.cricket.beans.Team;
 import com.tekion.cricket.models.BattingTeam;
 import com.tekion.cricket.models.PlayerDTO;
 import com.tekion.cricket.models.TeamDTO;
-import com.tekion.cricket.repository.BallEventsRepository;
-import com.tekion.cricket.repository.PlayerRepository;
-import com.tekion.cricket.repository.TeamInPlayRepository;
-import com.tekion.cricket.repository.TeamRepository;
 
 import java.util.List;
 
 //@Service
 public interface TeamService{
-    void setRepository(
-            PlayerRepository playerRepository, TeamRepository teamRepo, BallEventsRepository ballEventsRepository, TeamInPlayRepository teamInPlayRepository
-    );
 
-    Integer validateTeam(TeamDTO team);
+    Integer saveTeamWithPlayers(Team team, List<Player> players);
 
     List<TeamDTO> getAllTeams();
 
@@ -35,5 +29,7 @@ public interface TeamService{
 
     void updateStrikeOnWicket(Strike strike);
 
-    void insertStrikesForNewMatch(int teamId, int matchId);
+    void insertStrikesForNewInning(int teamId, int matchId);
+
+    List<TeamDTO> findAllTeams();
 }

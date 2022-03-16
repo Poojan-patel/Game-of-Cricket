@@ -5,10 +5,9 @@ public class Team {
     private String teamName;
     private Integer teamId;
 
-    public Team() {
-
-    }
-
+    /*
+    Constructor for persisting data in database
+     */
     public Team(String teamName) {
         this.teamName = teamName;
     }

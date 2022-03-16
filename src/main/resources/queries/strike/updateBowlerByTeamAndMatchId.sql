@@ -1,0 +1,1 @@
+update Strike set bowler = ? where team != ? and match_id = ?

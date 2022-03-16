@@ -1,12 +1,14 @@
 package com.tekion.cricket.repository;
 
+import com.tekion.cricket.beans.Player;
+import com.tekion.cricket.beans.Team;
 import com.tekion.cricket.models.BattingTeam;
 import com.tekion.cricket.models.TeamDTO;
 
 import java.util.List;
 
 public interface TeamRepository {
-    Integer save(TeamDTO team);
+    Integer save(Team team);
 
     List<TeamDTO> findAll();
 

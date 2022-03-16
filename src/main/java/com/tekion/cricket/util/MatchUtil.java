@@ -82,7 +82,7 @@ public class MatchUtil {
     }
 
     public static Integer getCurrentBowlingTeam(Match match) {
-        MatchState currentMatchState = match.getMatchState();
+        MatchState currentMatchState = MatchState.fromStringToEnum(match.getMatchState());
         if(currentMatchState != MatchState.TEAM1_BATTING && currentMatchState != MatchState.TEAM2_BATTING){
             throw new IllegalStateException("Either match is finished or not started yet!");
         }
@@ -91,6 +91,26 @@ public class MatchUtil {
         }
         else {
             return match.getTeam1Id();
+        }
+    }
+
+    public static boolean isMatchEnded(Match match){
+        MatchState matchState = MatchState.fromStringToEnum(match.getMatchState());
+        return (matchState == MatchState.TEAM1_WON || matchState == MatchState.TEAM2_WON || matchState == MatchState.TIE);
+    }
+
+    public static String decideWinner(List<String> teamNames, List<Integer> teamScore){
+        if(teamScore.size() != 2){
+            throw new IllegalStateException("Some Unknown Error Occured");
+        }
+        int diff = teamScore.get(0) - teamScore.get(1);
+        String winner = "";
+        if(diff == 0){
+            return "TIE";
+        } else if(diff > 0){
+            return teamNames.get(0);
+        } else{
+            return teamNames.get(1);
         }
     }
 }

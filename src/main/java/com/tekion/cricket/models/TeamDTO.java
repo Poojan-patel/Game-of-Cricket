@@ -24,6 +24,9 @@ public class TeamDTO {
         return players;
     }
 
+    public TeamDTO() {
+    }
+
     @Override
     public String toString() {
         String ts = "Team{" +
@@ -43,6 +46,7 @@ public class TeamDTO {
         for(Map<String, Object> singlePlayer: playerList){
             players.add(new PlayerDTO((String)singlePlayer.get("name"), (String)singlePlayer.get("playerType"), (String)singlePlayer.get("bowlingType")));
         }
+        System.out.println("Creation Done");
     }
 
     public int getTeamId() {

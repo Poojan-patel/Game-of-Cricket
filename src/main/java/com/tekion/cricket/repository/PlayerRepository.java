@@ -20,4 +20,6 @@ public interface PlayerRepository {
     String fetchPlayerNameByPlayerId(int bowlerId);
 
     Map<Integer, String> fetchPlayerNamesByTeamId(int teamId);
+
+    void saveBatch(List<Player> players, Integer teamId);
 }
