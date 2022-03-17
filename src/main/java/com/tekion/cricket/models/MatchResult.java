@@ -14,8 +14,10 @@ public class MatchResult implements ScoreBoard{
 
     @JsonView
     private List<String> battingStats;
+
     @JsonView
     private List<String> bowlingStats;
+
     public MatchResult() {
         teamScores = new ArrayList<>();
         battingStats = new ArrayList<>();

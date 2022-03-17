@@ -27,16 +27,16 @@ public class TeamDTO {
     public TeamDTO() {
     }
 
+    public TeamDTO(String teamName, Integer teamId){
+        this.teamName = teamName;
+        this.teamId = teamId;
+    }
+
     @Override
     public String toString() {
         String ts = "Team{" +
                 "teamName='" + teamName + ',' + "teamId=" + teamId + '}';
         return ts;
-    }
-
-    public TeamDTO(String teamName, Integer teamId){
-        this.teamName = teamName;
-        this.teamId = teamId;
     }
 
     @SuppressWarnings("unchecked")

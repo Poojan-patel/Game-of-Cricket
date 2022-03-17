@@ -53,7 +53,7 @@ public class Match {
     }
 
     public String getMatchState() {
-        return matchState.toString();
+        return matchState;
     }
 
     public void setTeam1Id(int team1Id) {

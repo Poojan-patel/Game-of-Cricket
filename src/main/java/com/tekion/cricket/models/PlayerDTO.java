@@ -43,6 +43,10 @@ public class PlayerDTO {
         return typeOfBowler;
     }
 
+    public int getPlayerId() {
+        return playerId;
+    }
+
     @Override
     public String toString() {
         return "Player{" +
@@ -50,9 +54,5 @@ public class PlayerDTO {
                 ", playerType=" + playerType +
                 ", typeOfBowler=" + typeOfBowler +
                 '}';
-    }
-
-    public int getPlayerId() {
-        return playerId;
     }
 }

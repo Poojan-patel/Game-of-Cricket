@@ -1,6 +1,7 @@
 package com.tekion.cricket.repository;
 
 import com.tekion.cricket.beans.BallEvent;
+import com.tekion.cricket.constants.Common;
 import com.tekion.cricket.dbconnector.MySqlConnector;
 import com.tekion.cricket.models.MatchResult;
 import com.tekion.cricket.util.MatchUtil;
@@ -173,9 +174,9 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
         while(rs.next()){
             matchResult.appendBowlingStats(
                     rs.getString("name") + ": " +
-                            "Wickets:" + rs.getInt("Wicket") +
-                            " Overs:" + rs.getInt("Balls Thrown")/6 + "." + rs.getInt("Balls Thrown")%6 +
-                            " Extras: " + rs.getInt("Extra")
+                            Common.WICKETS + ":" + rs.getInt("Wicket") +
+                            Common.SINGLE_SPACE + Common.OVERS + ":" + rs.getInt("Balls Thrown")/Common.BALLS_IN_ONE_OVER + "." +
+                            rs.getInt("Balls Thrown")%Common.BALLS_IN_ONE_OVER + Common.SINGLE_SPACE + Common.EXTRAS + ": " + rs.getInt("Extra")
             );
         }
     }
@@ -187,7 +188,7 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
         while(rs.next()){
             matchResult.appendBattingStats(
                     rs.getString("name") + ": " +
-                            rs.getInt("Score") + ", Balls:" + rs.getInt("Balls Played")
+                            rs.getInt("Score") + ", " + Common.BALLS + ": " + rs.getInt("Balls Played")
             );
         }
     }
@@ -201,9 +202,9 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
         while(rs.next()){
             matchResult.appendTeamScores(
                     rs.getString("name") + ": " +
-                            rs.getInt("Total Score") + "/" + rs.getInt("Total Wickets") +
-                            " Overs: " + rs.getInt("Total Balls")/6 + "." + rs.getInt("Total Balls")%6 +
-                            " Extras: " + rs.getInt("Extras")
+                            rs.getInt("Total Score") + "/" + rs.getInt("Total Wickets") + Common.SINGLE_SPACE +
+                            Common.OVERS + ": " + rs.getInt("Total Balls")/Common.BALLS_IN_ONE_OVER + "." +
+                            rs.getInt("Total Balls")%Common.BALLS_IN_ONE_OVER + Common.SINGLE_SPACE + Common.EXTRAS + ": " + rs.getInt("Extras")
             );
             teamName.add(rs.getString("name"));
             teamScore.add(rs.getInt("Total Score"));

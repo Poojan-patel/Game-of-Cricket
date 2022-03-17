@@ -2,6 +2,7 @@ package com.tekion.cricket.validators;
 
 import com.tekion.cricket.beans.Player;
 import com.tekion.cricket.beans.Team;
+import com.tekion.cricket.constants.Common;
 import com.tekion.cricket.enums.PlayerType;
 import com.tekion.cricket.models.MatchCreationRequest;
 import com.tekion.cricket.models.PlayerDTO;
@@ -28,7 +29,7 @@ public class TeamValidators {
         if (matchRequest.getTeam1Id() == matchRequest.getTeam2Id()) {
             throw new IllegalStateException("Both Team Cannot be Same");
         }
-        if (matchRequest.getOvers() < 5) {
+        if (matchRequest.getOvers() < Common.MIN_OVERS) {
             throw new IllegalStateException("Match must be 5 overs long");
         }
         return checkTeamExistance(matchRequest.getTeam1Id(), matchRequest.getTeam2Id());
@@ -56,7 +57,7 @@ public class TeamValidators {
         List<PlayerDTO> playerDTOs = teamDTO.getPlayers();
         Team team = new Team(teamDTO.getTeamName());
         List<Player> players = new ArrayList<>();
-        if(playerDTOs == null || playerDTOs.size() != 11) {
+        if(playerDTOs == null || playerDTOs.size() != Common.NUM_OF_PLAYERS) {
             throw new IllegalStateException("Players should be 11");
         }
         int numOfBowlers = 0;
@@ -66,7 +67,7 @@ public class TeamValidators {
             }
             players.add(new Player(p));
         }
-        if(numOfBowlers < 5) {
+        if(numOfBowlers < Common.MIN_BOWLERS) {
             throw new IllegalStateException("There must be At least 5 bowlers available in your team");
         }
 

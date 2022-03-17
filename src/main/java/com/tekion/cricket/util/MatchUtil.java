@@ -104,9 +104,8 @@ public class MatchUtil {
             throw new IllegalStateException("Some Unknown Error Occured");
         }
         int diff = teamScore.get(0) - teamScore.get(1);
-        String winner = "";
         if(diff == 0){
-            return "TIE";
+            return MatchState.TIE.toString();
         } else if(diff > 0){
             return teamNames.get(0);
         } else{

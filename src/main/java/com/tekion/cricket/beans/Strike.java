@@ -1,5 +1,7 @@
 package com.tekion.cricket.beans;
 
+import com.tekion.cricket.constants.Common;
+
 public class Strike {
     private int strike;
     private int nonStrike;
@@ -49,7 +51,7 @@ public class Strike {
     }
 
     public boolean isAllOut() {
-        return (currentWickets == 10);
+        return (currentWickets == Common.NUM_OF_WICKETS);
     }
 
     public int getTeamId() {

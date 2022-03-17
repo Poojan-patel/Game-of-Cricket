@@ -1,5 +1,6 @@
 package com.tekion.cricket.beans;
 
+import com.tekion.cricket.constants.Common;
 import com.tekion.cricket.models.PlayerDTO;
 
 public class Player {
@@ -55,6 +56,6 @@ public class Player {
         return
                 playerId +
                 ". " + name +
-                " - " + playerType + (("BATSMAN".equals(playerType)) ? "" : "," + typeOfBowler);
+                " - " + playerType + ((Common.BATSMAN.equals(playerType)) ? "" : "," + typeOfBowler);
     }
 }

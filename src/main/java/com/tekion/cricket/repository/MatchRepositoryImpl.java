@@ -1,6 +1,7 @@
 package com.tekion.cricket.repository;
 
 import com.tekion.cricket.beans.Match;
+import com.tekion.cricket.constants.Common;
 import com.tekion.cricket.dbconnector.MySqlConnector;
 import com.tekion.cricket.util.ReaderUtil;
 import org.springframework.stereotype.Repository;
@@ -21,7 +22,7 @@ public class MatchRepositoryImpl implements MatchRepository{
             ps.setInt(1, match.getTeam1Id());
             ps.setInt(2, match.getTeam2Id());
             ps.setInt(3, match.getOvers());
-            ps.setInt(4, (int) Math.ceil(match.getOvers() / 5.0));
+            ps.setInt(4, (int) Math.ceil((double) match.getOvers() / Common.MIN_BOWLERS));
             ps.execute();
             ResultSet rs = ps.getGeneratedKeys();
             while (rs.next())

@@ -1,5 +1,7 @@
 package com.tekion.cricket.beans;
 
+import com.tekion.cricket.constants.Common;
+
 public class BallEvent {
     private int eventId;
     private int matchId;
@@ -38,6 +40,14 @@ public class BallEvent {
 
     public int getBallNumber() {
         return ballNumber;
+    }
+
+    public int getOverNumber(){
+        return ballNumber / Common.BALLS_IN_ONE_OVER;
+    }
+
+    public int getBallNumberForOver(){
+        return ballNumber % Common.BALLS_IN_ONE_OVER;
     }
 
     public int getBatsman() {

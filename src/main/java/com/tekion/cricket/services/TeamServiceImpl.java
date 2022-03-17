@@ -1,6 +1,7 @@
 package com.tekion.cricket.services;
 
 import com.tekion.cricket.beans.*;
+import com.tekion.cricket.constants.Common;
 import com.tekion.cricket.enums.MatchState;
 import com.tekion.cricket.enums.PlayerType;
 import com.tekion.cricket.models.BattingTeam;
@@ -59,7 +60,7 @@ public class TeamServiceImpl implements  TeamService{
         int sum = match.getOvers();
         int thrownOvers;
         for(Player p:allBowlers){
-            thrownOvers = ((bowlersWhoThrownOvers.get(p.getPlayerId()) == null) ?0 :bowlersWhoThrownOvers.get(p.getPlayerId()));
+            thrownOvers = bowlersWhoThrownOvers.getOrDefault(p.getPlayerId(), 0);
             sum -= thrownOvers;
             if(p.getPlayerId() != lastBowler && thrownOvers < maxOvers){
                 availableBowlers.add(new PlayerDTO(p.getName(), p.getPlayerType(), p.getTypeOfBowler(), p.getPlayerId(), maxOvers - thrownOvers));
@@ -69,8 +70,7 @@ public class TeamServiceImpl implements  TeamService{
                 }
             }
         }
-
-        if(allBowlers.size() > 6 || match.getOvers()%5 != 0) {
+        if(allBowlers.size() > Common.MIN_BOWLERS || match.getOvers() % Common.MIN_OVERS != 0) {
             return availableBowlers;
         }
         if(maxi > sum/2) {

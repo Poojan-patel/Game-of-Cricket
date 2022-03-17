@@ -12,9 +12,6 @@ public class BatsmanStats {
     @JsonView
     private int playedBalls;
 
-    public BatsmanStats(){
-    }
-
     public BatsmanStats(String name, int playerId, int currentScore, int playedBalls) {
         this.name = name;
         this.currentScore = currentScore;
@@ -27,12 +24,12 @@ public class BatsmanStats {
         return name;
     }
 
+    public int getPlayerId() {
+        return playerId;
+    }
+
     @Override
     public String toString() {
         return String.format("%d. %s: %d runs in %d balls", playerId, name, currentScore, playedBalls);
-    }
-
-    public int getPlayerId() {
-        return playerId;
     }
 }

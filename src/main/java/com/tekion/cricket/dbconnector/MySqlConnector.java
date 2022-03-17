@@ -3,6 +3,10 @@ package com.tekion.cricket.dbconnector;
 import java.sql.*;
 
 public class MySqlConnector {
+    private static String PASSWORD = "root";
+    private static String USERNAME = "root";
+    private static String DB_URL = "jdbc:mysql://localhost:3306/cricket";
+    private static String MYSQL_CLASS = "com.mysql.cj.jdbc.Driver";
     private static Connection conn = null;
 //    private static Context ctx = null;
 //    private static DataSource ds = null;
@@ -24,8 +28,7 @@ public class MySqlConnector {
     }
 
     private static void initializeConnection() throws SQLException, ClassNotFoundException{
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        conn = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/cricket","root","root");
+        Class.forName(MYSQL_CLASS);
+        conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
     }
 }

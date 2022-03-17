@@ -10,6 +10,7 @@ import java.util.Scanner;
 public class ReaderUtil {
     private static Scanner sc = new Scanner(System.in);
     private static Path projectResourcePath = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "queries");
+    private static String FILE_EXTENSION = ".sql";
 
     public static String getStringFromAcceptableValues(List<String> acceptableValues){
         String input = "";
@@ -71,8 +72,8 @@ public class ReaderUtil {
     }
 
     public static String readSqlFromFile(String dirName, String fileName) {
-        Path pathToFile = Paths.get(projectResourcePath.toString(), dirName, fileName + ".sql");
-        String sql = null;
+        Path pathToFile = Paths.get(projectResourcePath.toString(), dirName, fileName + FILE_EXTENSION);
+        String sql;
         try {
             sql = new String(Files.readAllBytes(pathToFile));
         } catch (IOException e) {
