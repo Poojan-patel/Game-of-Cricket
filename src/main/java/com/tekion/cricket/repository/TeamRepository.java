@@ -1,6 +1,5 @@
 package com.tekion.cricket.repository;
 
-import com.tekion.cricket.beans.Player;
 import com.tekion.cricket.beans.Team;
 import com.tekion.cricket.models.BattingTeam;
 import com.tekion.cricket.models.TeamDTO;
@@ -8,13 +7,13 @@ import com.tekion.cricket.models.TeamDTO;
 import java.util.List;
 
 public interface TeamRepository {
-    Integer save(Team team);
+    String save(Team team);
 
     List<TeamDTO> findAll();
 
-    BattingTeam fetchTeamScoreFromMatchId(int matchId, int battingTeamId);
+    BattingTeam fetchTeamScoreFromMatchId(String matchId, String battingTeamId);
 
-    List<Integer> fetchFirstTwoPlayers(int team1Id);
+    List<Integer> fetchFirstTwoPlayers(String team1Id);
 
-    String getTeamNameByTeamId(int team2Id);
+    String getTeamNameByTeamId(String team2Id);
 }

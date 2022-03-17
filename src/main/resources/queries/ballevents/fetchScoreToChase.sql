@@ -1,1 +1,1 @@
-select sum(score) from BallEvents where match_id = ? and team = ?
+select sum(score) from BallEvents where match_id = ? and batting_team = ?

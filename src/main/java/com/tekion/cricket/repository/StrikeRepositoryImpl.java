@@ -11,15 +11,15 @@ import java.sql.*;
 public class StrikeRepositoryImpl implements StrikeRepository {
 
     @Override
-    public void updateBowlerByTeamAndMatchId(int bowlerId, int matchId, int teamId){
+    public void updateBowlerByTeamAndMatchId(int bowlerOrder, String matchId, String bowlingTeam){
         Connection con = null;
         try {
             con = MySqlConnector.getConnection();
             con.setAutoCommit(false);
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("strike", "updateBowlerByTeamAndMatchId"));
-            ps.setInt(1, bowlerId);
-            ps.setInt(2, teamId);
-            ps.setInt(3, matchId);
+            ps.setInt(1, bowlerOrder);
+            ps.setString(2, bowlingTeam);
+            ps.setString(3, matchId);
             ps.execute();
             con.commit();
             con.close();
@@ -56,8 +56,8 @@ public class StrikeRepositoryImpl implements StrikeRepository {
                 ps.setNull(2, Types.INTEGER);
             }
             ps.setInt(3, strike.getCurrentWickets());
-            ps.setInt(4, strike.getMatchId());
-            ps.setInt(5, strike.getTeamId());
+            ps.setString(4, strike.getMatchId());
+            ps.setString(5, strike.getBattingTeam());
             ps.executeUpdate();
             con.commit();
             con.close();
@@ -73,16 +73,17 @@ public class StrikeRepositoryImpl implements StrikeRepository {
     }
 
     @Override
-    public void insertStrike(Strike strike){
+    public void save(Strike strike){
         Connection con = null;
         try {
             con = MySqlConnector.getConnection();
             con.setAutoCommit(false);
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("strike", "insertStrike"));
-            ps.setInt(1, strike.getMatchId());
-            ps.setInt(2, strike.getTeamId());
-            ps.setInt(3, strike.getStrike());
-            ps.setInt(4, strike.getNonStrike());
+            ps.setString(1, strike.getMatchId());
+            ps.setString(2, strike.getBattingTeam());
+            ps.setString(3, strike.getBowlingTeam());
+            ps.setInt(4, strike.getStrike());
+            ps.setInt(5, strike.getNonStrike());
 
             ps.execute();
             con.commit();
@@ -99,17 +100,17 @@ public class StrikeRepositoryImpl implements StrikeRepository {
     }
 
     @Override
-    public int fetchTheLastOver(Integer matchId, Integer currentBowlTeamId) {
+    public int fetchTheLastOver(String matchId, String currentBowlTeamId) {
         Connection con = null;
-        int bowlerId = 0;
+        int bowlerOrder = 0;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("strike", "findLastBowlerByTeamAndMatchId"));
-            ps.setInt(1, matchId);
-            ps.setInt(2, currentBowlTeamId);
+            ps.setString(1, matchId);
+            ps.setString(2, currentBowlTeamId);
             ResultSet rs = ps.executeQuery();
             while(rs.next())
-                bowlerId = rs.getInt("bowler");
+                bowlerOrder = rs.getInt("bowler");
         } catch (SQLException sqle){
             sqle.printStackTrace();
         } catch (Exception ignored) {
@@ -119,23 +120,23 @@ public class StrikeRepositoryImpl implements StrikeRepository {
                 con.close();
             } catch (Exception ignored) {}
         }
-        return bowlerId;
+        return bowlerOrder;
     }
 
     @Override
-    public Strike fetchStrikeDetails(int matchId, int currentBatTeamId) {
+    public Strike fetchStrikeDetails(String matchId, String currentBatTeamId) {
         Connection con = null;
         Strike strike = null;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("strike", "fetchStrikeDetails"));
-            ps.setInt(1, matchId);
-            ps.setInt(2, currentBatTeamId);
+            ps.setString(1, matchId);
+            ps.setString(2, currentBatTeamId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()){
                 strike = new Strike(
                         rs.getInt("strike"), rs.getInt("nonstrike"), rs.getInt("bowler"),
-                        matchId, rs.getInt("team"), rs.getInt("currentwickets")
+                        matchId, rs.getString("batting_team"), rs.getString("bowling_team"), rs.getInt("current_wickets")
                 );
             }
         } catch (SQLException sqle){

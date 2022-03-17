@@ -1,1 +1,1 @@
-select team1,team2 from MatchTable where match_id = ?
+select team1_id,team2_id from MatchTable where match_id = ?

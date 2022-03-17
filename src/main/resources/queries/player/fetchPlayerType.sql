@@ -1,1 +1,1 @@
-select playertype from Player where player_id = ?
+select player_type from Player where player_order = ? and team_id = ?

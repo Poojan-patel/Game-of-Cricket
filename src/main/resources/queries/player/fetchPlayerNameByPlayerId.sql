@@ -1,1 +1,1 @@
-select name from Player where player_id = ?
+select name from Player where player_order = ? and team_id = ?

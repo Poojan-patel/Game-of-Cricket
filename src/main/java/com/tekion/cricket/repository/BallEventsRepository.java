@@ -10,11 +10,11 @@ public interface BallEventsRepository{
     void save
             (BallEvent ballEvent);
 
-    MatchResult generateFinalScoreBoard(int matchId);
+    MatchResult generateFinalScoreBoard(String matchId);
 
-    Map<Integer, Integer> fetchBowlersWithThrownOversByTeamAndMatchId(Integer matchId, Integer currentBowlTeamId);
+    Map<Integer, Integer> fetchBowlersWithThrownOversByTeamAndMatchId(String matchId, String currentBowlTeamId);
 
-    int fetchScoreToChase(int matchId, int currentBowlTeamId);
+    int fetchScoreToChase(String matchId, String currentBowlTeamId);
 
-    List<BallEvent> fetchAllEventsByMatchAndTeamId(int matchId, int teamId);
+    List<BallEvent> fetchAllEventsByMatchAndTeamId(String matchId, String teamId);
 }

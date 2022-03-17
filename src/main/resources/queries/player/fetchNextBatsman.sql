@@ -1,1 +1,1 @@
-select player_id from Player where team = ? and player_id > ? limit 1 offset 0
+select player_order from Player where team_id = ? and player_order > ? limit 1 offset 0

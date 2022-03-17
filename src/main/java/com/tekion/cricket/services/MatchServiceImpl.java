@@ -46,13 +46,16 @@ public class MatchServiceImpl implements  MatchService{
     @Override
     public MatchCreationResponse createNewMatch(MatchCreationRequest matchRequest, List<TeamDTO> selectedTeams){
         Match match = new Match(matchRequest.getTeam1Id(), matchRequest.getTeam2Id(), matchRequest.getOvers());
-        int matchId = matchRepository.save(match);
+        String matchId = matchRepository.save(match);
+        if(matchId == null){
+            throw new IllegalStateException("Match is not created");
+        }
         return new MatchCreationResponse(matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName(), matchRequest.getOvers());
     }
 
     @Override
     public TossSimulationResult stimulateTossAndInsertStrike(Match match) {
-        int matchId = match.getMatchId();
+        String matchId = match.getMatchId();
         if(MatchState.fromStringToEnum(match.getMatchState()) != MatchState.TOSS_LEFT){
             throw new IllegalStateException("Toss is already Stimulated\n Try to start playing the Game");
         }
@@ -70,19 +73,19 @@ public class MatchServiceImpl implements  MatchService{
         TossSimulationResult tossSimulationResult = new TossSimulationResult(
                 matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName()
         );
-        teamService.insertStrikesForNewInning(match.getTeam1Id(), matchId);
+        teamService.insertStrikesForNewInning(match.getTeam1Id(), match);
         return tossSimulationResult;
     }
 
     @Override
-    public List<PlayerDTO> fetchAvailableBowlers(Match match, Integer currentBowlTeamId) {
+    public List<PlayerDTO> fetchAvailableBowlers(Match match, String currentBowlTeamId) {
         int maxOvers = match.getMaxovers();
         return teamService.getAllAvailableBowlers(match, currentBowlTeamId, maxOvers);
     }
 
     @Override
-    public ScoreBoard playTheOver(Match match, int currentBowlTeamId, Player bowler) {
-        setBowlerForThisOver(match, currentBowlTeamId, bowler.getPlayerId());
+    public ScoreBoard playTheOver(Match match, String currentBowlTeamId, Player bowler) {
+        setBowlerForThisOver(match, currentBowlTeamId, bowler.getPlayerOrder());
         Strike strike = teamService.initializeStrike(match, currentBowlTeamId, bowler);
         BattingTeam battingTeam = teamService.initializeBattingTeam(match, currentBowlTeamId);
         UnfairBallType unfairBallType;
@@ -105,7 +108,7 @@ public class MatchServiceImpl implements  MatchService{
     }
 
     @Override
-    public MatchResult generateFinalScoreBoard(Integer matchId){
+    public MatchResult generateFinalScoreBoard(String matchId){
         return ballEventsRepository.generateFinalScoreBoard(matchId);
     }
 
@@ -124,11 +127,11 @@ public class MatchServiceImpl implements  MatchService{
     }
 
     @Override
-    public Match findByMatchId(Integer matchId) {
+    public Match findByMatchId(String matchId) {
         return matchRepository.findByMatchId(matchId);
     }
 
-    private ScoreBoard generateIntermediateScoreBoard(Match match, int currentBowlTeamId, Strike strike, BattingTeam battingTeam, OverCompletionResult overCompletionResult) {
+    private ScoreBoard generateIntermediateScoreBoard(Match match, String currentBowlTeamId, Strike strike, BattingTeam battingTeam, OverCompletionResult overCompletionResult) {
         if(!MatchUtil.isMatchEnded(match)) {
             getOverCompletionResult(strike, battingTeam, match, overCompletionResult, currentBowlTeamId);
             return overCompletionResult;
@@ -185,8 +188,8 @@ public class MatchServiceImpl implements  MatchService{
         matchRecreateResponse.appendLog(ballEvent.getOverNumber() + "." + ballEvent.getBallNumberForOver() + ": " + (ballEvent.getScore()-1) + Common.SINGLE_SPACE + Common.RUN);
     }
 
-    private void getOverCompletionResult(Strike strike, BattingTeam battingTeam, Match match, OverCompletionResult overCompletionResult, int currentBowlTeamId) {
-        List<BatsmanStats> batsmanStats = playerRepository.fetchOnFieldBatsmenData(strike.getStrike(), strike.getNonStrike(), strike.getMatchId());
+    private void getOverCompletionResult(Strike strike, BattingTeam battingTeam, Match match, OverCompletionResult overCompletionResult, String currentBowlTeamId) {
+        List<BatsmanStats> batsmanStats = playerRepository.fetchOnFieldBatsmenData(strike.getStrike(), strike.getNonStrike(), strike.getMatchId(), battingTeam.getTeamId());
         if(batsmanStats.size() == 1)
             overCompletionResult.setNonStrike(batsmanStats.get(0).toString());
         else{
@@ -199,7 +202,7 @@ public class MatchServiceImpl implements  MatchService{
             overCompletionResult.setScoreToChase((battingTeam.getScoreToChase() - battingTeam.getTeamScore() + 1) + " runs left in " + (match.getOvers()*6 - battingTeam.getPlayedBalls()) + Common.SINGLE_SPACE + Common.BALLS);
         }
 
-        overCompletionResult.setBowler(playerRepository.fetchPlayerNameByPlayerId(strike.getBowler()));
+        overCompletionResult.setBowler(playerRepository.fetchPlayerNameByPlayerId(strike.getBowler(), currentBowlTeamId));
         if(MatchState.fromStringToEnum(match.getMatchState()) == MatchState.TEAM1_BATTING)
             overCompletionResult.setBowlerForNextOver(fetchAvailableBowlers(match, match.getTeam2Id()));
         else
@@ -216,7 +219,7 @@ public class MatchServiceImpl implements  MatchService{
             if(MatchState.fromStringToEnum(match.getMatchState()) == MatchState.TEAM1_BATTING){
                 match.setMatchState(MatchState.TEAM2_BATTING.toString());
                 overCompletionResult.setIntermediateResult(battingTeam.getTeamName() + " will start fielding");
-                teamService.insertStrikesForNewInning(match.getTeam2Id(), match.getMatchId());
+                teamService.insertStrikesForNewInning(match.getTeam2Id(), match);
                 matchRepository.update(match);
             } else{
                 if(battingTeam.getScoreToChase() == battingTeam.getTeamScore()) {
@@ -240,7 +243,7 @@ public class MatchServiceImpl implements  MatchService{
             ballNumber = 0;
         }
         int currentPlayer = strike.getStrike();
-        int outcomeOfBallBowled = MatchUtil.generateRandomScore(playerRepository.fetchPlayerType(currentPlayer), wicketPossible);
+        int outcomeOfBallBowled = MatchUtil.generateRandomScore(playerRepository.fetchPlayerType(currentPlayer, battingTeam.getTeamId()), wicketPossible);
 
         if(outcomeOfBallBowled == -1){
             outcomeOnWicketBall(strike, battingTeam, overCompletionResult);
@@ -276,8 +279,8 @@ public class MatchServiceImpl implements  MatchService{
         String typeOfWicketFallen = MatchUtil.getRandomTypeOfWicket();
         overCompletionResult.appendBallLogs(over + "." + ballNumber + ": " + Common.WICKET + "-" + (strike.getCurrentWickets()+1) + "(" + typeOfWicketFallen + ") || " + Common.PLAYER + ": %s", strike.getStrike());
         ballEventsRepository.save(new BallEvent(
-                strike.getMatchId(), battingTeam.getTeamId(), battingTeam.getPlayedBalls(), strike.getStrike(),
-                strike.getBowler(), 0, Common.EMPTYSTRING, typeOfWicketFallen)
+                strike.getMatchId(), battingTeam.getTeamId(), strike.getStrike(), battingTeam.getPlayedBalls(),
+                strike.getBowlingTeam(), strike.getBowler(), 0, Common.EMPTYSTRING, typeOfWicketFallen)
         );
         teamService.updateStrikeOnWicket(strike);
     }
@@ -301,8 +304,8 @@ public class MatchServiceImpl implements  MatchService{
         }
 
         ballEventsRepository.save(new BallEvent(
-                strike.getMatchId(), battingTeam.getTeamId(), over*6 + ballNumber,
-                (isTeamScore) ?-1 :currentPlayer, strike.getBowler(), outcomeOfBallBowled + ((isTeamScore) ?1 :0), typeOfUnFairBall, Common.EMPTYSTRING)
+                strike.getMatchId(), battingTeam.getTeamId(), (isTeamScore) ?-1 :currentPlayer, over*6 + ballNumber,
+                strike.getBowlingTeam(), strike.getBowler(), outcomeOfBallBowled + ((isTeamScore) ?1 :0), typeOfUnFairBall, Common.EMPTYSTRING)
         );
 
         if(outcomeOfBallBowled%2 == 1) {
@@ -322,23 +325,23 @@ public class MatchServiceImpl implements  MatchService{
                 overCompletionResult.appendBallLogs(Common.RUN_OUT + "-%s", strike.getStrike());
 
                 ballEventsRepository.save(new BallEvent(
-                        strike.getMatchId(), battingTeam.getTeamId(), currentBallNumber,
-                        strike.getStrike(), -1, 0, Common.EMPTYSTRING, Common.RUN_OUT)
+                        strike.getMatchId(), battingTeam.getTeamId(), strike.getStrike(), currentBallNumber,
+                        strike.getBowlingTeam(), -1, 0, Common.EMPTYSTRING, Common.RUN_OUT)
                 );
                 teamService.updateStrikeOnWicket(strike);
             }
         }
     }
 
-    private List<TeamDTO> getSelectedTeams(int team1Id, int team2Id) {
+    private List<TeamDTO> getSelectedTeams(String team1Id, String team2Id) {
         List<TeamDTO> allTeams = teamRepository.findAll();
         TeamDTO team1 = null;
         TeamDTO team2 = null;
         for(TeamDTO t: allTeams){
-            if(t.getTeamId() == team1Id){
+            if(team1Id.equals(t.getTeamId())){
                 team1 = t;
             }
-            if(t.getTeamId() == team2Id){
+            if(team2Id.equals(t.getTeamId())){
                 team2 = t;
             }
         }
@@ -346,12 +349,12 @@ public class MatchServiceImpl implements  MatchService{
     }
 
     private void swapTeams(Match match) {
-        int team1Id = match.getTeam1Id();
+        String team1Id = match.getTeam1Id();
         match.setTeam1Id(match.getTeam2Id());
         match.setTeam2Id(team1Id);
     }
 
-    private void setBowlerForThisOver(Match match, Integer currentBowlTeamId, int bowlerId) {
+    private void setBowlerForThisOver(Match match, String currentBowlTeamId, int bowlerId) {
         teamService.setBowlerForThisOver(match, currentBowlTeamId, bowlerId);
     }
 }

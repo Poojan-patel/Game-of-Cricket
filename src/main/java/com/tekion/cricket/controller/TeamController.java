@@ -28,8 +28,8 @@ public class TeamController {
 
     @PostMapping("/create")
     public ResponseEntity<String> createTeam(@RequestBody TeamDTO team){
-        Integer teamId = teamValidators.validateTeam(team);
-        return ResponseEntity.accepted().body(teamId.toString());
+        String teamId = teamValidators.validateTeam(team);
+        return ResponseEntity.accepted().body(teamId);
     }
 
     @GetMapping("/list")

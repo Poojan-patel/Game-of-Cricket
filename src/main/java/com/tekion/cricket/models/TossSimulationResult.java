@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 public class TossSimulationResult {
     @JsonView
-    private int matchId;
+    private String matchId;
     @JsonView
     private String team1Name;
     @JsonView
@@ -12,7 +12,7 @@ public class TossSimulationResult {
     @JsonView
     private String tossWinner;
 
-    public TossSimulationResult(int matchId, String team1Name, String team2Name) {
+    public TossSimulationResult(String matchId, String team1Name, String team2Name) {
         this.matchId = matchId;
         this.team1Name = team1Name;
         this.team2Name = team2Name;

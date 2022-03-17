@@ -19,7 +19,7 @@ public class MatchValidators {
         this.matchService = matchService;
     }
 
-    public Match checkMatchIdValidity(Integer matchId) {
+    public Match checkMatchIdValidity(String matchId) {
         Match match = matchService.findByMatchId(matchId);
         if(match == null){
             throw new IllegalStateException("Match Id does not exists");
@@ -27,7 +27,7 @@ public class MatchValidators {
         return match;
     }
 
-    public Player checkBowlerValidity(Match match, Integer currentBowlTeamId, Integer chosenBowler) {
+    public Player checkBowlerValidity(Match match, String currentBowlTeamId, Integer chosenBowler) {
         List<PlayerDTO> availableBowlers = matchService.fetchAvailableBowlers(match, currentBowlTeamId);
 
         for(PlayerDTO p: availableBowlers){

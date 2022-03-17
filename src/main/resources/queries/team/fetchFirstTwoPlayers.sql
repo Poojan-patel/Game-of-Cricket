@@ -1,1 +1,1 @@
-select player_id from Player where team = ? limit 2
+select player_order from Player where team_id = ? limit 2

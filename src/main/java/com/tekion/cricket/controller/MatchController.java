@@ -41,37 +41,37 @@ public class MatchController {
     }
 
     @RequestMapping("/play/{matchId}")
-    public ResponseEntity<ScoreBoard> stimulateMatch(@PathVariable Integer matchId, @RequestBody BowlerForNextOver bowlerForNextOver){
+    public ResponseEntity<ScoreBoard> stimulateMatch(@PathVariable String matchId, @RequestBody BowlerForNextOver bowlerForNextOver){
         Match match = matchValidators.checkMatchIdValidity(matchId);
-        Integer currentBowlTeamId = MatchUtil.getCurrentBowlingTeam(match);
+        String currentBowlTeamId = MatchUtil.getCurrentBowlingTeam(match);
         Player bowler = matchValidators.checkBowlerValidity(match, currentBowlTeamId, bowlerForNextOver.getBowlerId());
         ScoreBoard scoreBoard = matchService.playTheOver(match, currentBowlTeamId, bowler);
         return ResponseEntity.ok(scoreBoard);
     }
 
     @GetMapping("/scoreboard/{matchId}")
-    public ResponseEntity<MatchResult> getScoreBoard(@PathVariable Integer matchId){
+    public ResponseEntity<MatchResult> getScoreBoard(@PathVariable String matchId){
         matchValidators.checkMatchIdValidity(matchId);
         return ResponseEntity.ok(matchService.generateFinalScoreBoard(matchId));
     }
 
     @GetMapping("/bowlerslist/{matchId}")
-    public ResponseEntity<List<PlayerDTO>> getAvailableBowlers(@PathVariable Integer matchId){
+    public ResponseEntity<List<PlayerDTO>> getAvailableBowlers(@PathVariable String matchId){
         Match match = matchValidators.checkMatchIdValidity(matchId);
-        Integer currentBowlTeamId = MatchUtil.getCurrentBowlingTeam(match);
+        String currentBowlTeamId = MatchUtil.getCurrentBowlingTeam(match);
         List<PlayerDTO> availableBowlers =  matchService.fetchAvailableBowlers(match, currentBowlTeamId);
         return ResponseEntity.ok(availableBowlers);
     }
 
     @GetMapping("/toss/{matchId}")
-    public ResponseEntity<TossSimulationResult> stimulateToss(@PathVariable Integer matchId){
+    public ResponseEntity<TossSimulationResult> stimulateToss(@PathVariable String matchId){
         Match match = matchValidators.checkMatchIdValidity(matchId);
         TossSimulationResult tossSimulationResult = matchService.stimulateTossAndInsertStrike(match);
         return ResponseEntity.ok(tossSimulationResult);
     }
 
     @GetMapping("/recreate/{matchId}")
-    public ResponseEntity<MatchRecreateResponse> recreateMatch(@PathVariable Integer matchId){
+    public ResponseEntity<MatchRecreateResponse> recreateMatch(@PathVariable String matchId){
         Match match = matchValidators.checkMatchIdValidity(matchId);
         MatchRecreateResponse matchRecreateResponse = matchService.recreateMatch(match);
         return ResponseEntity.ok(matchRecreateResponse);

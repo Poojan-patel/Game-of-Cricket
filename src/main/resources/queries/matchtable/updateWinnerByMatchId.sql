@@ -1,1 +1,1 @@
-update MatchTable set matchState = ? where match_id = ?
+update MatchTable set match_state = ? where match_id = ?

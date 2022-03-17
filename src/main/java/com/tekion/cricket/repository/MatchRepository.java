@@ -4,9 +4,9 @@ import com.tekion.cricket.beans.Match;
 
 public interface MatchRepository {
 
-    int save(Match match);
+    String save(Match match);
 
-    Match findByMatchId(Integer matchId);
+    Match findByMatchId(String matchId);
 
     void update(Match match);
 }

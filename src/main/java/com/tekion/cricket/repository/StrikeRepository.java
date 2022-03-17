@@ -4,13 +4,13 @@ import com.tekion.cricket.beans.Strike;
 
 public interface StrikeRepository {
 
-    void updateBowlerByTeamAndMatchId(int bowlerId, int matchId, int teamId);
+    void updateBowlerByTeamAndMatchId(int bowlerOrder, String matchId, String bowlingTeam);
 
     void updateStrikesByTeamAndMatchId(Strike strike);
 
-    void insertStrike(Strike strike);
+    void save(Strike strike);
 
-    int fetchTheLastOver(Integer matchId, Integer currentBowlTeamId);
+    int fetchTheLastOver(String matchId, String currentBowlTeamId);
 
-    Strike fetchStrikeDetails(int matchId, int currentBatTeamId);
+    Strike fetchStrikeDetails(String matchId, String currentBatTeamId);
 }

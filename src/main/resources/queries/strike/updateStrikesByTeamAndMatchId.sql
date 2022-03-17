@@ -1,1 +1,1 @@
-update Strike set strike = ?, nonstrike = ?, currentwickets = ? where match_id = ? and team = ?
+update Strike set strike = ?, nonstrike = ?, current_wickets = ? where match_id = ? and batting_team = ?

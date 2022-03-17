@@ -3,7 +3,6 @@ package com.tekion.cricket.services;
 import com.tekion.cricket.beans.*;
 import com.tekion.cricket.constants.Common;
 import com.tekion.cricket.enums.MatchState;
-import com.tekion.cricket.enums.PlayerType;
 import com.tekion.cricket.models.BattingTeam;
 import com.tekion.cricket.models.PlayerDTO;
 import com.tekion.cricket.models.TeamDTO;
@@ -35,9 +34,9 @@ public class TeamServiceImpl implements  TeamService{
     }
 
     @Override
-    public Integer saveTeamWithPlayers(Team team, List<Player> players) {
-        Integer teamId = teamRepository.save(team);
-        if(teamId <= 0) {
+    public String saveTeamWithPlayers(Team team, List<Player> players) {
+        String teamId = teamRepository.save(team);
+        if(teamId == null) {
             throw new IllegalStateException("Team could not be saved");
         }
         playerRepository.saveBatch(players, teamId);
@@ -50,7 +49,7 @@ public class TeamServiceImpl implements  TeamService{
     }
 
     @Override
-    public List<PlayerDTO> getAllAvailableBowlers(Match match, Integer currentBowlTeamId, Integer maxOvers) {
+    public List<PlayerDTO> getAllAvailableBowlers(Match match, String currentBowlTeamId, Integer maxOvers) {
         List<Player> allBowlers = playerRepository.fetchBowlersForBowlingTeamByTeamId(currentBowlTeamId);
         Map<Integer,Integer> bowlersWhoThrownOvers = ballEventsRepository.fetchBowlersWithThrownOversByTeamAndMatchId(match.getMatchId(), currentBowlTeamId);
         int lastBowler = strikeRepository.fetchTheLastOver(match.getMatchId(), currentBowlTeamId);
@@ -60,10 +59,10 @@ public class TeamServiceImpl implements  TeamService{
         int sum = match.getOvers();
         int thrownOvers;
         for(Player p:allBowlers){
-            thrownOvers = bowlersWhoThrownOvers.getOrDefault(p.getPlayerId(), 0);
+            thrownOvers = bowlersWhoThrownOvers.getOrDefault(p.getPlayerOrder(), 0);
             sum -= thrownOvers;
-            if(p.getPlayerId() != lastBowler && thrownOvers < maxOvers){
-                availableBowlers.add(new PlayerDTO(p.getName(), p.getPlayerType(), p.getTypeOfBowler(), p.getPlayerId(), maxOvers - thrownOvers));
+            if(p.getPlayerOrder() != lastBowler && thrownOvers < maxOvers){
+                availableBowlers.add(new PlayerDTO(p.getName(), p.getPlayerType(), p.getTypeOfBowler(), p.getPlayerOrder(), maxOvers - thrownOvers));
                 if(maxOvers - thrownOvers > maxi){
                     maxi = maxOvers - thrownOvers;
                     minOverPlayer = availableBowlers.get(availableBowlers.size()-1);
@@ -80,20 +79,20 @@ public class TeamServiceImpl implements  TeamService{
     }
 
     @Override
-    public void setBowlerForThisOver(Match match, Integer currentBowlTeamId, int bowlerId) {
+    public void setBowlerForThisOver(Match match, String currentBowlTeamId, int bowlerId) {
         strikeRepository.updateBowlerByTeamAndMatchId(bowlerId, match.getMatchId(), currentBowlTeamId);
     }
 
     @Override
-    public Strike initializeStrike(Match match, int currentBowlTeamId, Player bowler) {
-        int currentBatTeamId = (match.getTeam1Id() == currentBowlTeamId) ? match.getTeam2Id() : match.getTeam1Id();
+    public Strike initializeStrike(Match match, String currentBowlTeamId, Player bowler) {
+        String currentBatTeamId = (match.getTeam1Id().equals(currentBowlTeamId)) ? match.getTeam2Id() : match.getTeam1Id();
         return strikeRepository.fetchStrikeDetails(match.getMatchId(), currentBatTeamId);
     }
 
     @Override
-    public BattingTeam initializeBattingTeam(Match match, int currentBowlTeamId) {
+    public BattingTeam initializeBattingTeam(Match match, String currentBowlTeamId) {
         int scoreToChase = -1;
-        int currentBatTeamId = (match.getTeam1Id() == currentBowlTeamId) ? match.getTeam2Id() : match.getTeam1Id();
+        String currentBatTeamId = (match.getTeam1Id().equals(currentBowlTeamId)) ? match.getTeam2Id() : match.getTeam1Id();
         if(MatchState.fromStringToEnum(match.getMatchState()) == MatchState.TEAM2_BATTING){
             scoreToChase = ballEventsRepository.fetchScoreToChase(match.getMatchId(), currentBowlTeamId);
         }
@@ -112,15 +111,16 @@ public class TeamServiceImpl implements  TeamService{
     public void updateStrikeOnWicket(Strike strike) {
         int maxOrder = strike.getMaxOrderedPlayer();
         strike.incrementWickets();
-        int newBatter = playerRepository.fetchNextBatsman(strike.getTeamId(), maxOrder);
+        int newBatter = playerRepository.fetchNextBatsman(strike.getBattingTeam(), maxOrder);
         strike.setNewBatsman(newBatter);
         strikeRepository.updateStrikesByTeamAndMatchId(strike);
     }
 
     @Override
-    public void insertStrikesForNewInning(int teamId, int matchId) {
-        List<Integer> playerIds = teamRepository.fetchFirstTwoPlayers(teamId);
-        strikeRepository.insertStrike(new Strike(playerIds.get(0), playerIds.get(1), matchId, teamId));
+    public void insertStrikesForNewInning(String battingTeamId, Match match) {
+        List<Integer> playerIds = teamRepository.fetchFirstTwoPlayers(battingTeamId);
+        String bowlingTeamId = ((battingTeamId.equals(match.getTeam1Id())) ?match.getTeam2Id() :match.getTeam1Id());
+        strikeRepository.save(new Strike(playerIds.get(0), playerIds.get(1), match.getMatchId(), battingTeamId, bowlingTeamId));
     }
 
     @Override

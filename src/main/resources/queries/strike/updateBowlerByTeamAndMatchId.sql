@@ -1,1 +1,1 @@
-update Strike set bowler = ? where team != ? and match_id = ?
+update Strike set bowler = ? where bowling_team = ? and match_id = ?

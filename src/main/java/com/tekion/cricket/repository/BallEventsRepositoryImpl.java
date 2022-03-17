@@ -21,10 +21,11 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "insertEvent"));
-            ps.setInt(1,ballEvent.getMatchId());
-            ps.setInt(2,ballEvent.getTeam());
-            ps.setInt(3,ballEvent.getBallNumber());
-            ps.setInt(6,ballEvent.getScore());
+            ps.setString(1, ballEvent.getMatchId());
+            ps.setInt(2, ballEvent.getBallNumber());
+            ps.setString(3, ballEvent.getBattingTeam());
+            ps.setString(5, ballEvent.getBowlingTeam());
+            ps.setInt(7, ballEvent.getScore());
 
             if(ballEvent.getBatsman() != -1) {
                 ps.setInt(4, ballEvent.getBatsman());
@@ -34,24 +35,24 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
             }
 
             if(ballEvent.getBowler() != -1) {
-                ps.setInt(5, ballEvent.getBowler());
+                ps.setInt(6, ballEvent.getBowler());
             }
             else {
-                ps.setNull(5, Types.INTEGER);
+                ps.setNull(6, Types.INTEGER);
             }
 
-            if("".equals(ballEvent.getUnfairBallType())) {
-                ps.setNull(7, Types.VARCHAR);
-            }
-            else {
-                ps.setString(7, ballEvent.getUnfairBallType());
-            }
-
-            if("".equals(ballEvent.getWicketType())) {
+            if(Common.EMPTYSTRING.equals(ballEvent.getUnfairBallType())) {
                 ps.setNull(8, Types.VARCHAR);
             }
             else {
-                ps.setString(8, ballEvent.getWicketType());
+                ps.setString(8, ballEvent.getUnfairBallType());
+            }
+
+            if(Common.EMPTYSTRING.equals(ballEvent.getWicketType())) {
+                ps.setNull(9, Types.VARCHAR);
+            }
+            else {
+                ps.setString(9, ballEvent.getWicketType());
             }
 
             ps.execute();
@@ -67,7 +68,7 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
     }
 
     @Override
-    public MatchResult generateFinalScoreBoard(int matchId) {
+    public MatchResult generateFinalScoreBoard(String matchId) {
         Connection con = null;
         MatchResult matchResult = new MatchResult();
         try{
@@ -88,14 +89,14 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
     }
 
     @Override
-    public Map<Integer, Integer> fetchBowlersWithThrownOversByTeamAndMatchId(Integer matchId, Integer currentBowlTeamId) {
+    public Map<Integer, Integer> fetchBowlersWithThrownOversByTeamAndMatchId(String matchId, String currentBowlTeamId) {
         Connection con = null;
         Map<Integer, Integer> bowlerWithThrownOvers = null;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "fetchBowlersWithThrownOversByTeamAndMatchId"));
-            ps.setInt(1, matchId);
-            ps.setInt(2, currentBowlTeamId);
+            ps.setString(1, matchId);
+            ps.setString(2, currentBowlTeamId);
             ResultSet rs = ps.executeQuery();
             bowlerWithThrownOvers = new HashMap<>();
             while(rs.next()){
@@ -115,14 +116,14 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
     }
 
     @Override
-    public int fetchScoreToChase(int matchId, int currentBowlTeamId) {
+    public int fetchScoreToChase(String matchId, String currentBowlTeamId) {
         Connection con = null;
         int scoreToChase = -1;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "fetchScoreToChase"));
-            ps.setInt(1, matchId);
-            ps.setInt(2, currentBowlTeamId);
+            ps.setString(1, matchId);
+            ps.setString(2, currentBowlTeamId);
             ResultSet rs = ps.executeQuery();
             while(rs.next())
                 scoreToChase = rs.getInt(1);
@@ -140,19 +141,19 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
     }
 
     @Override
-    public List<BallEvent> fetchAllEventsByMatchAndTeamId(int matchId, int teamId) {
+    public List<BallEvent> fetchAllEventsByMatchAndTeamId(String matchId, String teamId) {
         Connection con = null;
         List<BallEvent> ballEvents = new ArrayList<>();
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "fetchAllEventsByMatchAndTeamId"));
-            ps.setInt(1, matchId);
-            ps.setInt(2, teamId);
+            ps.setString(1, matchId);
+            ps.setString(2, teamId);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
-                ballEvents.add(new BallEvent(rs.getInt("event_id"), rs.getInt("match_id"), rs.getInt("team"),
-                        rs.getInt("ballnumber"), rs.getInt("batsman"), rs.getInt("bowler"), rs.getInt("score"),
-                        rs.getString("extra"), rs.getString("wicket"))
+                ballEvents.add(new BallEvent(rs.getString("event_id"), rs.getString("match_id"), rs.getString("batting_team"),
+                        rs.getInt("batsman"), rs.getInt("ball_number"), rs.getString("bowling_team"), rs.getInt("bowler"),
+                        rs.getInt("score"), rs.getString("extra"), rs.getString("wicket_type"))
                 );
             }
         } catch(SQLException sqle){
@@ -167,9 +168,9 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
         return ballEvents;
     }
 
-    private void getBowlingStats(int matchId, Connection con, MatchResult matchResult) throws SQLException {
+    private void getBowlingStats(String matchId, Connection con, MatchResult matchResult) throws SQLException {
         PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getBowlingStats"));
-        ps.setInt(1,matchId);
+        ps.setString(1, matchId);
         ResultSet rs = ps.executeQuery();
         while(rs.next()){
             matchResult.appendBowlingStats(
@@ -181,9 +182,9 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
         }
     }
 
-    private void getBatsmanStats(int matchId, Connection con, MatchResult matchResult) throws SQLException{
+    private void getBatsmanStats(String matchId, Connection con, MatchResult matchResult) throws SQLException{
         PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getBatsmanStats"));
-        ps.setInt(1,matchId);
+        ps.setString(1, matchId);
         ResultSet rs = ps.executeQuery();
         while(rs.next()){
             matchResult.appendBattingStats(
@@ -193,9 +194,9 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
         }
     }
 
-    private void getTeamScore(int matchId, Connection con, MatchResult matchResult) throws SQLException{
+    private void getTeamScore(String matchId, Connection con, MatchResult matchResult) throws SQLException{
         PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getTeamScore"));
-        ps.setInt(1,matchId);
+        ps.setString(1, matchId);
         ResultSet rs = ps.executeQuery();
         List<String> teamName = new ArrayList<>();
         List<Integer> teamScore = new ArrayList<>();

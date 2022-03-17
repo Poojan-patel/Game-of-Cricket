@@ -81,7 +81,7 @@ public class MatchUtil {
             return 2;
     }
 
-    public static Integer getCurrentBowlingTeam(Match match) {
+    public static String getCurrentBowlingTeam(Match match) {
         MatchState currentMatchState = MatchState.fromStringToEnum(match.getMatchState());
         if(currentMatchState != MatchState.TEAM1_BATTING && currentMatchState != MatchState.TEAM2_BATTING){
             throw new IllegalStateException("Either match is finished or not started yet!");

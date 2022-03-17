@@ -1,15 +1,15 @@
 package com.tekion.cricket.models;
 
 public class MatchCreationRequest {
-    private int team1Id;
-    private int team2Id;
+    private String team1Id;
+    private String team2Id;
     private int overs;
 
-    public int getTeam1Id() {
+    public String getTeam1Id() {
         return team1Id;
     }
 
-    public int getTeam2Id() {
+    public String getTeam2Id() {
         return team2Id;
     }
 

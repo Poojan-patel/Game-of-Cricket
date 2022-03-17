@@ -1,1 +1,1 @@
-select player_id, name, playertype, bowling_pace from player where team = ? and playertype != 'BATSMAN'
+select player_order, name, player_type, bowling_pace from player where team_id = ? and player_type != 'BATSMAN'

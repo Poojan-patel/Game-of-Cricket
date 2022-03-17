@@ -9,17 +9,17 @@ import java.util.Map;
 
 public interface PlayerRepository {
 
-    List<Player> fetchBowlersForBowlingTeamByTeamId(Integer teamId);
+    List<Player> fetchBowlersForBowlingTeamByTeamId(String teamId);
 
-    List<BatsmanStats> fetchOnFieldBatsmenData(int strike, int nonStrike, int matchId);
+    List<BatsmanStats> fetchOnFieldBatsmenData(int strike, int nonStrike, String matchId, String battingTeam);
 
-    int fetchNextBatsman(Integer teamId, int maxOrder);
+    int fetchNextBatsman(String teamId, int maxOrder);
 
-    PlayerType fetchPlayerType(int playerId);
+    PlayerType fetchPlayerType(int playerOrder, String team);
 
-    String fetchPlayerNameByPlayerId(int bowlerId);
+    String fetchPlayerNameByPlayerId(int playerOrder, String teamId);
 
-    Map<Integer, String> fetchPlayerNamesByTeamId(int teamId);
+    Map<Integer, String> fetchPlayerNamesByTeamId(String teamId);
 
-    void saveBatch(List<Player> players, Integer teamId);
+    void saveBatch(List<Player> players, String teamId);
 }

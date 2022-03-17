@@ -1,1 +1,1 @@
-select player_id, name, playertype, bowling_pace from Player where team = ? limit ?, ?
+select player_order, name, player_type, bowling_pace from Player where team_id = ? limit ?, ?

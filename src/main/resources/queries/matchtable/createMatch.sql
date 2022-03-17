@@ -1,1 +1,1 @@
-insert into MatchTable(team1, team2, overs, maxovers) VALUES(?,?,?,?)
+insert into MatchTable(match_id, team1_id, team2_id, overs, max_overs) VALUES(?,?,?,?,?)

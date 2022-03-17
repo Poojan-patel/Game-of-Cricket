@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TeamValidators {
@@ -26,7 +27,7 @@ public class TeamValidators {
     }
 
     public List<TeamDTO> validateTeamsForMatchCreation(MatchCreationRequest matchRequest) {
-        if (matchRequest.getTeam1Id() == matchRequest.getTeam2Id()) {
+        if (matchRequest.getTeam1Id().equals(matchRequest.getTeam2Id())) {
             throw new IllegalStateException("Both Team Cannot be Same");
         }
         if (matchRequest.getOvers() < Common.MIN_OVERS) {
@@ -35,15 +36,15 @@ public class TeamValidators {
         return checkTeamExistance(matchRequest.getTeam1Id(), matchRequest.getTeam2Id());
     }
 
-    private List<TeamDTO> checkTeamExistance(int team1Id, int team2Id) {
+    private List<TeamDTO> checkTeamExistance(String team1Id, String team2Id) {
         List<TeamDTO> allTeams = teamService.findAllTeams();
         TeamDTO team1 = null;
         TeamDTO team2 = null;
         for(TeamDTO t: allTeams){
-            if(t.getTeamId() == team1Id){
+            if(team1Id.equals(t.getTeamId())){
                 team1 = t;
             }
-            if(t.getTeamId() == team2Id){
+            if(team2Id.equals(t.getTeamId())){
                 team2 = t;
             }
         }
@@ -53,7 +54,7 @@ public class TeamValidators {
         return Arrays.asList(team1, team2);
     }
 
-    public Integer validateTeam(TeamDTO teamDTO){
+    public String validateTeam(TeamDTO teamDTO){
         List<PlayerDTO> playerDTOs = teamDTO.getPlayers();
         Team team = new Team(teamDTO.getTeamName());
         List<Player> players = new ArrayList<>();

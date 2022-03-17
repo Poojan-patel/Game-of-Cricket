@@ -14,26 +14,20 @@ import java.util.*;
 public class PlayerRepositoryImpl implements PlayerRepository{
 
     @Override
-    public List<Player> fetchBowlersForBowlingTeamByTeamId(Integer teamId){
+    public List<Player> fetchBowlersForBowlingTeamByTeamId(String teamId){
         Connection con = null;
         List<Player> bowlers = null;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchBowlersForBowlingTeamByTeamId"));
-            ps.setInt(1, teamId);
+            ps.setString(1, teamId);
             ResultSet rs = ps.executeQuery();
 
-            String name;
-            int playerId;
-            String playerType;
-            String bowlingPace;
             bowlers = new ArrayList<>();
             while(rs.next()){
-                playerType = rs.getString("playertype");
-                name = rs.getString("name");
-                playerId = rs.getInt("player_id");
-                bowlingPace = rs.getString("bowling_pace");
-                bowlers.add(new Player(name, playerType, bowlingPace, playerId));
+                bowlers.add(new Player(
+                        rs.getString("name"), rs.getString("player_type"), rs.getString("bowling_pace"), rs.getInt("player_order"))
+                );
             }
             con.close();
         } catch(SQLException sqle){
@@ -49,7 +43,7 @@ public class PlayerRepositoryImpl implements PlayerRepository{
     }
 
     @Override
-    public List<BatsmanStats> fetchOnFieldBatsmenData(int strike, int nonStrike, int matchId) {
+    public List<BatsmanStats> fetchOnFieldBatsmenData(int strike, int nonStrike, String matchId, String battingTeam) {
         Connection con = null;
         List<BatsmanStats> currentPlayers = new ArrayList<>();
         try{
@@ -57,13 +51,15 @@ public class PlayerRepositoryImpl implements PlayerRepository{
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchOnFieldBatsmenData"));
             ps.setInt(1, strike);
             ps.setInt(2, nonStrike);
-            ps.setInt(3, strike);
-            ps.setInt(4, nonStrike);
-            ps.setInt(5, matchId);
+            ps.setString(3, battingTeam);
+            ps.setInt(4, strike);
+            ps.setInt(5, nonStrike);
+            ps.setString(6, matchId);
+            ps.setString(7, battingTeam);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 currentPlayers.add(new BatsmanStats(
-                        rs.getString("name"), rs.getInt("player_id"), rs.getInt("Score"), rs.getInt("Balls"))
+                        rs.getString("name"), rs.getInt("player_order"), rs.getInt("Score"), rs.getInt("Balls"))
                 );
             }
             if(currentPlayers.size() > 1 && currentPlayers.get(0).getPlayerId() != strike){
@@ -83,13 +79,13 @@ public class PlayerRepositoryImpl implements PlayerRepository{
     }
 
     @Override
-    public int fetchNextBatsman(Integer teamId, int maxOrder) {
+    public int fetchNextBatsman(String teamId, int maxOrder) {
         Connection con = null;
         int newPlayer = -1;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchNextBatsman"));
-            ps.setInt(1, teamId);
+            ps.setString(1, teamId);
             ps.setInt(2, maxOrder);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
@@ -108,13 +104,14 @@ public class PlayerRepositoryImpl implements PlayerRepository{
     }
 
     @Override
-    public PlayerType fetchPlayerType(int playerId) {
+    public PlayerType fetchPlayerType(int playerOrder, String team) {
         Connection con = null;
         PlayerType playerType = null;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchPlayerType"));
-            ps.setInt(1, playerId);
+            ps.setInt(1, playerOrder);
+            ps.setString(2, team);
             ResultSet rs = ps.executeQuery();
             while(rs.next())
                 playerType = PlayerType.fromStringToEnum(rs.getString(1));
@@ -131,13 +128,14 @@ public class PlayerRepositoryImpl implements PlayerRepository{
     }
 
     @Override
-    public String fetchPlayerNameByPlayerId(int playerId) {
+    public String fetchPlayerNameByPlayerId(int playerOrder, String teamId) {
         Connection con = null;
         String name = null;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchPlayerNameByPlayerId"));
-            ps.setInt(1, playerId);
+            ps.setInt(1, playerOrder);
+            ps.setString(2, teamId);
             ResultSet rs = ps.executeQuery();
             while(rs.next())
                 name = rs.getString(1);
@@ -155,13 +153,13 @@ public class PlayerRepositoryImpl implements PlayerRepository{
     }
 
     @Override
-    public Map<Integer, String> fetchPlayerNamesByTeamId(int teamId) {
+    public Map<Integer, String> fetchPlayerNamesByTeamId(String teamId) {
         Connection con = null;
         Map<Integer, String> playerNamesFromIds = new HashMap<>();
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "fetchPlayerNamesByTeamId"));
-            ps.setInt(1, teamId);
+            ps.setString(1, teamId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()){
                 playerNamesFromIds.put(rs.getInt(2), rs.getString(1));
@@ -180,17 +178,19 @@ public class PlayerRepositoryImpl implements PlayerRepository{
     }
 
     @Override
-    public void saveBatch(List<Player> players, Integer teamId) {
+    public void saveBatch(List<Player> players, String teamId) {
         Connection con = null;
         try {
             con = MySqlConnector.getConnection();
             con.setAutoCommit(false);
             PreparedStatement stmt = con.prepareStatement(ReaderUtil.readSqlFromFile("player", "insertTeamPlayers"), Statement.RETURN_GENERATED_KEYS);
+            int order = 0;
             for (Player player : players) {
-                stmt.setInt(1, teamId);
-                stmt.setString(2, player.getName());
-                stmt.setString(3, player.getPlayerType());
-                stmt.setString(4, player.getTypeOfBowler());
+                stmt.setString(1, teamId);
+                stmt.setInt(2, order++);
+                stmt.setString(3, player.getName());
+                stmt.setString(4, player.getPlayerType());
+                stmt.setString(5, player.getTypeOfBowler());
                 stmt.addBatch();
             }
             stmt.executeBatch();

@@ -1,1 +1,1 @@
-insert into team(name) values(?)
+insert into team(team_id, name) values(?,?)

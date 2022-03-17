@@ -1,1 +1,1 @@
-select * from BallEvents where match_id = ? and team = ?
+select * from BallEvents where match_id = ? and batting_team = ? order by ball_number

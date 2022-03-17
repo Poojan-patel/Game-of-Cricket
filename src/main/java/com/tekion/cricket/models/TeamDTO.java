@@ -14,7 +14,7 @@ public class TeamDTO {
     @JsonIgnore
     private List<PlayerDTO> players;
     @JsonView
-    private Integer teamId;
+    private String teamId;
 
     public String getTeamName() {
         return teamName;
@@ -27,7 +27,7 @@ public class TeamDTO {
     public TeamDTO() {
     }
 
-    public TeamDTO(String teamName, Integer teamId){
+    public TeamDTO(String teamName, String teamId){
         this.teamName = teamName;
         this.teamId = teamId;
     }
@@ -46,10 +46,9 @@ public class TeamDTO {
         for(Map<String, Object> singlePlayer: playerList){
             players.add(new PlayerDTO((String)singlePlayer.get("name"), (String)singlePlayer.get("playerType"), (String)singlePlayer.get("bowlingType")));
         }
-        System.out.println("Creation Done");
     }
 
-    public int getTeamId() {
+    public String getTeamId() {
         return teamId;
     }
 }

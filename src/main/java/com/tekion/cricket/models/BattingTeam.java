@@ -4,10 +4,10 @@ public class BattingTeam {
     private String name;
     private int currentScore;
     private int playedBalls;
-    private int teamId;
+    private String teamId;
     private int scoreToChase;
 
-    public BattingTeam(String name, int currentScore, int playedBalls, int teamId) {
+    public BattingTeam(String name, int currentScore, int playedBalls, String teamId) {
         this.name = name;
         this.currentScore = currentScore;
         this.playedBalls = playedBalls;
@@ -30,7 +30,7 @@ public class BattingTeam {
         return playedBalls;
     }
 
-    public int getTeamId() {
+    public String getTeamId() {
         return teamId;
     }
 

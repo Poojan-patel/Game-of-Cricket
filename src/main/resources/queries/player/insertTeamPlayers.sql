@@ -1,1 +1,1 @@
-insert into player(team, name, playertype, bowling_pace) values (?,?,?,?)
+insert into Player(team_id, player_order, name, player_type, bowling_pace) values (?,?,?,?,?)

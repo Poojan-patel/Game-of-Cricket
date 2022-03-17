@@ -4,7 +4,7 @@ import com.tekion.cricket.constants.Common;
 import com.tekion.cricket.models.PlayerDTO;
 
 public class Player {
-    private int playerId;
+    private int playerOrder;
     private String name;
 
     /** {@link com.tekion.cricket.enums.PlayerType}
@@ -14,7 +14,7 @@ public class Player {
     /** {@link com.tekion.cricket.enums.TypeOfBowler}
      */
     private String typeOfBowler;
-    private int teamId;
+    private String teamId;
 
     /*
     Constructor for persisting data in database
@@ -28,11 +28,11 @@ public class Player {
     /*
     Constructor for persisting data in database and creation of POJO from db
      */
-    public Player(String name, String playerType, String typeOfBowler, int playerId){
+    public Player(String name, String playerType, String typeOfBowler, int playerOrder){
         this.name = name;
         this.playerType = playerType;
         this.typeOfBowler = typeOfBowler;
-        this.playerId = playerId;
+        this.playerOrder = playerOrder;
     }
 
     public String getName() {
@@ -47,14 +47,14 @@ public class Player {
         return typeOfBowler;
     }
 
-    public int getPlayerId() {
-        return playerId;
+    public int getPlayerOrder() {
+        return playerOrder;
     }
 
     @Override
     public String toString() {
         return
-                playerId +
+                playerOrder +
                 ". " + name +
                 " - " + playerType + ((Common.BATSMAN.equals(playerType)) ? "" : "," + typeOfBowler);
     }
