@@ -5,6 +5,7 @@ import com.tekion.cricket.beans.Player;
 import com.tekion.cricket.models.PlayerDTO;
 import com.tekion.cricket.repository.MatchRepository;
 import com.tekion.cricket.services.MatchService;
+import com.tekion.cricket.util.MatchUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,14 @@ public class MatchValidators {
         Match match = matchService.findByMatchId(matchId);
         if(match == null){
             throw new IllegalStateException("Match Id does not exists");
+        }
+        return match;
+    }
+
+    public Match isMatchEnded(String matchId){
+        Match match = checkMatchIdValidity(matchId);
+        if(!MatchUtil.isMatchEnded(match)){
+            throw new IllegalStateException("Match has not completed yet");
         }
         return match;
     }

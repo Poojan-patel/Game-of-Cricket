@@ -19,7 +19,7 @@ public interface PlayerRepository {
 
     String fetchPlayerNameByPlayerId(int playerOrder, String teamId);
 
-    Map<Integer, String> fetchPlayerNamesByTeamId(String teamId);
+    Map<Integer, String> fetchPlayerNamesByTeamId(String teamId, int offset);
 
     void saveBatch(List<Player> players, String teamId);
 }

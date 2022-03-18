@@ -141,9 +141,10 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
     }
 
     @Override
-    public List<BallEvent> fetchAllEventsByMatchAndTeamId(String matchId, String teamId) {
+    public List<BallEvent> fetchAllEventsByMatchAndTeamId(String matchId, String teamId, int batsmanOffset) {
         Connection con = null;
         List<BallEvent> ballEvents = new ArrayList<>();
+        int bowlerOffset = Common.NUM_OF_PLAYERS - batsmanOffset;
         try{
             con = MySqlConnector.getConnection();
             PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "fetchAllEventsByMatchAndTeamId"));
@@ -152,8 +153,8 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 ballEvents.add(new BallEvent(rs.getString("event_id"), rs.getString("match_id"), rs.getString("batting_team"),
-                        rs.getInt("batsman"), rs.getInt("ball_number"), rs.getString("bowling_team"), rs.getInt("bowler"),
-                        rs.getInt("score"), rs.getString("extra"), rs.getString("wicket_type"))
+                        rs.getInt("batsman") + batsmanOffset, rs.getInt("ball_number"), rs.getString("bowling_team"),
+                        rs.getInt("bowler") + bowlerOffset, rs.getInt("score"), rs.getString("extra"), rs.getString("wicket_type"))
                 );
             }
         } catch(SQLException sqle){

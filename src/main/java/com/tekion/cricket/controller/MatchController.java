@@ -51,7 +51,7 @@ public class MatchController {
 
     @GetMapping("/scoreboard/{matchId}")
     public ResponseEntity<MatchResult> getScoreBoard(@PathVariable String matchId){
-        matchValidators.checkMatchIdValidity(matchId);
+        matchValidators.isMatchEnded(matchId);
         return ResponseEntity.ok(matchService.generateFinalScoreBoard(matchId));
     }
 
@@ -72,7 +72,7 @@ public class MatchController {
 
     @GetMapping("/recreate/{matchId}")
     public ResponseEntity<MatchRecreateResponse> recreateMatch(@PathVariable String matchId){
-        Match match = matchValidators.checkMatchIdValidity(matchId);
+        Match match = matchValidators.isMatchEnded(matchId);
         MatchRecreateResponse matchRecreateResponse = matchService.recreateMatch(match);
         return ResponseEntity.ok(matchRecreateResponse);
     }

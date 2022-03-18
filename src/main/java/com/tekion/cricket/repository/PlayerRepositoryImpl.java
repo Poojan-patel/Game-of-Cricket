@@ -153,7 +153,7 @@ public class PlayerRepositoryImpl implements PlayerRepository{
     }
 
     @Override
-    public Map<Integer, String> fetchPlayerNamesByTeamId(String teamId) {
+    public Map<Integer, String> fetchPlayerNamesByTeamId(String teamId, int offset) {
         Connection con = null;
         Map<Integer, String> playerNamesFromIds = new HashMap<>();
         try{
@@ -162,7 +162,7 @@ public class PlayerRepositoryImpl implements PlayerRepository{
             ps.setString(1, teamId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()){
-                playerNamesFromIds.put(rs.getInt(2), rs.getString(1));
+                playerNamesFromIds.put(rs.getInt(2) + offset, rs.getString(1));
             }
         } catch (SQLException sqle){
             sqle.printStackTrace();

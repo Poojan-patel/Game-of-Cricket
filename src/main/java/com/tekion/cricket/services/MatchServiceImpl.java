@@ -57,7 +57,7 @@ public class MatchServiceImpl implements  MatchService{
     public TossSimulationResult stimulateTossAndInsertStrike(Match match) {
         String matchId = match.getMatchId();
         if(MatchState.fromStringToEnum(match.getMatchState()) != MatchState.TOSS_LEFT){
-            throw new IllegalStateException("Toss is already Stimulated\n Try to start playing the Game");
+            throw new IllegalStateException("Toss is already Stimulated\nTry to start playing the Game");
         }
         int headOrTail = MatchUtil.stimulateToss();
         int choiceOfInning = MatchUtil.stimulateToss();
@@ -90,10 +90,11 @@ public class MatchServiceImpl implements  MatchService{
         BattingTeam battingTeam = teamService.initializeBattingTeam(match, currentBowlTeamId);
         UnfairBallType unfairBallType;
         boolean isWicketPossible = true;
-        OverCompletionResult overCompletionResult = new OverCompletionResult(playerRepository.fetchPlayerNamesByTeamId(battingTeam.getTeamId()));
+        OverCompletionResult overCompletionResult = new OverCompletionResult(playerRepository.fetchPlayerNamesByTeamId(battingTeam.getTeamId(), 0));
         for (int j = 0; j < Common.BALLS_IN_ONE_OVER; j++) {
             unfairBallType = playTheBall(strike, battingTeam, overCompletionResult, isWicketPossible);
             if (strike.isAllOut() || ((battingTeam.getScoreToChase() != -1) && (battingTeam.getScoreToChase() < battingTeam.getTeamScore()))) {
+                strike.changeStrike(); // As if team is all out or chased another, we don't have to change the strike, so to revert the effect, we have to update strike two times in total
                 break;
             }
             if(unfairBallType != UnfairBallType.NA) {
@@ -114,12 +115,9 @@ public class MatchServiceImpl implements  MatchService{
 
     @Override
     public MatchRecreateResponse recreateMatch(Match match) {
-        if(!MatchUtil.isMatchEnded(match)){
-            throw new IllegalStateException("Match has not completed yet");
-        }
         MatchResult matchResult = generateFinalScoreBoard(match.getMatchId());
-        Map<Integer, String> playerIdToNameMap = playerRepository.fetchPlayerNamesByTeamId(match.getTeam1Id());
-        playerIdToNameMap.putAll(playerRepository.fetchPlayerNamesByTeamId(match.getTeam2Id()));
+        Map<Integer, String> playerIdToNameMap = playerRepository.fetchPlayerNamesByTeamId(match.getTeam1Id(), 0);
+        playerIdToNameMap.putAll(playerRepository.fetchPlayerNamesByTeamId(match.getTeam2Id(), Common.NUM_OF_PLAYERS));
         MatchRecreateResponse matchRecreateResponse = new MatchRecreateResponse(playerIdToNameMap);
         matchRecreateResponse.setMatchResult(matchResult);
         setBallByBallStats(matchRecreateResponse, match);
@@ -142,8 +140,8 @@ public class MatchServiceImpl implements  MatchService{
     }
 
     private void setBallByBallStats(MatchRecreateResponse matchRecreateResponse, Match match) {
-        List<BallEvent> team1BallEvents = ballEventsRepository.fetchAllEventsByMatchAndTeamId(match.getMatchId(), match.getTeam1Id());
-        List<BallEvent> team2BallEvents = ballEventsRepository.fetchAllEventsByMatchAndTeamId(match.getMatchId(), match.getTeam2Id());
+        List<BallEvent> team1BallEvents = ballEventsRepository.fetchAllEventsByMatchAndTeamId(match.getMatchId(), match.getTeam1Id(), 0);
+        List<BallEvent> team2BallEvents = ballEventsRepository.fetchAllEventsByMatchAndTeamId(match.getMatchId(), match.getTeam2Id(), Common.NUM_OF_PLAYERS);
         String team1Name = teamRepository.getTeamNameByTeamId(match.getTeam1Id());
         String team2Name = teamRepository.getTeamNameByTeamId(match.getTeam2Id());
         setBallByBallStatsForSingleTeam(matchRecreateResponse, team1BallEvents, team1Name);
@@ -321,7 +319,6 @@ public class MatchServiceImpl implements  MatchService{
         if(outcomeOfBallBowled != 4 && outcomeOfBallBowled != 6) {
             int possibilityOfRunOut = ThreadLocalRandom.current().nextInt(0, 10);
             if (possibilityOfRunOut == 9) {
-                // overCompletionResult.appendBallLogs("RunOut-" + battingTeam.getNameOfPlayer(strike.getStrike()));
                 overCompletionResult.appendBallLogs(Common.RUN_OUT + "-%s", strike.getStrike());
 
                 ballEventsRepository.save(new BallEvent(

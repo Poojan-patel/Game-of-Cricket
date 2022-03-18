@@ -16,5 +16,5 @@ public interface BallEventsRepository{
 
     int fetchScoreToChase(String matchId, String currentBowlTeamId);
 
-    List<BallEvent> fetchAllEventsByMatchAndTeamId(String matchId, String teamId);
+    List<BallEvent> fetchAllEventsByMatchAndTeamId(String matchId, String teamId, int batsmanOffset);
 }
