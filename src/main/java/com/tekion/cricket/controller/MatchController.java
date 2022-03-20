@@ -2,6 +2,7 @@ package com.tekion.cricket.controller;
 
 import com.tekion.cricket.beans.Match;
 import com.tekion.cricket.beans.Player;
+import com.tekion.cricket.beans.Team;
 import com.tekion.cricket.models.*;
 import com.tekion.cricket.services.MatchService;
 import com.tekion.cricket.util.MatchUtil;
@@ -35,7 +36,7 @@ public class MatchController {
 
     @PostMapping("/create")
     public ResponseEntity<MatchCreationResponse> organizeMatch(@RequestBody MatchCreationRequest matchCreationRequest){
-        List<TeamDTO> teamsForMatch = teamValidators.validateTeamsForMatchCreation(matchCreationRequest);
+        List<Team> teamsForMatch = teamValidators.validateTeamsForMatchCreation(matchCreationRequest);
         MatchCreationResponse response = matchService.createNewMatch(matchCreationRequest, teamsForMatch);
         return ResponseEntity.ok(response);
     }

@@ -1,7 +1,6 @@
 package com.tekion.cricket.repository;
 
 import com.tekion.cricket.beans.Team;
-import com.tekion.cricket.constants.Common;
 import com.tekion.cricket.dbconnector.MySqlConnector;
 import com.tekion.cricket.models.BattingTeam;
 import com.tekion.cricket.models.TeamDTO;
@@ -71,15 +70,15 @@ public class TeamRepositoryImpl implements TeamRepository{
     }
 
     @Override
-    public List<TeamDTO> findAll(){
+    public List<Team> findAll(){
         Connection con = null;
-        List<TeamDTO> teams = new ArrayList<>();
+        List<Team> teams = new ArrayList<>();
         try{
             con = MySqlConnector.getConnection();
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(ReaderUtil.readSqlFromFile("team", "getAll"));
             while(rs.next()){
-                teams.add(new TeamDTO(rs.getString(2), rs.getString(1)));
+                teams.add(new Team(rs.getString(2), rs.getString(1)));
             }
         } catch (SQLException sql){
             sql.printStackTrace();

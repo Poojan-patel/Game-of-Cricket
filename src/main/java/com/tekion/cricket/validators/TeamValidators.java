@@ -26,7 +26,7 @@ public class TeamValidators {
         this.teamService = teamService;
     }
 
-    public List<TeamDTO> validateTeamsForMatchCreation(MatchCreationRequest matchRequest) {
+    public List<Team> validateTeamsForMatchCreation(MatchCreationRequest matchRequest) {
         if (matchRequest.getTeam1Id().equals(matchRequest.getTeam2Id())) {
             throw new IllegalStateException("Both Team Cannot be Same");
         }
@@ -36,11 +36,11 @@ public class TeamValidators {
         return checkTeamExistance(matchRequest.getTeam1Id(), matchRequest.getTeam2Id());
     }
 
-    private List<TeamDTO> checkTeamExistance(String team1Id, String team2Id) {
-        List<TeamDTO> allTeams = teamService.findAllTeams();
-        TeamDTO team1 = null;
-        TeamDTO team2 = null;
-        for(TeamDTO t: allTeams){
+    private List<Team> checkTeamExistance(String team1Id, String team2Id) {
+        List<Team> allTeams = teamService.findAllTeams();
+        Team team1 = null;
+        Team team2 = null;
+        for(Team t: allTeams){
             if(team1Id.equals(t.getTeamId())){
                 team1 = t;
             }

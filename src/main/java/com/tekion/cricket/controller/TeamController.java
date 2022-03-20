@@ -1,5 +1,6 @@
 package com.tekion.cricket.controller;
 
+import com.tekion.cricket.beans.Team;
 import com.tekion.cricket.models.TeamDTO;
 import com.tekion.cricket.services.TeamService;
 import com.tekion.cricket.validators.TeamValidators;
@@ -33,8 +34,8 @@ public class TeamController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<TeamDTO>> getAllTeams(){
-        List<TeamDTO> allTeams = teamService.getAllTeams();
+    public ResponseEntity<List<Team>> getAllTeams(){
+        List<Team> allTeams = teamService.getAllTeams();
         return ResponseEntity.ok(allTeams);
     }
 }

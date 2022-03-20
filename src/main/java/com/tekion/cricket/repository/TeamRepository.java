@@ -2,14 +2,13 @@ package com.tekion.cricket.repository;
 
 import com.tekion.cricket.beans.Team;
 import com.tekion.cricket.models.BattingTeam;
-import com.tekion.cricket.models.TeamDTO;
 
 import java.util.List;
 
 public interface TeamRepository {
     String save(Team team);
 
-    List<TeamDTO> findAll();
+    List<Team> findAll();
 
     BattingTeam fetchTeamScoreFromMatchId(String matchId, String battingTeamId);
 

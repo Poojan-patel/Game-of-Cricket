@@ -44,7 +44,7 @@ public class MatchServiceImpl implements  MatchService{
     }
 
     @Override
-    public MatchCreationResponse createNewMatch(MatchCreationRequest matchRequest, List<TeamDTO> selectedTeams){
+    public MatchCreationResponse createNewMatch(MatchCreationRequest matchRequest, List<Team> selectedTeams){
         Match match = new Match(matchRequest.getTeam1Id(), matchRequest.getTeam2Id(), matchRequest.getOvers());
         String matchId = matchRepository.save(match);
         if(matchId == null){
@@ -69,7 +69,7 @@ public class MatchServiceImpl implements  MatchService{
 
         match.setMatchState(MatchState.TEAM1_BATTING.toString());
         matchRepository.update(match);
-        List<TeamDTO> selectedTeams = getSelectedTeams(match.getTeam1Id(), match.getTeam2Id());
+        List<Team> selectedTeams = getSelectedTeams(match.getTeam1Id(), match.getTeam2Id());
         TossSimulationResult tossSimulationResult = new TossSimulationResult(
                 matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName()
         );
@@ -79,7 +79,7 @@ public class MatchServiceImpl implements  MatchService{
 
     @Override
     public List<PlayerDTO> fetchAvailableBowlers(Match match, String currentBowlTeamId) {
-        int maxOvers = match.getMaxovers();
+        int maxOvers = match.getMaxOvers();
         return teamService.getAllAvailableBowlers(match, currentBowlTeamId, maxOvers);
     }
 
@@ -330,11 +330,11 @@ public class MatchServiceImpl implements  MatchService{
         }
     }
 
-    private List<TeamDTO> getSelectedTeams(String team1Id, String team2Id) {
-        List<TeamDTO> allTeams = teamRepository.findAll();
-        TeamDTO team1 = null;
-        TeamDTO team2 = null;
-        for(TeamDTO t: allTeams){
+    private List<Team> getSelectedTeams(String team1Id, String team2Id) {
+        List<Team> allTeams = teamRepository.findAll();
+        Team team1 = null;
+        Team team2 = null;
+        for(Team t: allTeams){
             if(team1Id.equals(t.getTeamId())){
                 team1 = t;
             }

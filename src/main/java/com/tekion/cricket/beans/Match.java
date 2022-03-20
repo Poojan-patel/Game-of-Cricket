@@ -9,7 +9,7 @@ public class Match {
     private String team1Id;
     private String team2Id;
     private int overs;
-    private int maxovers;
+    private int maxOvers;
 
     /** {@link com.tekion.cricket.enums.MatchState}
      */
@@ -22,20 +22,35 @@ public class Match {
         this.team1Id = team1Id;
         this.team2Id = team2Id;
         this.overs = overs;
-        this.maxovers = (int)Math.ceil(overs/5.0);
+        this.maxOvers = (int)Math.ceil(overs/5.0);
         matchState = MatchState.TOSS_LEFT.toString();
         this.matchId = UUID.randomUUID().toString();
     }
 
+    public Match() {
+    }
+
+    public void setMatchId(String matchId) {
+        this.matchId = matchId;
+    }
+
+    public void setOvers(int overs) {
+        this.overs = overs;
+    }
+
+    public void setMaxOvers(int maxOvers) {
+        this.maxOvers = maxOvers;
+    }
+
     /*
-    Constructor for creation of POJO from db data
-     */
-    public Match(String matchId, String team1Id, String team2Id, int overs, int maxovers, String matchState) {
+        Constructor for creation of POJO from db data
+         */
+    public Match(String matchId, String team1Id, String team2Id, int overs, int maxOvers, String matchState) {
         this.matchId = matchId;
         this.team1Id = team1Id;
         this.team2Id = team2Id;
         this.overs = overs;
-        this.maxovers = maxovers;
+        this.maxOvers = maxOvers;
         this.matchState = matchState;
     }
 
@@ -71,7 +86,7 @@ public class Match {
         this.matchState = matchState;
     }
 
-    public int getMaxovers() {
-        return maxovers;
+    public int getMaxOvers() {
+        return maxOvers;
     }
 }

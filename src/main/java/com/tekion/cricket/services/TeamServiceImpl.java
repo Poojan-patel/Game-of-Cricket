@@ -5,7 +5,6 @@ import com.tekion.cricket.constants.Common;
 import com.tekion.cricket.enums.MatchState;
 import com.tekion.cricket.models.BattingTeam;
 import com.tekion.cricket.models.PlayerDTO;
-import com.tekion.cricket.models.TeamDTO;
 import com.tekion.cricket.repository.BallEventsRepository;
 import com.tekion.cricket.repository.PlayerRepository;
 import com.tekion.cricket.repository.StrikeRepository;
@@ -44,7 +43,7 @@ public class TeamServiceImpl implements  TeamService{
     }
 
     @Override
-    public List<TeamDTO> getAllTeams() {
+    public List<Team> getAllTeams() {
         return teamRepository.findAll();
     }
 
@@ -124,7 +123,7 @@ public class TeamServiceImpl implements  TeamService{
     }
 
     @Override
-    public List<TeamDTO> findAllTeams() {
+    public List<Team> findAllTeams() {
         return teamRepository.findAll();
     }
 

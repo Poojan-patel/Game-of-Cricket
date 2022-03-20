@@ -6,7 +6,6 @@ import com.tekion.cricket.beans.Strike;
 import com.tekion.cricket.beans.Team;
 import com.tekion.cricket.models.BattingTeam;
 import com.tekion.cricket.models.PlayerDTO;
-import com.tekion.cricket.models.TeamDTO;
 
 import java.util.List;
 
@@ -15,7 +14,7 @@ public interface TeamService{
 
     String saveTeamWithPlayers(Team team, List<Player> players);
 
-    List<TeamDTO> getAllTeams();
+    List<Team> getAllTeams();
 
     List<PlayerDTO> getAllAvailableBowlers(Match match, String currentBowlTeamId, Integer maxOvers);
 
@@ -31,5 +30,5 @@ public interface TeamService{
 
     void insertStrikesForNewInning(String teamId, Match match);
 
-    List<TeamDTO> findAllTeams();
+    List<Team> findAllTeams();
 }
