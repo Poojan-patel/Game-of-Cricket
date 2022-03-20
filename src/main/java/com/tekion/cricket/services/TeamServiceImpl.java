@@ -61,7 +61,7 @@ public class TeamServiceImpl implements  TeamService{
             thrownOvers = bowlersWhoThrownOvers.getOrDefault(p.getPlayerOrder(), 0);
             sum -= thrownOvers;
             if(p.getPlayerOrder() != lastBowler && thrownOvers < maxOvers){
-                availableBowlers.add(new PlayerDTO(p.getName(), p.getPlayerType(), p.getTypeOfBowler(), p.getPlayerOrder(), maxOvers - thrownOvers));
+                availableBowlers.add(new PlayerDTO(p.getName(), p.getPlayerType(), p.getBowlingPace(), p.getPlayerOrder(), maxOvers - thrownOvers));
                 if(maxOvers - thrownOvers > maxi){
                     maxi = maxOvers - thrownOvers;
                     minOverPlayer = availableBowlers.get(availableBowlers.size()-1);
@@ -111,7 +111,7 @@ public class TeamServiceImpl implements  TeamService{
         int maxOrder = strike.getMaxOrderedPlayer();
         strike.incrementWickets();
         int newBatter = playerRepository.fetchNextBatsman(strike.getBattingTeam(), maxOrder);
-        strike.setNewBatsman(newBatter);
+        strike.setStrike(newBatter);
         strikeRepository.updateStrikesByTeamAndMatchId(strike);
     }
 

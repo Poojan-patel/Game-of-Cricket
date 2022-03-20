@@ -17,6 +17,9 @@ public class BallEvent {
     private String unfairBallType;
     private String wicketType;
 
+    public BallEvent() {
+    }
+
     /*
     Constructor for creation of POJO from db data
      */
@@ -83,5 +86,45 @@ public class BallEvent {
 
     public String getBowlingTeam() {
         return bowlingTeam;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
+
+    public void setMatchId(String matchId) {
+        this.matchId = matchId;
+    }
+
+    public void setBattingTeam(String battingTeam) {
+        this.battingTeam = battingTeam;
+    }
+
+    public void setBatsman(int batsman) {
+        this.batsman = batsman;
+    }
+
+    public void setBallNumber(int ballNumber) {
+        this.ballNumber = ballNumber;
+    }
+
+    public void setBowlingTeam(String bowlingTeam) {
+        this.bowlingTeam = bowlingTeam;
+    }
+
+    public void setBowler(int bowler) {
+        this.bowler = bowler;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void setUnfairBallType(String unfairBallType) {
+        this.unfairBallType = unfairBallType;
+    }
+
+    public void setWicketType(String wicketType) {
+        this.wicketType = wicketType;
     }
 }

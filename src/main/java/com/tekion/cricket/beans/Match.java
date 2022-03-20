@@ -30,6 +30,18 @@ public class Match {
     public Match() {
     }
 
+    /*
+        Constructor for creation of POJO from db data
+    */
+    public Match(String matchId, String team1Id, String team2Id, int overs, int maxOvers, String matchState) {
+        this.matchId = matchId;
+        this.team1Id = team1Id;
+        this.team2Id = team2Id;
+        this.overs = overs;
+        this.maxOvers = maxOvers;
+        this.matchState = matchState;
+    }
+
     public void setMatchId(String matchId) {
         this.matchId = matchId;
     }
@@ -40,18 +52,6 @@ public class Match {
 
     public void setMaxOvers(int maxOvers) {
         this.maxOvers = maxOvers;
-    }
-
-    /*
-        Constructor for creation of POJO from db data
-         */
-    public Match(String matchId, String team1Id, String team2Id, int overs, int maxOvers, String matchState) {
-        this.matchId = matchId;
-        this.team1Id = team1Id;
-        this.team2Id = team2Id;
-        this.overs = overs;
-        this.maxOvers = maxOvers;
-        this.matchState = matchState;
     }
 
     public String getTeam1Id() {
@@ -89,4 +89,5 @@ public class Match {
     public int getMaxOvers() {
         return maxOvers;
     }
+
 }

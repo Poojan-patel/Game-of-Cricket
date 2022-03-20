@@ -50,7 +50,7 @@ public class MatchServiceImpl implements  MatchService{
         if(matchId == null){
             throw new IllegalStateException("Match is not created");
         }
-        return new MatchCreationResponse(matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName(), matchRequest.getOvers());
+        return new MatchCreationResponse(matchId, selectedTeams.get(0).getName(), selectedTeams.get(1).getName(), matchRequest.getOvers());
     }
 
     @Override
@@ -71,7 +71,7 @@ public class MatchServiceImpl implements  MatchService{
         matchRepository.update(match);
         List<Team> selectedTeams = getSelectedTeams(match.getTeam1Id(), match.getTeam2Id());
         TossSimulationResult tossSimulationResult = new TossSimulationResult(
-                matchId, selectedTeams.get(0).getTeamName(), selectedTeams.get(1).getTeamName()
+                matchId, selectedTeams.get(0).getName(), selectedTeams.get(1).getName()
         );
         teamService.insertStrikesForNewInning(match.getTeam1Id(), match);
         return tossSimulationResult;

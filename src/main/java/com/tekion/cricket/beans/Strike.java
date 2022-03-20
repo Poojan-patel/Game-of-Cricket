@@ -35,6 +35,9 @@ public class Strike {
         this.bowlingTeam = bowlingTeam;
     }
 
+    public Strike() {
+    }
+
     public void changeStrike(){
         int tempForSwap = strike;
         strike = nonStrike;
@@ -49,7 +52,7 @@ public class Strike {
         return matchId;
     }
 
-    public void setNewBatsman(int newBatter) {
+    public void setStrike(int newBatter) {
         strike = newBatter;
     }
 
@@ -83,5 +86,29 @@ public class Strike {
 
     public void incrementWickets() {
         currentWickets++;
+    }
+
+    public void setMatchId(String matchId) {
+        this.matchId = matchId;
+    }
+
+    public void setBattingTeam(String battingTeam) {
+        this.battingTeam = battingTeam;
+    }
+
+    public void setNonStrike(int nonStrike) {
+        this.nonStrike = nonStrike;
+    }
+
+    public void setBowlingTeam(String bowlingTeam) {
+        this.bowlingTeam = bowlingTeam;
+    }
+
+    public void setBowler(int bowler) {
+        this.bowler = bowler;
+    }
+
+    public void setCurrentWickets(int currentWickets) {
+        this.currentWickets = currentWickets;
     }
 }

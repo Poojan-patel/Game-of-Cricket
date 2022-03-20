@@ -4,20 +4,27 @@ import java.util.UUID;
 
 public class Team {
 
-    private String teamName;
+    private String name;
     private String teamId;
 
     /*
     Constructor for persisting data in database
      */
-    public Team(String teamName) {
-        this.teamName = teamName;
+    public Team(String name) {
+        this.name = name;
         this.teamId = UUID.randomUUID().toString();
     }
 
-    public Team(String teamName, String teamId) {
-        this.teamName = teamName;
+    public Team(String name, String teamId) {
+        this.name = name;
         this.teamId = teamId;
+    }
+
+    public Team() {
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getTeamId(){ return teamId; }
@@ -26,7 +33,7 @@ public class Team {
         this.teamId = teamId;
     }
 
-    public String getTeamName() {
-        return teamName;
+    public String getName() {
+        return name;
     }
 }
