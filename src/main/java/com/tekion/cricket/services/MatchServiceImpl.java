@@ -109,13 +109,13 @@ public class MatchServiceImpl implements  MatchService{
     }
 
     @Override
-    public MatchResult generateFinalScoreBoard(String matchId){
-        return ballEventsRepository.generateFinalScoreBoard(matchId);
+    public MatchResult generateFinalScoreBoard(String matchId, String team1Id, String team2Id){
+        return ballEventsRepository.generateFinalScoreBoard(matchId, team1Id, team2Id);
     }
 
     @Override
     public MatchRecreateResponse recreateMatch(Match match) {
-        MatchResult matchResult = generateFinalScoreBoard(match.getMatchId());
+        MatchResult matchResult = generateFinalScoreBoard(match.getMatchId(), match.getTeam1Id(), match.getTeam2Id());
         Map<Integer, String> playerIdToNameMap = playerRepository.fetchPlayerNamesByTeamId(match.getTeam1Id(), 0);
         playerIdToNameMap.putAll(playerRepository.fetchPlayerNamesByTeamId(match.getTeam2Id(), Common.NUM_OF_PLAYERS));
         MatchRecreateResponse matchRecreateResponse = new MatchRecreateResponse(playerIdToNameMap);
@@ -135,7 +135,7 @@ public class MatchServiceImpl implements  MatchService{
             return overCompletionResult;
         }
         else{
-            return generateFinalScoreBoard(match.getMatchId());
+            return generateFinalScoreBoard(match.getMatchId(), match.getTeam1Id(), match.getTeam2Id());
         }
     }
 
@@ -278,7 +278,7 @@ public class MatchServiceImpl implements  MatchService{
         overCompletionResult.appendBallLogs(over + "." + ballNumber + ": " + Common.WICKET + "-" + (strike.getCurrentWickets()+1) + "(" + typeOfWicketFallen + ") || " + Common.PLAYER + ": %s", strike.getStrike());
         ballEventsRepository.save(new BallEvent(
                 strike.getMatchId(), battingTeam.getTeamId(), strike.getStrike(), battingTeam.getPlayedBalls(),
-                strike.getBowlingTeam(), strike.getBowler(), 0, Common.EMPTYSTRING, typeOfWicketFallen)
+                strike.getBowler(), 0, Common.EMPTYSTRING, typeOfWicketFallen)
         );
         teamService.updateStrikeOnWicket(strike);
     }
@@ -303,7 +303,7 @@ public class MatchServiceImpl implements  MatchService{
 
         ballEventsRepository.save(new BallEvent(
                 strike.getMatchId(), battingTeam.getTeamId(), (isTeamScore) ?-1 :currentPlayer, over*6 + ballNumber,
-                strike.getBowlingTeam(), strike.getBowler(), outcomeOfBallBowled + ((isTeamScore) ?1 :0), typeOfUnFairBall, Common.EMPTYSTRING)
+                strike.getBowler(), outcomeOfBallBowled + ((isTeamScore) ?1 :0), typeOfUnFairBall, Common.EMPTYSTRING)
         );
 
         if(outcomeOfBallBowled%2 == 1) {
@@ -323,7 +323,7 @@ public class MatchServiceImpl implements  MatchService{
 
                 ballEventsRepository.save(new BallEvent(
                         strike.getMatchId(), battingTeam.getTeamId(), strike.getStrike(), currentBallNumber,
-                        strike.getBowlingTeam(), -1, 0, Common.EMPTYSTRING, Common.RUN_OUT)
+                        -1, 0, Common.EMPTYSTRING, Common.RUN_OUT)
                 );
                 teamService.updateStrikeOnWicket(strike);
             }

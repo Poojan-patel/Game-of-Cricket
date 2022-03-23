@@ -2,7 +2,6 @@ package com.tekion.cricket.repository;
 
 import com.tekion.cricket.beans.BallEvent;
 import com.tekion.cricket.constants.Common;
-import com.tekion.cricket.dbconnector.MySqlConnector;
 import com.tekion.cricket.models.MatchResult;
 import com.tekion.cricket.util.MatchUtil;
 import com.tekion.cricket.util.ReaderUtil;
@@ -32,7 +31,7 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
         try{
             jdbcTemplate.update(ReaderUtil.readSqlFromFile("ballevents", "insertEvent"),
                     ballEvent.getMatchId(), ballEvent.getBallNumber(), ballEvent.getBattingTeam(), (ballEvent.getBatsman() != -1) ?ballEvent.getBatsman() :null,
-                    ballEvent.getBowlingTeam(), (ballEvent.getBowler() != -1) ?ballEvent.getBowler() :null, ballEvent.getScore(),
+                    (ballEvent.getBowler() != -1) ?ballEvent.getBowler() :null, ballEvent.getScore(),
                     Common.EMPTYSTRING.equals(ballEvent.getUnfairBallType()) ?null :ballEvent.getUnfairBallType(),
                     Common.EMPTYSTRING.equals(ballEvent.getWicketType()) ?null :ballEvent.getWicketType()
             );
@@ -90,14 +89,15 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
     }
 
     @Override
-    public MatchResult generateFinalScoreBoard(String matchId) {
+    public MatchResult generateFinalScoreBoard(String matchId, String team1Id, String team2Id) {
         //Connection con = null;
         MatchResult matchResult = new MatchResult();
         try{
             //con = MySqlConnector.getConnection();
             getTeamScore(matchId, matchResult);
             getBatsmanStats(matchId, matchResult);
-            getBowlingStats(matchId, matchResult);
+            getBowlingStats(matchId, matchResult, team1Id);
+            getBowlingStats(matchId, matchResult, team2Id);
         } catch (DataAccessException | SQLException e){
             e.printStackTrace();
         }
@@ -151,7 +151,7 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
     @Override
     public int fetchScoreToChase(String matchId, String currentBowlTeamId) {
         //Connection con = null;
-        int scoreToChase = -1;
+        Integer scoreToChase = null;
 //        try{
 //            con = MySqlConnector.getConnection();
 //            PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "fetchScoreToChase"));
@@ -175,7 +175,7 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
             e.printStackTrace();
         }
 
-        return scoreToChase;
+        return ((scoreToChase == null) ?-1 :scoreToChase);
     }
 
     @Override
@@ -191,7 +191,7 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
 //            ResultSet rs = ps.executeQuery();
 //            while(rs.next()){
 //                ballEvents.add(new BallEvent(rs.getString("event_id"), rs.getString("match_id"), rs.getString("batting_team"),
-//                        rs.getInt("batsman") + batsmanOffset, rs.getInt("ball_number"), rs.getString("bowling_team"),
+//                        rs.getInt("batsman") + batsmanOffset, rs.getInt("ball_number"),
 //                        rs.getInt("bowler") + bowlerOffset, rs.getInt("score"), rs.getString("unfair_ball_type"), rs.getString("wicket_type"))
 //                );
 //            }
@@ -207,7 +207,7 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
         try{
             jdbcTemplate.query(ReaderUtil.readSqlFromFile("ballevents", "fetchAllEventsByMatchAndTeamId"), rs -> {
                 ballEvents.add(new BallEvent(rs.getString("event_id"), rs.getString("match_id"), rs.getString("batting_team"),
-                        rs.getInt("batsman") + batsmanOffset, rs.getInt("ball_number"), rs.getString("bowling_team"),
+                        rs.getInt("batsman") + batsmanOffset, rs.getInt("ball_number"),
                         rs.getInt("bowler") + bowlerOffset, rs.getInt("score"), rs.getString("unfair_ball_type"), rs.getString("wicket_type"))
                 );
             }, matchId, teamId);
@@ -217,7 +217,7 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
         return ballEvents;
     }
 
-    private void getBowlingStats(String matchId, MatchResult matchResult) throws DataAccessException, SQLException {
+    private void getBowlingStats(String matchId, MatchResult matchResult, String bowlTeamId) throws DataAccessException, SQLException {
 //        PreparedStatement ps = con.prepareStatement(ReaderUtil.readSqlFromFile("ballevents", "getBowlingStats"));
 //        ps.setString(1, matchId);
 //        ResultSet rs = ps.executeQuery();
@@ -239,7 +239,7 @@ public class BallEventsRepositoryImpl implements BallEventsRepository{
                             rs.getInt("Balls Thrown")%Common.BALLS_IN_ONE_OVER + Common.SINGLE_SPACE + Common.EXTRAS + ": " + rs.getInt("unfairBallType")
             );
             }
-        }, matchId);
+        }, matchId, bowlTeamId, bowlTeamId);
     }
 
     private void getBatsmanStats(String matchId, MatchResult matchResult) throws DataAccessException, SQLException{

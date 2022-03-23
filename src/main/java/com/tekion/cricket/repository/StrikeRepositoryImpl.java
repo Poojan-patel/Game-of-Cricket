@@ -134,7 +134,7 @@ public class StrikeRepositoryImpl implements StrikeRepository {
     @Override
     public int fetchTheLastOver(String matchId, String currentBowlTeamId) {
         //Connection con = null;
-        int bowlerOrder = 0;
+        Integer bowlerOrder = null;
         try{
             bowlerOrder = jdbcTemplate.queryForObject(ReaderUtil.readSqlFromFile("strike", "findLastBowlerByTeamAndMatchId"), Integer.class, matchId, currentBowlTeamId);
         } catch (DataAccessException | NullPointerException e){
@@ -157,7 +157,7 @@ public class StrikeRepositoryImpl implements StrikeRepository {
 //                con.close();
 //            } catch (Exception ignored) {}
 //        }
-        return bowlerOrder;
+        return ((bowlerOrder == null) ?0 :bowlerOrder);
     }
 
     @Override

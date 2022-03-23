@@ -7,10 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 public interface BallEventsRepository{
-    void save
-            (BallEvent ballEvent);
+    void save(BallEvent ballEvent);
 
-    MatchResult generateFinalScoreBoard(String matchId);
+    MatchResult generateFinalScoreBoard(String matchId, String teamId, String team2Id);
 
     Map<Integer, Integer> fetchBowlersWithThrownOversByTeamAndMatchId(String matchId, String currentBowlTeamId);
 

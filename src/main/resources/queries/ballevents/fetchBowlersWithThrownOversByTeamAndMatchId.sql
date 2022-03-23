@@ -1,1 +1,1 @@
-select bowler, count(distinct ball_number)/6 "overs" from BallEvents where match_id = ? and bowling_team = ? and bowler group by bowler;
+select bowler, count(distinct ball_number)/6 "overs" from BallEvents where match_id = ? and batting_team != ? and bowler group by bowler;

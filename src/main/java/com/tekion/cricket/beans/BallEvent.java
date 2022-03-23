@@ -8,7 +8,6 @@ public class BallEvent {
     private String battingTeam;
     private int batsman;
     private int ballNumber;
-    private String bowlingTeam;
     private int bowler;
     private int score;
 
@@ -24,18 +23,17 @@ public class BallEvent {
     Constructor for creation of POJO from db data
      */
 
-    public BallEvent(String eventId, String matchId, String battingTeam, int batsman, int ballNumber, String bowlingTeam, int bowler, int score, String unfairBallType, String wicketType) {
-        this(matchId, battingTeam, batsman, ballNumber, bowlingTeam, bowler, score, unfairBallType, wicketType);
+    public BallEvent(String eventId, String matchId, String battingTeam, int batsman, int ballNumber, int bowler, int score, String unfairBallType, String wicketType) {
+        this(matchId, battingTeam, batsman, ballNumber, bowler, score, unfairBallType, wicketType);
         this.eventId = eventId;
     }
 
     /*
         Constructor for persisting data in database
          */
-    public BallEvent(String matchId, String battingTeam, int batsman, int ballNumber, String bowlingTeam, int bowler, int score, String unfairBallType, String wicketType) {
+    public BallEvent(String matchId, String battingTeam, int batsman, int ballNumber, int bowler, int score, String unfairBallType, String wicketType) {
         this.matchId = matchId;
         this.battingTeam = battingTeam;
-        this.bowlingTeam = bowlingTeam;
         this.ballNumber = ballNumber;
         this.batsman = batsman;
         this.bowler = bowler;
@@ -84,10 +82,6 @@ public class BallEvent {
         return battingTeam;
     }
 
-    public String getBowlingTeam() {
-        return bowlingTeam;
-    }
-
     public void setEventId(String eventId) {
         this.eventId = eventId;
     }
@@ -106,10 +100,6 @@ public class BallEvent {
 
     public void setBallNumber(int ballNumber) {
         this.ballNumber = ballNumber;
-    }
-
-    public void setBowlingTeam(String bowlingTeam) {
-        this.bowlingTeam = bowlingTeam;
     }
 
     public void setBowler(int bowler) {

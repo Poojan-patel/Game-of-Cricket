@@ -52,8 +52,8 @@ public class MatchController {
 
     @GetMapping("/scoreboard/{matchId}")
     public ResponseEntity<MatchResult> getScoreBoard(@PathVariable String matchId){
-        matchValidators.isMatchEnded(matchId);
-        return ResponseEntity.ok(matchService.generateFinalScoreBoard(matchId));
+        Match match = matchValidators.isMatchEnded(matchId);
+        return ResponseEntity.ok(matchService.generateFinalScoreBoard(matchId, match.getTeam1Id(), match.getTeam2Id()));
     }
 
     @GetMapping("/bowlerslist/{matchId}")

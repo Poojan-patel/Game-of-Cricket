@@ -1,1 +1,1 @@
-insert into BallEvents(match_id, ball_number, batting_team, batsman, bowling_team, bowler, score, unfair_ball_type, wicket_type) values(?,?,?,?,?,?,?,?,?)
+insert into BallEvents(match_id, ball_number, batting_team, batsman, bowler, score, unfair_ball_type, wicket_type) values(?,?,?,?,?,?,?,?)

@@ -17,7 +17,7 @@ public interface MatchService {
 
     ScoreBoard playTheOver(Match match, String currentBowlTeamId, Player bowler);
 
-    MatchResult generateFinalScoreBoard(String matchId);
+    MatchResult generateFinalScoreBoard(String matchId, String team1Id, String team2Id);
 
     MatchRecreateResponse recreateMatch(Match match);
 
